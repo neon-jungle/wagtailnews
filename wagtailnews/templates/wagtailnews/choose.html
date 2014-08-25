@@ -1,0 +1,30 @@
+{% extends "wagtailadmin/base.html" %}
+{% load i18n %}
+{% block titletag %}{% trans "News" %}{% endblock %}
+{% block bodyclass %}menu-news{% endblock %}
+{% block content %}
+
+    {% include "wagtailadmin/shared/header.html" with title="News" icon="news" %}
+
+    <div class="nice-padding">
+        {% if has_news %}
+
+            <ul class="listing">
+                {% for newsindex, model_type in newsindex_list %}
+                    <li>
+                        <div class="row row-flush title">
+                            <h2>
+                                <a href="{% url 'wagtailnews_index' pk=newsindex.pk %}" class="col6">
+                                    {{ newsindex.title }}
+                                </a>
+                            </h2>
+                            <small class="col6">{{ model_type|title }}</small>
+                        </div>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>There are no news pages yet - go add one!</p>
+        {% endif %}
+    </div>
+{% endblock %}

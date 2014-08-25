@@ -1,0 +1,31 @@
+{% extends "wagtailadmin/base.html" %}
+{% load i18n %}
+{% block titletag %}{% trans "News" %}{% endblock %}
+{% block bodyclass %}menu-news{% endblock %}
+{% block content %}
+
+    {% trans "Edit" as new_str %}
+    {% include "wagtailadmin/shared/header.html" with title=new_str subtitle=newsitem icon="news" %}
+
+    <form action="{% url 'wagtailnews_edit' pk=newsindex.pk newsitem_pk=newsitem.pk %}" method="POST">
+        {% csrf_token %}
+        {{ edit_handler.render_form_content }}
+
+        <footer>
+            <ul>
+                <li class="actions">
+                    <div class="dropdown dropup match-width">
+                        <div><input type="submit" value="{% trans 'Update' %}" /></div>
+                    </div>
+                </li>
+            </ul>
+        </footer>
+    </form>
+{% endblock %}
+
+{% block extra_css %}
+    {% include "wagtailadmin/pages/_editor_css.html" %}
+{% endblock %}
+{% block extra_js %}
+    {% include "wagtailadmin/pages/_editor_js.html" %}
+{% endblock %}
