@@ -58,8 +58,6 @@ def news_day(request, newsindex, year, month, day):
 def newsitem_detail(request, newsindex, year, month, day, pk,
                     slug):
     NewsItem = newsindex.get_newsitem_model()
-    print year, month, day
-    print NewsItem.objects.filter(newsindex=newsindex, date__year=int(year), date__month=int(month), date__day=int(day))
     newsitem = get_object_or_404(
         NewsItem, newsindex=newsindex,
         date__year=int(year), date__month=int(month), date__day=int(day),

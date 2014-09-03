@@ -41,9 +41,7 @@ def create(request, pk):
         form = EditForm(request.POST, request.FILES)
 
         if form.is_valid():
-            print newsitem.pk
             newsitem = form.save(commit=False)
-            print newsitem.pk
             newsitem.newsindex = newsindex
             newsitem.save()
 
@@ -75,9 +73,7 @@ def edit(request, pk, newsitem_pk):
         form = EditForm(request.POST, request.FILES, instance=newsitem)
 
         if form.is_valid():
-            print newsitem.pk
             newsitem = form.save(commit=False)
-            print newsitem.pk
             newsitem.save()
 
             messages.success(request, _('The news post "{0!s}" has been updated').format(newsitem))

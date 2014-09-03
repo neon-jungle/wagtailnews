@@ -87,15 +87,9 @@ class AbstractNewsItem(models.Model):
     def url(self):
         newsindex = self.newsindex.specific
         ldate = timezone.localtime(self.date)
-        print 'newsindex.url:', newsindex.url
-        try:
-            url = newsindex.url + newsindex.reverse_subpage('post', kwargs={
-                'year': ldate.year, 'month': ldate.month, 'day': ldate.day,
-                'pk': self.pk, 'slug': self.get_nice_url()})
-        except Exception as e:
-            print e
-            raise
-        print 'url:', url
+        url = newsindex.url + newsindex.reverse_subpage('post', kwargs={
+            'year': ldate.year, 'month': ldate.month, 'day': ldate.day,
+            'pk': self.pk, 'slug': self.get_nice_url()})
         return url
 
 
