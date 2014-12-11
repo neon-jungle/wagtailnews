@@ -12,7 +12,7 @@ from wagtail.contrib.wagtailroutablepage.models import RoutablePageMixin
 from wagtail.wagtailadmin.edit_handlers import FieldPanel
 from wagtail.wagtailcore.models import Page
 from wagtail.wagtailcore.utils import resolve_model_string
-from wagtail.wagtailsearch import indexed
+from wagtail.wagtailsearch import index
 
 
 NEWSINDEX_MODEL_CLASSES = []
@@ -69,7 +69,7 @@ class AbstractNewsItem(models.Model):
         FieldPanel('date'),
     ]
 
-    search_fields = (indexed.FilterField('date'),)
+    search_fields = (index.FilterField('date'),)
 
     class Meta:
         ordering = ('-date',)
