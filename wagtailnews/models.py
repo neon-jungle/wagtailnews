@@ -50,6 +50,7 @@ class NewsIndexMixin(RoutablePageMixin):
     v_day = lambda s, r, **k: frontend.news_day(r, s, **k)
     v_post = lambda s, r, **k: frontend.newsitem_detail(r, s, **k)
 
+    @classmethod
     def get_newsitem_model(cls):
         if isinstance(cls.newsitem_model, models.Model):
             return cls.newsitem_model

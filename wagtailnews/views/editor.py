@@ -1,4 +1,5 @@
 from django.contrib import messages
+from django.contrib.auth.decorators import permission_required
 from django.shortcuts import redirect, render, get_object_or_404
 from django.utils.translation import ugettext_lazy as _
 
@@ -29,6 +30,7 @@ def get_newsitem_form(NewsItem, EditHandler):
 get_newsitem_form = memoize(get_newsitem_form, {}, 2)
 
 
+@permission_required('wagtailadmin.access_admin')  # further permissions are enforced within the view
 def create(request, pk):
     newsindex = get_object_or_404(Page, pk=pk, content_type__in=get_newsindex_content_types()).specific
     NewsItem = newsindex.get_newsitem_model()
@@ -61,6 +63,7 @@ def create(request, pk):
     })
 
 
+@permission_required('wagtailadmin.access_admin')  # further permissions are enforced within the view
 def edit(request, pk, newsitem_pk):
     newsindex = get_object_or_404(Page, pk=pk, content_type__in=get_newsindex_content_types()).specific
     NewsItem = newsindex.get_newsitem_model()
@@ -93,6 +96,7 @@ def edit(request, pk, newsitem_pk):
     })
 
 
+@permission_required('wagtailadmin.access_admin')  # further permissions are enforced within the view
 def delete(request, pk, newsitem_pk):
     newsindex = get_object_or_404(Page, pk=pk, content_type__in=get_newsindex_content_types()).specific
     NewsItem = newsindex.get_newsitem_model()
