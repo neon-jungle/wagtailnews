@@ -1,5 +1,5 @@
 from django.conf import settings
-from django.utils.importlib import import_module
+from django.utils.module_loading import import_string
 
 
 try:
@@ -19,4 +19,4 @@ except AttributeError:
         return paginator, page
 
 else:
-    paginate = import_module()
+    paginate = import_string(name)
