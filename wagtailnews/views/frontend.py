@@ -9,7 +9,7 @@ from ..conf import paginate
 def _newsitem_list(request, newsindex, newsitem_list, extra_context):
     paginator, page = paginate(request, newsitem_list)
     context = {
-        'self': news_index,
+        'self': newsindex,
         'paginator': paginator,
         'page': page,
         'newsitem_list': page.object_list,
@@ -58,17 +58,10 @@ def news_day(request, newsindex, year, month, day):
 def newsitem_detail(request, newsindex, year, month, day, pk,
                     slug):
     NewsItem = newsindex.get_newsitem_model()
-    newsitem = get_object_or_404(
-        NewsItem, newsindex=newsindex,
-        date__year=int(year), date__month=int(month), date__day=int(day),
-        pk=pk)
+    newsitem = get_object_or_404(NewsItem, newsindex=newsindex, pk=pk)
 
-    if slug != newsitem.get_nice_url():
-        return redirect(newsindex.relative_url(request.site)
-                        + newsindex.reverse_subpage('post', kwargs={
-                            'year': year, 'month': month, 'day': day,
-                            'pk': pk,
-                            'nice_url': newsitem.get_nice_url()}))
+    if request.path != newsitem.url():
+        return redirect(newsitem.url())
 
     return render(request, newsitem.get_template(request), {
         'self': newsindex,
