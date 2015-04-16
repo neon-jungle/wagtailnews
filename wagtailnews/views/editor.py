@@ -16,7 +16,7 @@ from ..models import get_newsindex_content_types
 def get_newsitem_edit_handler(NewsItem):
     panels = extract_panel_definitions_from_model_class(
         NewsItem, exclude=['newsindex'])
-    EditHandler = ObjectList(panels)
+    EditHandler = ObjectList(panels).bind_to_model(NewsItem)
     return EditHandler
 get_newsitem_edit_handler = memoize(get_newsitem_edit_handler, {}, 1)
 
