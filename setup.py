@@ -24,14 +24,14 @@ setup(
     author_email='tim@takeflight.com.au',
     url='https://bitbucket.org/takeflight/wagtailnews',
 
-    install_requires=['wagtail>=0.7'],
+    install_requires=['wagtail>=0.9'],
     zip_safe=False,
     license='BSD License',
 
     packages=find_packages(),
 
     include_package_data=True,
-    package_data={ },
+    package_data={},
 
     classifiers=[
         'Environment :: Web Environment',
