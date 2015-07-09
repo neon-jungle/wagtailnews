@@ -8,7 +8,7 @@ from django.db import models
 from django.utils import timezone
 from django.utils.text import slugify
 
-from wagtail.contrib.wagtailroutablepage.models import RoutablePageMixin
+from wagtail.contrib.wagtailroutablepage.models import RoutablePageMixin, route
 from wagtail.wagtailadmin.edit_handlers import FieldPanel
 from wagtail.wagtailcore.models import Page
 from wagtail.wagtailcore.utils import resolve_model_string
@@ -36,19 +36,25 @@ class NewsIndexMixin(RoutablePageMixin):
     newsitem_model = None
     subpage_types = []
 
-    subpage_urls = (
-        url(r'^$', 'v_index', name='index'),
-        url(r'^(?P<year>\d{4})/$', 'v_year', name='year'),
-        url(r'^(?P<year>\d{4})/(?P<month>\d{1,2})/$', 'v_month', name='month'),
-        url(r'^(?P<year>\d{4})/(?P<month>\d{1,2})/(?P<day>\d{1,2})/$', 'v_day', name='day'),
-        url(r'^(?P<year>\d{4})/(?P<month>\d{1,2})/(?P<day>\d{1,2})/(?P<pk>\d+)-(?P<slug>.*)/$', 'v_post', name='post'),
-    )
+    @route(r'^$', name='index')
+    def v_index(s, r):
+        return frontend.news_index(r, s)
 
-    v_index = lambda s, r: frontend.news_index(r, s)
-    v_year = lambda s, r, **k: frontend.news_year(r, s, **k)
-    v_month = lambda s, r, **k: frontend.news_month(r, s, **k)
-    v_day = lambda s, r, **k: frontend.news_day(r, s, **k)
-    v_post = lambda s, r, **k: frontend.newsitem_detail(r, s, **k)
+    @route(r'^(?P<year>\d{4})/$', name='year')
+    def v_year(s, r, **k):
+        return frontend.news_year(r, s, **k)
+
+    @route(r'^(?P<year>\d{4})/(?P<month>\d{1,2})/$', name='month')
+    def v_month(s, r, **k):
+        return frontend.news_month(r, s, **k)
+
+    @route(r'^(?P<year>\d{4})/(?P<month>\d{1,2})/(?P<day>\d{1,2})/$', name='day')
+    def v_day(s, r, **k):
+        return frontend.news_day(r, s, **k)
+
+    @route(r'^(?P<year>\d{4})/(?P<month>\d{1,2})/(?P<day>\d{1,2})/(?P<pk>\d+)-(?P<slug>.*)/$', name='post')
+    def v_post(s, r, **k):
+        return frontend.newsitem_detail(r, s, **k)
 
     @classmethod
     def get_newsitem_model(cls):
