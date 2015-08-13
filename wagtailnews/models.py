@@ -91,6 +91,12 @@ class AbstractNewsItem(models.Model):
         except AttributeError:
             return '{0}/{1}.html'.format(self._meta.app_label, self._meta.model_name)
 
+    def get_context(self, request, *args, **kwargs):
+        return {
+            'self': self.newsindex,
+            'newsitem': self
+        }
+
     def url(self):
         newsindex = self.newsindex.specific
         ldate = timezone.localtime(self.date)
