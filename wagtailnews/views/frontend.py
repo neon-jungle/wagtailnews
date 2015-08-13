@@ -63,4 +63,7 @@ def newsitem_detail(request, newsindex, year, month, day, pk,
     if request.path != newsitem.url():
         return redirect(newsitem.url())
 
-    return render(request, newsitem.get_template(request), newsitem.get_context())
+    template = newsitem.get_template(request)
+    context = newsitem.get_context(request, year=year, month=month, day=day,
+                                   pk=pk, slug=slug)
+    return render(request, template, context)
