@@ -3,31 +3,20 @@ from django.contrib.auth.decorators import permission_required
 from django.shortcuts import redirect, render, get_object_or_404
 from django.utils.translation import ugettext_lazy as _
 
-# TODO Swap with django.utils.lru_cache.lru_cache at Django 1.7
-from django.utils.functional import memoize
+from django.utils.lru_cache import lru_cache
 
 from wagtail.wagtailadmin.edit_handlers import (
-    ObjectList, extract_panel_definitions_from_model_class, get_form_for_model)
+    ObjectList, extract_panel_definitions_from_model_class)
 from wagtail.wagtailcore.models import Page
 
 from ..models import get_newsindex_content_types
 
 
+@lru_cache(maxsize=None)
 def get_newsitem_edit_handler(NewsItem):
     panels = extract_panel_definitions_from_model_class(
         NewsItem, exclude=['newsindex'])
-    EditHandler = ObjectList(panels).bind_to_model(NewsItem)
-    return EditHandler
-get_newsitem_edit_handler = memoize(get_newsitem_edit_handler, {}, 1)
-
-
-def get_newsitem_form(NewsItem, EditHandler):
-    return get_form_for_model(
-        NewsItem,
-        formsets=EditHandler.required_formsets(),
-        widgets=EditHandler.widget_overrides(),
-        exclude=['newsindex'])
-get_newsitem_form = memoize(get_newsitem_form, {}, 2)
+    return ObjectList(panels).bind_to_model(NewsItem)
 
 
 @permission_required('wagtailadmin.access_admin')  # further permissions are enforced within the view
@@ -37,10 +26,10 @@ def create(request, pk):
 
     newsitem = NewsItem()
     EditHandler = get_newsitem_edit_handler(NewsItem)
-    EditForm = get_newsitem_form(NewsItem, EditHandler)
+    EditForm = EditHandler.get_form_class(NewsItem)
 
     if request.method == 'POST':
-        form = EditForm(request.POST, request.FILES)
+        form = EditForm(request.POST, request.FILES, instance=newsitem)
 
         if form.is_valid():
             newsitem = form.save(commit=False)
@@ -70,7 +59,7 @@ def edit(request, pk, newsitem_pk):
     newsitem = get_object_or_404(NewsItem, newsindex=newsindex, pk=newsitem_pk)
 
     EditHandler = get_newsitem_edit_handler(NewsItem)
-    EditForm = get_newsitem_form(NewsItem, EditHandler)
+    EditForm = EditHandler.get_form_class(NewsItem)
 
     if request.method == 'POST':
         form = EditForm(request.POST, request.FILES, instance=newsitem)
