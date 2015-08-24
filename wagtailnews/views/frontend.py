@@ -4,6 +4,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
 
 from ..conf import paginate
+from django.utils.six.moves.urllib.parse import urlparse
 
 
 def _newsitem_list(request, newsindex, newsitem_list, extra_context):
@@ -60,7 +61,8 @@ def newsitem_detail(request, newsindex, year, month, day, pk,
     NewsItem = newsindex.get_newsitem_model()
     newsitem = get_object_or_404(NewsItem, newsindex=newsindex, pk=pk)
 
-    if request.path != newsitem.url():
+    newsitem_path = urlparse(newsitem.url(), allow_fragments=True).path
+    if request.path != newsitem_path:
         return redirect(newsitem.url())
 
     template = newsitem.get_template(request)
