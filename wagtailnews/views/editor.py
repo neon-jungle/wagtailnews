@@ -24,7 +24,7 @@ def create(request, pk):
     newsindex = get_object_or_404(Page, pk=pk, content_type__in=get_newsindex_content_types()).specific
     NewsItem = newsindex.get_newsitem_model()
 
-    newsitem = NewsItem()
+    newsitem = NewsItem(newsindex=newsindex)
     EditHandler = get_newsitem_edit_handler(NewsItem)
     EditForm = EditHandler.get_form_class(NewsItem)
 
@@ -32,9 +32,7 @@ def create(request, pk):
         form = EditForm(request.POST, request.FILES, instance=newsitem)
 
         if form.is_valid():
-            newsitem = form.save(commit=False)
-            newsitem.newsindex = newsindex
-            newsitem.save()
+            form.save()
 
             messages.success(request, _('The news post "{0!s}" has been added').format(newsitem))
             return redirect('wagtailnews_index', pk=newsindex.pk)
@@ -65,8 +63,7 @@ def edit(request, pk, newsitem_pk):
         form = EditForm(request.POST, request.FILES, instance=newsitem)
 
         if form.is_valid():
-            newsitem = form.save(commit=False)
-            newsitem.save()
+            form.save()
 
             messages.success(request, _('The news post "{0!s}" has been updated').format(newsitem))
             return redirect('wagtailnews_index', pk=newsindex.pk)
