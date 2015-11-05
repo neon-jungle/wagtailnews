@@ -15,6 +15,9 @@ from wagtail.wagtailcore.models import Page
 from wagtail.wagtailcore.utils import resolve_model_string
 from wagtail.wagtailsearch import index
 
+from .utils.views import ModelViewProxy
+
+frontend = ModelViewProxy('wagtailnews.views.frontend')
 
 NEWSINDEX_MODEL_CLASSES = []
 
@@ -36,23 +39,23 @@ class NewsIndexMixin(RoutablePageMixin):
 
     @route(r'^$', name='index')
     def v_index(s, r):
-        return frontend.news_index(r, s)
+        return frontend.news_index(s, r)
 
     @route(r'^(?P<year>\d{4})/$', name='year')
     def v_year(s, r, **k):
-        return frontend.news_year(r, s, **k)
+        return frontend.news_year(s, r, **k)
 
     @route(r'^(?P<year>\d{4})/(?P<month>\d{1,2})/$', name='month')
     def v_month(s, r, **k):
-        return frontend.news_month(r, s, **k)
+        return frontend.news_month(s, r, **k)
 
     @route(r'^(?P<year>\d{4})/(?P<month>\d{1,2})/(?P<day>\d{1,2})/$', name='day')
     def v_day(s, r, **k):
-        return frontend.news_day(r, s, **k)
+        return frontend.news_day(s, r, **k)
 
     @route(r'^(?P<year>\d{4})/(?P<month>\d{1,2})/(?P<day>\d{1,2})/(?P<pk>\d+)-(?P<slug>.*)/$', name='post')
     def v_post(s, r, **k):
-        return frontend.newsitem_detail(r, s, **k)
+        return frontend.newsitem_detail(s, r, **k)
 
     @classmethod
     def get_newsitem_model(cls):
@@ -210,4 +213,3 @@ class AbstractNewsItem(ClusterableModel):
                 return _("live + draft")
             else:
                 return _("live")
-
