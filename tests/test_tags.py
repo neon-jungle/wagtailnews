@@ -9,7 +9,7 @@ from wagtail.wagtailcore.models import Page
 from wagtail.tests.utils import WagtailTestUtils
 
 
-class TestNewItemWithTags(TestCase, WagtailTestUtils):
+class TestNewsItemWithTags(TestCase, WagtailTestUtils):
 
     def setUp(self):
         root_page = Page.objects.get(pk=2)
