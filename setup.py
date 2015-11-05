@@ -4,7 +4,9 @@ Install wagtailnews using setuptools
 """
 import sys
 
-from wagtailnews import __version__
+with open('wagtailnews/version.py', 'r') as f:
+    version = None
+    exec(f.read())
 
 with open('README.rst', 'r') as f:
     readme = f.read()
@@ -23,7 +25,7 @@ if sys.version_info < (3,):
 
 setup(
     name='wagtailnews',
-    version=__version__,
+    version=version,
     description='News / blog plugin for the Wagtail CMS',
     long_description=readme,
     author='Tim Heap',
