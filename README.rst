@@ -26,7 +26,7 @@ Create news models for your application that inherit from the relevant ``wagtail
     from wagtail.wagtailcore.fields import RichTextField
     from wagtail.wagtailcore.models import Page
 
-    from wagtailnews.models import NewsIndexMixin, AbstractNewsItem
+    from wagtailnews.models import NewsIndexMixin, AbstractNewsItem, AbstractNewsItemRevision
     from wagtailnews.decorators import newsindex
 
 
@@ -51,3 +51,7 @@ Create news models for your application that inherit from the relevant ``wagtail
 
         def __unicode__(self):
             return self.title
+
+
+    class NewsItemRevision(AbstractNewsItemRevision):
+        newsitem = models.ForeignKey(NewsItem, related_name='revisions')
