@@ -2,15 +2,16 @@ from django.db import models
 from django.utils.encoding import python_2_unicode_compatible
 
 from modelcluster.fields import ParentalKey
+from modelcluster.contrib.taggit import ClusterTaggableManager
 
 from taggit.models import TaggedItemBase
-from taggit.managers import TaggableManager
 
 from wagtail.wagtailadmin.edit_handlers import FieldPanel
 from wagtail.wagtailcore.models import Page
 from wagtail.wagtailsnippets.models import register_snippet
 
-from wagtailnews.models import NewsIndexMixin, AbstractNewsItem
+from wagtailnews.models import (
+    NewsIndexMixin, AbstractNewsItem, AbstractNewsItemRevision)
 from wagtailnews.decorators import newsindex
 
 
@@ -32,7 +33,7 @@ class NewsIndex(NewsIndexMixin, Page):
 class NewsItem(AbstractNewsItem):
     title = models.CharField(max_length=32)
 
-    tags = TaggableManager(through=NewsItemTag, blank=True)
+    tags = ClusterTaggableManager(through=NewsItemTag, blank=True)
 
     panels = [
         FieldPanel('title'),
@@ -42,3 +43,7 @@ class NewsItem(AbstractNewsItem):
 
     def __str__(self):
         return self.title
+
+
+class NewsItemRevision(AbstractNewsItemRevision):
+    newsitem = models.ForeignKey(NewsItem, related_name='revisions')

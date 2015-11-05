@@ -22,7 +22,7 @@ def _newsitem_list(request, newsindex, newsitem_list, extra_context):
 def news_index(request, newsindex):
     now = timezone.now()
     NewsItem = newsindex.get_newsitem_model()
-    newsitem_list = NewsItem.objects.filter(
+    newsitem_list = NewsItem.objects.live().filter(
         newsindex=newsindex, date__lte=now)
     return _newsitem_list(request, newsindex, newsitem_list, {
         'list_type': 'index',
@@ -31,7 +31,7 @@ def news_index(request, newsindex):
 
 def news_year(request, newsindex, year):
     NewsItem = newsindex.get_newsitem_model()
-    newsitem_list = NewsItem.objects.filter(
+    newsitem_list = NewsItem.objects.live().filter(
         newsindex=newsindex, date__year=year)
     return _newsitem_list(request, newsindex, newsitem_list, {
         'list_type': 'index',
@@ -40,7 +40,7 @@ def news_year(request, newsindex, year):
 
 def news_month(request, newsindex, year, month):
     NewsItem = newsindex.get_newsitem_model()
-    newsitem_list = NewsItem.objects.filter(
+    newsitem_list = NewsItem.objects.live().filter(
         newsindex=newsindex, date__year=year, date__month=month)
     return _newsitem_list(request, newsindex, newsitem_list, {
         'list_type': 'index',
@@ -49,17 +49,17 @@ def news_month(request, newsindex, year, month):
 
 def news_day(request, newsindex, year, month, day):
     NewsItem = newsindex.get_newsitem_model()
-    newsitem_list = NewsItem.objects.filter(
+    newsitem_list = NewsItem.objects.live().filter(
         newsindex=newsindex, date__year=year, date__month=month, date__day=day)
     return _newsitem_list(request, newsindex, newsitem_list, {
         'list_type': 'index',
     })
 
 
-def newsitem_detail(request, newsindex, year, month, day, pk,
-                    slug):
+def newsitem_detail(request, newsindex, year, month, day, pk, slug):
     NewsItem = newsindex.get_newsitem_model()
-    newsitem = get_object_or_404(NewsItem, newsindex=newsindex, pk=pk)
+    newsitem = get_object_or_404(NewsItem.objects.live(),
+                                 newsindex=newsindex, pk=pk)
 
     newsitem_path = urlparse(newsitem.url(), allow_fragments=True).path
     if request.path != newsitem_path:

@@ -15,7 +15,11 @@
             <ul>
                 <li class="actions">
                     <div class="dropdown dropup match-width">
-                        <div><input type="submit" value="{% trans 'Update' %}" /></div>
+                        <div><input type="submit" name="action-draft" value="{% trans 'Save draft' %}" /></div>
+                        <div class="dropdown-toggle icon icon-arrow-up"></div>
+                        <ul role="menu">
+                            <li><input type="submit" name="action-publish" value="{% trans 'Publish changes' %}" /></li>
+                        </ul>
                     </div>
                 </li>
             </ul>

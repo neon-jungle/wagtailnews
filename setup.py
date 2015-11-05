@@ -2,6 +2,7 @@
 """
 Install wagtailnews using setuptools
 """
+import sys
 
 from wagtailnews import __version__
 
@@ -15,6 +16,11 @@ except ImportError:
     use_setuptools()
     from setuptools import setup, find_packages
 
+
+install_requires = ['wagtail>=1.0']
+if sys.version_info < (3,):
+    install_requires += ['enum==0.4.6']
+
 setup(
     name='wagtailnews',
     version=__version__,
@@ -24,7 +30,7 @@ setup(
     author_email='tim@takeflight.com.au',
     url='https://bitbucket.org/takeflight/wagtailnews',
 
-    install_requires=['wagtail>=1.0'],
+    install_requires=install_requires,
     zip_safe=False,
     license='BSD License',
 
