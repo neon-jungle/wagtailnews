@@ -21,7 +21,7 @@ except ImportError:
 
 install_requires = ['wagtail>=1.0']
 if sys.version_info < (3,):
-    install_requires += ['enum==0.4.6']
+    install_requires += ['enum34==1.0.4']
 
 setup(
     name='wagtailnews',
