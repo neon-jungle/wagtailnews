@@ -1,12 +1,9 @@
-from django.test import TestCase
 from django.core.urlresolvers import reverse
+from django.test import TestCase
+from wagtail.tests.utils import WagtailTestUtils
+from wagtail.wagtailcore.models import Page
 
 from tests.app.models import NewsIndex, NewsItem
-
-from taggit.models import Tag
-
-from wagtail.wagtailcore.models import Page
-from wagtail.tests.utils import WagtailTestUtils
 
 
 class TestCreateNewsItem(TestCase, WagtailTestUtils):
@@ -140,3 +137,65 @@ class TestEditNewsItem(TestCase, WagtailTestUtils):
         newsitem = NewsItem.objects.get()
         self.assertEqual(newsitem.title, 'draft title')
         self.assertTrue(newsitem.live)
+
+
+class TestPreviewDraft(TestCase, WagtailTestUtils):
+    def setUp(self):
+        self.user = self.login()
+        root_page = Page.objects.get(pk=2)
+        self.index = NewsIndex(
+            title='News', slug='news')
+        root_page.add_child(instance=self.index)
+
+    def test_preview_live_item(self):
+        " Preview a live item with no draft "
+        newsitem = NewsItem.objects.create(
+            newsindex=self.index,
+            title='Preview me')
+        response = self.client.get(reverse('wagtailnews_view_draft', kwargs={
+            'pk': self.index.pk, 'newsitem_pk': newsitem.pk}))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Preview me')
+        self.assertTemplateUsed(response, 'app/newsitem.html')
+
+    def test_preview_draft_item(self):
+        " Preview a draft of an article"
+        newsitem = NewsItem.objects.create(
+            newsindex=self.index,
+            title='Live title')
+
+        draft_newsitem = NewsItem.objects.get(pk=newsitem.pk)
+        draft_newsitem.title = 'Draft title'
+        draft_newsitem.save_revision(user=self.user)
+
+        response = self.client.get(reverse('wagtailnews_view_draft', kwargs={
+            'pk': self.index.pk, 'newsitem_pk': draft_newsitem.pk}))
+        self.assertContains(response, 'Draft title')
+
+        live_newsitem = NewsItem.objects.get(pk=newsitem.pk)
+        response = self.client.get(live_newsitem.url())
+        self.assertContains(response, 'Live title')
+
+    def test_save_and_preview(self):
+        " Preview straight from the editor "
+        newsitem = NewsItem.objects.create(
+            newsindex=self.index,
+            title='Live title')
+
+        response = self.client.post(
+            reverse('wagtailnews_edit', kwargs={
+                'pk': self.index.pk, 'newsitem_pk': newsitem.pk}),
+            follow=True, data={
+                'title': 'Draft title', 'date': '2015-11-03 17:12',
+                'action-preview': 'preview'})
+
+        preview_url = reverse('wagtailnews_view_draft', kwargs={
+            'pk': self.index.pk, 'newsitem_pk': newsitem.pk})
+        self.assertEqual(response.redirect_chain,
+                         [('http://testserver' + preview_url, 302)])
+        self.assertContains(response, 'Draft title')
+
+        live_newsitem = NewsItem.objects.get(pk=newsitem.pk)
+        response = self.client.get(live_newsitem.url())
+        self.assertContains(response, 'Live title')

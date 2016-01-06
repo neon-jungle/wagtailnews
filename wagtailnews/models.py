@@ -1,5 +1,7 @@
 from __future__ import absolute_import, unicode_literals
 
+from modelcluster.models import ClusterableModel
+
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
@@ -8,7 +10,6 @@ from django.utils.lru_cache import lru_cache
 from django.utils.six import string_types, text_type
 from django.utils.text import slugify
 from django.utils.translation import ugettext_lazy as _
-from modelcluster.models import ClusterableModel
 from wagtail.contrib.wagtailroutablepage.models import RoutablePageMixin, route
 from wagtail.wagtailadmin.edit_handlers import FieldPanel
 from wagtail.wagtailcore.models import Page
@@ -165,13 +166,18 @@ class AbstractNewsItem(ClusterableModel):
             'newsitem': self
         }
 
-    def url(self):
+    def url_suffix(self):
         newsindex = self.newsindex.specific
         ldate = timezone.localtime(self.date)
-        url = newsindex.url + newsindex.reverse_subpage('post', kwargs={
+        return newsindex.reverse_subpage('post', kwargs={
             'year': ldate.year, 'month': ldate.month, 'day': ldate.day,
             'pk': self.pk, 'slug': self.get_nice_url()})
-        return url
+
+    def url(self):
+        return self.newsindex.specific.url + self.url_suffix()
+
+    def full_url(self):
+        return self.newsindex.specific.full_url + self.url_suffix()
 
     def save_revision(self, user=None, changed=True):
         # Create revision

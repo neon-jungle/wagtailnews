@@ -19,3 +19,4 @@ class ActionSet(Enum):
 class SaveActionSet(ActionSet):
     draft = 1
     publish = 2
+    preview = 3

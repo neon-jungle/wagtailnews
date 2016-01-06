@@ -33,6 +33,7 @@
                         </h2>
                         <ul class="actions">
                             <li><a href="{% url 'wagtailnews_edit' pk=newsindex.pk newsitem_pk=newsitem.pk %}" class="button button-small">{% trans 'Edit' %}</a></li>
+                            <li><a href="{% url 'wagtailnews_view_draft' pk=newsindex.pk newsitem_pk=newsitem.pk %}" class="button button-small button-secondary">{% trans 'View' %}</a></li>
                             <li><a href="{% url 'wagtailnews_delete' pk=newsindex.pk newsitem_pk=newsitem.pk %}" class="button button-small button-secondary no">{% trans 'Delete' %}</a></li>
                         </ul>
                     </td>

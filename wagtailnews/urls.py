@@ -15,4 +15,6 @@ urlpatterns = [
         name='wagtailnews_edit'),
     url(r'^(?P<pk>\d+)/delete/(?P<newsitem_pk>.*)/$', editor.delete,
         name='wagtailnews_delete'),
+    url(r'^(?P<pk>\d+)/view_draft/(?P<newsitem_pk>.*)/$', editor.view_draft,
+        name='wagtailnews_view_draft'),
 ]
