@@ -1,4 +1,3 @@
-from django.contrib.auth.decorators import permission_required
 from django.shortcuts import redirect, render, get_object_or_404
 
 from wagtail.wagtailcore.models import Page
@@ -6,7 +5,6 @@ from wagtail.wagtailcore.models import Page
 from ..models import get_newsindex_content_types
 
 
-@permission_required('wagtailadmin.access_admin')  # further permissions are enforced within the view
 def choose(request):
     newsindex_list = Page.objects.filter(content_type__in=get_newsindex_content_types())
     newsindex_count = newsindex_list.count()
@@ -21,7 +19,6 @@ def choose(request):
     })
 
 
-@permission_required('wagtailadmin.access_admin')  # further permissions are enforced within the view
 def index(request, pk):
     newsindex = get_object_or_404(Page, pk=pk, content_type__in=get_newsindex_content_types()).specific
     NewsItem = newsindex.get_newsitem_model()
