@@ -192,8 +192,10 @@ class TestPreviewDraft(TestCase, WagtailTestUtils):
 
         preview_url = reverse('wagtailnews_view_draft', kwargs={
             'pk': self.index.pk, 'newsitem_pk': newsitem.pk})
-        self.assertEqual(response.redirect_chain,
-                         [('http://testserver' + preview_url, 302)])
+        # redirect_chain changed in Django 1.9, which makes testing it annoying
+        self.assertEqual(len(response.redirect_chain), 1)
+        self.assertTrue(response.redirect_chain[0][0].endswith(preview_url))
+        self.assertEqual(response.redirect_chain[0][1], 302)
         self.assertContains(response, 'Draft title')
 
         live_newsitem = NewsItem.objects.get(pk=newsitem.pk)
