@@ -162,7 +162,7 @@ class AbstractNewsItem(ClusterableModel):
 
     def get_context(self, request, *args, **kwargs):
         return {
-            'self': self.newsindex,
+            'self': self.newsindex.specific,
             'newsitem': self
         }
 

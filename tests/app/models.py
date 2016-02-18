@@ -44,6 +44,11 @@ class NewsItem(AbstractNewsItem):
     def __str__(self):
         return self.title
 
+    def get_context(self, request, *args, **kwargs):
+        context = super(NewsItem, self).get_context(request, *args, **kwargs)
+        context['foo'] = 'bar'
+        return context
+
 
 class NewsItemRevision(AbstractNewsItemRevision):
     newsitem = models.ForeignKey(NewsItem, related_name='revisions')
