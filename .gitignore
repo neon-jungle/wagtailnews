@@ -4,3 +4,4 @@ dist/
 *.sqlite*
 .tox/
 settings.py
+build/
