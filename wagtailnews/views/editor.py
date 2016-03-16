@@ -1,5 +1,5 @@
 from django.conf import settings
-from django.contrib import messages
+from wagtail.wagtailadmin import messages
 from django.core.urlresolvers import reverse
 from django.core.handlers.base import BaseHandler
 from django.core.handlers.wsgi import WSGIRequest
@@ -120,6 +120,24 @@ def edit(request, pk, newsitem_pk):
         'edit_handler': edit_handler,
         'do_preview': do_preview,
         'newsitem_opts': NewsItem._meta,
+    })
+
+
+def unpublish(request, pk, newsitem_pk):
+    newsindex = get_object_or_404(Page, pk=pk, content_type__in=get_newsindex_content_types()).specific
+    NewsItem = newsindex.get_newsitem_model()
+    newsitem = get_object_or_404(NewsItem, newsindex=newsindex, pk=newsitem_pk)
+
+    if request.method == 'POST':
+        newsitem.unpublish()
+        messages.success(request, _('{} has been unpublished').format(newsitem), [
+            (reverse('wagtailnews_edit', kwargs={'pk': pk, 'newsitem_pk': newsitem_pk}), _('Edit')),
+        ])
+        return redirect('wagtailnews_index', pk=pk)
+
+    return render(request, 'wagtailnews/unpublish.html', {
+        'newsindex': newsindex,
+        'newsitem': newsitem,
     })
 
 

@@ -1,0 +1,24 @@
+{% extends "wagtailadmin/base.html" %}
+{% load i18n %}
+{% block titletag %}{% blocktrans with newsitem=newsitem %}Unpublish {{ newsitem }}{% endblocktrans %}{% endblock %}
+{% block bodyclass %}menu-news{% endblock %}
+{% block content %}
+
+    {% trans "Unpublish" as new_str %}
+    {% include "wagtailadmin/shared/header.html" with title=new_str subtitle=newsitem icon="grip" %}
+
+    <div class="row row-flush nice-padding">
+        <form action="{% url 'wagtailnews_unpublish' pk=newsindex.pk newsitem_pk=newsitem.pk %}" method="POST">
+            {% csrf_token %}
+            <p>{% blocktrans %}Are you sure you want to unpublish this news item?{% endblocktrans %}</p>
+            <input type="submit" value="{% trans 'Yes, unpublish it' %}">
+        </form>
+    </div>
+{% endblock %}
+
+{% block extra_css %}
+    {% include "wagtailadmin/pages/_editor_css.html" %}
+{% endblock %}
+{% block extra_js %}
+    {% include "wagtailadmin/pages/_editor_js.html" %}
+{% endblock %}

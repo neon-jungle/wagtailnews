@@ -18,6 +18,7 @@
                         <div><input type="submit" name="action-draft" value="{% trans 'Save draft' %}" /></div>
                         <div class="dropdown-toggle icon icon-arrow-up"></div>
                         <ul role="menu">
+                            <li><a href="{% url 'wagtailnews_unpublish' pk=newsindex.pk newsitem_pk=newsitem.pk %}" class="no">{% trans 'Unpublish' %}</a></li>
                             <li><a href="{% url 'wagtailnews_delete' pk=newsindex.pk newsitem_pk=newsitem.pk %}" class="no">{% trans 'Delete' %}</a></li>
                             <li><hr class="dropdown-separator"></li>
                             <li><input type="submit" name="action-publish" value="{% trans 'Publish' %}" /></li>

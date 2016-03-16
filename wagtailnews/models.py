@@ -208,8 +208,6 @@ class AbstractNewsItem(ClusterableModel):
             if commit:
                 self.save(update_fields=['live', 'has_unpublished_changes'])
 
-            self.revisions.update(approved_go_live_at=None)
-
     @property
     def status_string(self):
         if not self.live:
