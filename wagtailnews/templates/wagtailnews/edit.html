@@ -25,7 +25,7 @@
                     </div>
                 </li>
                 <li class="actions preview">
-                    <button class="action-preview icon icon-view" name="action-preview">
+                    <button class="icon icon-view" name="action-preview" value="woop">
                         {% trans 'Preview' %}
                     </button>
                 </li>
@@ -48,4 +48,15 @@
 {% endblock %}
 {% block extra_js %}
     {% include "wagtailadmin/pages/_editor_js.html" %}
+    {% if do_preview %}
+    <script>
+    $(function() {
+        setTimeout(function() {
+            var url = "{% url 'wagtailnews_view_draft' pk=newsindex.pk newsitem_pk=newsitem.pk %}";
+            var previewWindow = window.open(url, "wagtailnews_edit")
+            previewWindow.focus();
+        }, 10);
+    });
+    </script>
+    {% endif %}
 {% endblock %}

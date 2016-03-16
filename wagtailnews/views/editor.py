@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.contrib import messages
+from django.core.urlresolvers import reverse
 from django.core.handlers.base import BaseHandler
 from django.core.handlers.wsgi import WSGIRequest
 from django.shortcuts import get_object_or_404, redirect, render
@@ -14,6 +15,8 @@ from wagtail.wagtailcore.models import Page
 from ..forms import SaveActionSet
 from ..models import get_newsindex_content_types
 
+
+OPEN_PREVIEW_PARAM = 'do_preview'
 
 @lru_cache(maxsize=None)
 def get_newsitem_edit_handler(NewsItem):
@@ -49,6 +52,12 @@ def create(request, pk):
                 messages.success(request, _('A draft news post "{0!s}" has been created').format(newsitem))
                 return redirect('wagtailnews_edit', pk=newsindex.pk, newsitem_pk=newsitem.pk)
 
+            elif action is SaveActionSet.preview:
+                edit_url = reverse('wagtailnews_edit', kwargs={
+                    'pk': newsindex.pk, 'newsitem_pk': newsitem.pk})
+                return redirect("{url}?{param}=1".format(
+                    url=edit_url, param=OPEN_PREVIEW_PARAM))
+
         else:
             messages.error(request, _('The news post could not be created due to validation errors'))
             edit_handler = EditHandler(instance=newsitem, form=form)
@@ -72,6 +81,8 @@ def edit(request, pk, newsitem_pk):
 
     EditHandler = get_newsitem_edit_handler(NewsItem)
     EditForm = EditHandler.get_form_class(NewsItem)
+
+    do_preview = False
 
     if request.method == 'POST':
         form = EditForm(request.POST, request.FILES, instance=newsitem)
@@ -107,6 +118,7 @@ def edit(request, pk, newsitem_pk):
         'newsitem': newsitem,
         'form': form,
         'edit_handler': edit_handler,
+        'do_preview': do_preview,
         'newsitem_opts': NewsItem._meta,
     })
 
