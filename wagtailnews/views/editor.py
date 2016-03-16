@@ -60,6 +60,7 @@ def create(request, pk):
         'newsindex': newsindex,
         'form': form,
         'edit_handler': edit_handler,
+        'newsitem_opts': NewsItem._meta,
     })
 
 
@@ -90,19 +91,23 @@ def edit(request, pk, newsitem_pk):
                 return redirect('wagtailnews_edit', pk=newsindex.pk, newsitem_pk=newsitem.pk)
 
             elif action is SaveActionSet.preview:
-                return redirect('wagtailnews_view_draft', pk=newsindex.pk, newsitem_pk=newsitem.pk)
+                do_preview = True
         else:
             messages.error(request, _('The news post could not be updated due to validation errors'))
-            edit_handler = EditHandler(instance=newsitem, form=form)
+
+        edit_handler = EditHandler(instance=newsitem, form=form)
     else:
         form = EditForm(instance=newsitem)
         edit_handler = EditHandler(instance=newsitem, form=form)
+        # The create view can set this param to open a preview on redirect
+        do_preview = bool(request.GET.get(OPEN_PREVIEW_PARAM))
 
     return render(request, 'wagtailnews/edit.html', {
         'newsindex': newsindex,
         'newsitem': newsitem,
         'form': form,
         'edit_handler': edit_handler,
+        'newsitem_opts': NewsItem._meta,
     })
 
 

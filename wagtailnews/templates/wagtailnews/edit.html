@@ -1,6 +1,6 @@
 {% extends "wagtailadmin/base.html" %}
 {% load i18n %}
-{% block titletag %}{% trans "News" %}{% endblock %}
+{% block titletag %}{% blocktrans with newsitem=newsitem type=newsitem_opts.verbose_name %}Editing {{ type }}: {{ newsitem }}{% endblocktrans %}{% endblock %}
 {% block bodyclass %}menu-news{% endblock %}
 {% block content %}
 
