@@ -14,14 +14,20 @@
         <footer>
             <ul>
                 <li class="actions">
-                    <div class="dropdown dropup match-width">
+                    <div class="dropdown dropup dropdown-button match-width">
                         <div><input type="submit" name="action-draft" value="{% trans 'Save draft' %}" /></div>
                         <div class="dropdown-toggle icon icon-arrow-up"></div>
                         <ul role="menu">
-                            <li><input type="submit" name="action-preview" value="{% trans 'Save and view draft' %}" /></li>
-                            <li><input type="submit" name="action-publish" value="{% trans 'Publish changes' %}" /></li>
+                            <li><a href="{% url 'wagtailnews_delete' pk=newsindex.pk newsitem_pk=newsitem.pk %}" class="no">{% trans 'Delete' %}</a></li>
+                            <li><hr class="dropdown-separator"></li>
+                            <li><input type="submit" name="action-publish" value="{% trans 'Publish' %}" /></li>
                         </ul>
                     </div>
+                </li>
+                <li class="actions preview">
+                    <button class="action-preview icon icon-view" name="action-preview">
+                        {% trans 'Preview' %}
+                    </button>
                 </li>
             </ul>
         </footer>
@@ -30,6 +36,15 @@
 
 {% block extra_css %}
     {% include "wagtailadmin/pages/_editor_css.html" %}
+    <style>
+        .dropdown-separator {
+            border: 0 none;
+            height: 1rem;
+            display: block;
+            background: #333333;
+            margin: 0;
+        }
+    </style>
 {% endblock %}
 {% block extra_js %}
     {% include "wagtailadmin/pages/_editor_js.html" %}
