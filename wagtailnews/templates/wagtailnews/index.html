@@ -21,6 +21,7 @@
             <thead><tr class="table-headers">
                 <th class="title">Title</th>
                 <th class="date">Date</th>
+                <th class="date">Status</th>
             </tr></thead>
             <tbody>
             {% for newsitem in newsitem_list %}
@@ -43,9 +44,15 @@
                     </td>
                     <td class="status" valign="top">
                         {% if newsitem.live %}
-                            <a href="{{ newsitem.url }}" target="_blank" class="status-tag primary">{{ newsitem.status_string }}</a>
+                            {% if newsitem.has_unpublished_changes %}
+                                <a href="{{ newsitem.url }}" target="_blank" class="status-tag primary">{% trans "live" %}</a>
+                                +
+                                <a href="{% url 'wagtailnews_view_draft' pk=newsindex.pk newsitem_pk=newsitem.pk %}" class="status-tag">{% trans 'draft' %}</a>
+                            {% else %}
+                                <a href="{{ newsitem.url }}" target="_blank" class="status-tag primary">{% trans "live" %}</a>
+                            {% endif %}
                         {% else %}
-                            <span class="status-tag">{{ newsitem.status_string }}</span>
+                            <a href="{% url 'wagtailnews_view_draft' pk=newsindex.pk newsitem_pk=newsitem.pk %}" class="status-tag">{% trans 'draft' %}</a>
                         {% endif %}
                     </td>
                 </tr>
