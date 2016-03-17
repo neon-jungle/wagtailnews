@@ -4,6 +4,7 @@ from wagtail.tests.utils import WagtailTestUtils
 from wagtail.wagtailcore.models import Page
 
 from tests.app.models import NewsIndex, NewsItem
+from wagtailnews.views.editor import OPEN_PREVIEW_PARAM
 
 
 class TestCreateNewsItem(TestCase, WagtailTestUtils):
@@ -19,7 +20,7 @@ class TestCreateNewsItem(TestCase, WagtailTestUtils):
         self.assertEqual(NewsItem.objects.count(), 0)
 
         # Make a news item
-        self.client.post(
+        response = self.client.post(
             reverse('wagtailnews_create', kwargs={'pk': self.index.pk}), {
                 'title': 'test title',
                 'tags': '',
@@ -40,11 +41,15 @@ class TestCreateNewsItem(TestCase, WagtailTestUtils):
         self.assertEqual(newsitem.to_json(),
                          newsitem_revision.to_json())
 
+        # Make sure the user is redirected to the index
+        self.assertRedirects(response, reverse('wagtailnews_index', kwargs={
+            'pk': self.index.pk}))
+
     def test_create_newsitem_draft(self):
         self.assertEqual(NewsItem.objects.count(), 0)
 
         # Make a news item
-        self.client.post(
+        response = self.client.post(
             reverse('wagtailnews_create', kwargs={'pk': self.index.pk}), {
                 'title': 'test title',
                 'tags': '',
@@ -65,6 +70,10 @@ class TestCreateNewsItem(TestCase, WagtailTestUtils):
         newsitem_revision = newsitem.get_latest_revision_as_newsitem()
         self.assertEqual(newsitem.to_json(),
                          newsitem_revision.to_json())
+
+        # Make sure the user is redirected to the edit page
+        self.assertRedirects(response, reverse('wagtailnews_edit', kwargs={
+            'pk': self.index.pk, 'newsitem_pk': newsitem.pk}))
 
 
 class TestEditNewsItem(TestCase, WagtailTestUtils):
@@ -138,6 +147,17 @@ class TestEditNewsItem(TestCase, WagtailTestUtils):
         self.assertEqual(newsitem.title, 'draft title')
         self.assertTrue(newsitem.live)
 
+    def test_actions_present(self):
+        """ Ensure that all the required actions are present """
+        response = self.client.get(
+            reverse('wagtailnews_edit', kwargs={
+                'pk': self.index.pk,
+                'newsitem_pk': self.newsitem.pk}))
+
+        url_kwargs = {'pk': self.index.pk, 'newsitem_pk': self.newsitem.pk}
+        self.assertContains(response, reverse('wagtailnews_delete', kwargs=url_kwargs))
+        self.assertContains(response, reverse('wagtailnews_unpublish', kwargs=url_kwargs))
+
 
 class TestPreviewDraft(TestCase, WagtailTestUtils):
     def setUp(self):
@@ -177,6 +197,30 @@ class TestPreviewDraft(TestCase, WagtailTestUtils):
         response = self.client.get(live_newsitem.url())
         self.assertContains(response, 'Live title')
 
+    def test_create_and_preview(self):
+        " Preview straight from creating a news item"
+        self.assertEqual(NewsItem.objects.count(), 0)
+
+        # Make a news item
+        response = self.client.post(
+            reverse('wagtailnews_create', kwargs={'pk': self.index.pk}),
+            follow=True, data={
+                'title': 'test title',
+                'tags': '',
+                'date': '2015-11-03 17:12',
+                'action-preview': 'preview',
+            })
+
+        newsitem = NewsItem.objects.get(title='test title')
+        edit_url = reverse('wagtailnews_edit', kwargs={
+            'pk': self.index.pk, 'newsitem_pk': newsitem.pk})
+        self.assertRedirects(response, '{}?{}=1'.format(edit_url, OPEN_PREVIEW_PARAM))
+
+        preview_url = reverse('wagtailnews_view_draft', kwargs={
+            'pk': self.index.pk, 'newsitem_pk': newsitem.pk})
+        self.assertContains(response, 'url = "{}"'.format(preview_url))
+        self.assertContains(response, 'window.open(url,')
+
     def test_save_and_preview(self):
         " Preview straight from the editor "
         newsitem = NewsItem.objects.create(
@@ -186,16 +230,16 @@ class TestPreviewDraft(TestCase, WagtailTestUtils):
         response = self.client.post(
             reverse('wagtailnews_edit', kwargs={
                 'pk': self.index.pk, 'newsitem_pk': newsitem.pk}),
-            follow=True, data={
+            data={
                 'title': 'Draft title', 'date': '2015-11-03 17:12',
                 'action-preview': 'preview'})
 
         preview_url = reverse('wagtailnews_view_draft', kwargs={
             'pk': self.index.pk, 'newsitem_pk': newsitem.pk})
-        # redirect_chain changed in Django 1.9, which makes testing it annoying
-        self.assertEqual(len(response.redirect_chain), 1)
-        self.assertTrue(response.redirect_chain[0][0].endswith(preview_url))
-        self.assertEqual(response.redirect_chain[0][1], 302)
+        self.assertContains(response, 'url = "{}"'.format(preview_url))
+        self.assertContains(response, 'window.open(url,')
+
+        response = self.client.get(preview_url)
         self.assertContains(response, 'Draft title')
 
         live_newsitem = NewsItem.objects.get(pk=newsitem.pk)
