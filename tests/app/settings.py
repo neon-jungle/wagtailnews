@@ -15,7 +15,6 @@ INSTALLED_APPS = [
     'tests.app',
 
     'taggit',
-    'compressor',
     'modelcluster',
 
     'wagtail.wagtailcore',
