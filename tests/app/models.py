@@ -24,6 +24,11 @@ class NewsItemTag(TaggedItemBase):
 class NewsIndex(NewsIndexMixin, Page):
     newsitem_model = 'NewsItem'
 
+    def get_context(self, request, *args, **kwargs):
+        context = super(NewsIndex, self).get_context(request, *args, **kwargs)
+        context.update({'extra': 'foo'})
+        return context
+
 
 @register_snippet
 @python_2_unicode_compatible

@@ -26,9 +26,13 @@ class TestNewsItem(TestCase, WagtailTestUtils):
         # Check the right NewsIndex was used, and is its most specific type
         self.assertIsInstance(response.context['self'], NewsIndex)
         self.assertEqual(response.context['self'], self.index)
+        self.assertEqual(response.context['page'], self.index)
 
         # Check the right NewsItem was used
         self.assertEqual(response.context['newsitem'], self.newsitem)
+
+        # Check the NewsIndex context is used as a base
+        self.assertEqual(response.context['extra'], 'foo')
 
         # Check the context can be overridden using NewsItem.get_context()
         self.assertEqual(response.context['foo'], 'bar')

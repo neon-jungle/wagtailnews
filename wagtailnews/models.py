@@ -161,10 +161,11 @@ class AbstractNewsItem(ClusterableModel):
             return '{0}/{1}.html'.format(self._meta.app_label, self._meta.model_name)
 
     def get_context(self, request, *args, **kwargs):
-        return {
-            'self': self.newsindex.specific,
+        context = self.newsindex.specific.get_context(request, *args, **kwargs)
+        context.update({
             'newsitem': self
-        }
+        })
+        return context
 
     def url_suffix(self):
         newsindex = self.newsindex.specific
