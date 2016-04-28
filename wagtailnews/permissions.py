@@ -1,6 +1,7 @@
 from django.contrib.auth.models import Permission
+from django.contrib.contenttypes.models import ContentType
 
-from .models import get_newsindex_content_types
+from .models import NEWSINDEX_MODEL_CLASSES
 
 
 def user_can_edit_news_type(user, content_type):
@@ -19,12 +20,15 @@ def user_can_edit_news_type(user, content_type):
 
 def user_can_edit_news(user):
     """ true if user has any permission related to any content type registered as a news type """
-    news_content_types = get_newsindex_content_types()
+    newsitem_models = [model.get_newsitem_model()
+                       for model in NEWSINDEX_MODEL_CLASSES]
+    newsitem_cts = ContentType.objects.get_for_models(*newsitem_models).values()
     if user.is_active and user.is_superuser:
         # admin can edit news iff any news types exist
-        return bool(news_content_types)
+        return bool(newsitem_cts)
 
-    permissions = Permission.objects.filter(content_type__in=news_content_types).select_related('content_type')
+    permissions = Permission.objects.filter(content_type__in=newsitem_cts)\
+        .select_related('content_type')
     for perm in permissions:
         permission_name = "%s.%s" % (perm.content_type.app_label, perm.codename)
         if user.has_perm(permission_name):
