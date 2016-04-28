@@ -11,6 +11,8 @@ import modelcluster.contrib.taggit
 
 class Migration(migrations.Migration):
 
+    initial = True
+
     dependencies = [
         ('taggit', '0002_auto_20150616_2121'),
         ('wagtailcore', '0019_verbose_names_cleanup'),
@@ -45,6 +47,7 @@ class Migration(migrations.Migration):
                 ('has_unpublished_changes', models.BooleanField(editable=False, verbose_name='Has unpublished changes', default=False)),
                 ('title', models.CharField(max_length=32)),
                 ('newsindex', models.ForeignKey(to='wagtailcore.Page')),
+                ('page', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='+', to='wagtailcore.Page')),
             ],
             options={
                 'abstract': False,
