@@ -11,7 +11,7 @@
         <form action="{% url 'wagtailnews_unpublish' pk=newsindex.pk newsitem_pk=newsitem.pk %}" method="POST">
             {% csrf_token %}
             <p>{% blocktrans %}Are you sure you want to unpublish this news item?{% endblocktrans %}</p>
-            <input type="submit" value="{% trans 'Yes, unpublish it' %}">
+            <input class="button" type="submit" value="{% trans 'Yes, unpublish it' %}">
         </form>
     </div>
 {% endblock %}
