@@ -57,3 +57,16 @@ class NewsItem(AbstractNewsItem):
 
 class NewsItemRevision(AbstractNewsItemRevision):
     newsitem = models.ForeignKey(NewsItem, related_name='revisions')
+
+
+@newsindex
+class SecondaryNewsIndex(NewsIndexMixin, Page):
+    newsitem_model = 'SecondaryNewsItem'
+
+
+class SecondaryNewsItem(AbstractNewsItem):
+    pass
+
+
+class SecondaryNewsItemRevision(AbstractNewsItemRevision):
+    newsitem = models.ForeignKey(SecondaryNewsItem, related_name='revisions')
