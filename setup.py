@@ -4,6 +4,8 @@ Install wagtailnews using setuptools
 """
 import sys
 
+from setuptools import find_packages, setup
+
 with open('wagtailnews/version.py', 'r') as f:
     version = None
     exec(f.read())
@@ -11,12 +13,6 @@ with open('wagtailnews/version.py', 'r') as f:
 with open('README.rst', 'r') as f:
     readme = f.read()
 
-try:
-    from setuptools import setup, find_packages
-except ImportError:
-    from ez_setup import use_setuptools
-    use_setuptools()
-    from setuptools import setup, find_packages
 
 
 install_requires = ['wagtail>=1.0']
@@ -36,7 +32,7 @@ setup(
     zip_safe=False,
     license='BSD License',
 
-    packages=find_packages(),
+    packages=find_packages(exclude=['tests*']),
 
     include_package_data=True,
     package_data={},
