@@ -4,7 +4,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from wagtail.wagtailcore.models import Page
 
 from ..models import NEWSINDEX_MODEL_CLASSES, NewsIndexMixin
-from ..permissions import user_can_edit_newsitem
+from ..permissions import perms_for_template, user_can_edit_newsitem
 
 
 def choose(request):
@@ -46,4 +46,5 @@ def index(request, pk):
     return render(request, 'wagtailnews/index.html', {
         'newsindex': newsindex,
         'newsitem_list': newsitem_list,
+        'newsitem_perms': perms_for_template(request, NewsItem),
     })

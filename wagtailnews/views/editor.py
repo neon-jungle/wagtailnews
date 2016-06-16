@@ -15,7 +15,7 @@ from wagtail.wagtailcore.models import Page
 
 from ..forms import SaveActionSet
 from ..models import NewsIndexMixin
-from ..permissions import format_perms
+from ..permissions import format_perms, perms_for_template
 
 OPEN_PREVIEW_PARAM = 'do_preview'
 
@@ -76,6 +76,7 @@ def create(request, pk):
         'form': form,
         'edit_handler': edit_handler,
         'newsitem_opts': NewsItem._meta,
+        'newsitem_perms': perms_for_template(request, NewsItem),
     })
 
 
@@ -131,6 +132,7 @@ def edit(request, pk, newsitem_pk):
         'edit_handler': edit_handler,
         'do_preview': do_preview,
         'newsitem_opts': NewsItem._meta,
+        'newsitem_perms': perms_for_template(request, NewsItem),
     })
 
 
@@ -154,6 +156,7 @@ def unpublish(request, pk, newsitem_pk):
     return render(request, 'wagtailnews/unpublish.html', {
         'newsindex': newsindex,
         'newsitem': newsitem,
+        'newsitem_perms': perms_for_template(request, NewsItem),
     })
 
 
@@ -174,6 +177,7 @@ def delete(request, pk, newsitem_pk):
     return render(request, 'wagtailnews/delete.html', {
         'newsindex': newsindex,
         'newsitem': newsitem,
+        'newsitem_perms': perms_for_template(request, NewsItem),
     })
 
 

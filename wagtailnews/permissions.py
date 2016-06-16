@@ -47,3 +47,8 @@ def user_can_edit_newsitem(user, NewsItem):
             return True
 
     return False
+
+
+def perms_for_template(request, NewsItem):
+    return {action: request.user.has_perm(format_perm(NewsItem, action))
+            for action in ['add', 'change', 'delete']}
