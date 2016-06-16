@@ -114,6 +114,15 @@ class TestChooseNewsIndex(PermissionTestCase):
         response = self.client.get(reverse('wagtailnews_choose'))
         self.assertEqual(response.status_code, 403)
 
+    @grant_permissions(['app.add_newsitem', 'app.change_newsitem'])
+    def test_chooser_has_perms_no_news(self):
+        """
+        Test the chooser when there are no news items, but the user has
+        relevant permissions.
+        """
+        response = self.client.get(reverse('wagtailnews_choose'))
+        self.assertEqual(response.status_code, 200)
+
 
 class TestNewsIndex(WithNewsIndexTestCase, PermissionTestCase):
 

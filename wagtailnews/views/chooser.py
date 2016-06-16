@@ -4,12 +4,15 @@ from django.shortcuts import get_object_or_404, redirect, render
 from wagtail.wagtailcore.models import Page
 
 from ..models import NEWSINDEX_MODEL_CLASSES, NewsIndexMixin
-from ..permissions import perms_for_template, user_can_edit_newsitem
+from ..permissions import (
+    perms_for_template, user_can_edit_news, user_can_edit_newsitem)
 
 
 def choose(request):
-
     user = request.user
+    if not user_can_edit_news(user):
+        raise PermissionDenied
+
     allowed_news_types = [
         NewsIndex for NewsIndex in NEWSINDEX_MODEL_CLASSES
         if user_can_edit_newsitem(user, NewsIndex.get_newsitem_model())]
@@ -18,9 +21,6 @@ def choose(request):
         .values()
     newsindex_list = Page.objects.filter(content_type__in=allowed_cts)
     newsindex_count = newsindex_list.count()
-
-    if newsindex_count == 0:
-        raise PermissionDenied()
 
     if newsindex_count == 1:
         newsindex = newsindex_list.first()
