@@ -1,23 +1,49 @@
-from django.contrib.auth.models import Permission
-from django.contrib.contenttypes.models import ContentType
-
 from .models import NEWSINDEX_MODEL_CLASSES
 
 
+def format_perm(model, action):
+    """
+    Format a permission string "app.verb_model" for the model and the
+    requested action (add, change, delete).
+    """
+    return '{meta.app_label}.{action}_{meta.model_name}'.format(
+        meta=model._meta, action=action)
+
+
+def format_perms(model, actions):
+    """
+    Make a list of permission strings "app.verb_model" for the model and the
+    requested actions (add, change, delete).
+    """
+    return [format_perm(model, action) for action in actions]
+
+
 def user_can_edit_news(user):
-    """ true if user has any permission related to any content type registered as a news type """
+    """
+    Check if the user has permission to edit any of the registered NewsItem
+    types.
+    """
     newsitem_models = [model.get_newsitem_model()
                        for model in NEWSINDEX_MODEL_CLASSES]
-    newsitem_cts = ContentType.objects.get_for_models(*newsitem_models).values()
+
     if user.is_active and user.is_superuser:
         # admin can edit news iff any news types exist
-        return bool(newsitem_cts)
+        return bool(newsitem_models)
 
-    permissions = Permission.objects.filter(content_type__in=newsitem_cts)\
-        .select_related('content_type')
-    for perm in permissions:
-        permission_name = "%s.%s" % (perm.content_type.app_label, perm.codename)
-        if user.has_perm(permission_name):
+    for NewsItem in newsitem_models:
+        for perm in format_perms(NewsItem, ['add', 'change', 'delete']):
+            if user.has_perm(perm):
+                return True
+
+    return False
+
+
+def user_can_edit_newsitem(user, NewsItem):
+    """
+    Check if the user has permission to edit a particular NewsItem type.
+    """
+    for perm in format_perms(NewsItem, ['add', 'change', 'delete']):
+        if user.has_perm(perm):
             return True
 
     return False

@@ -1,13 +1,27 @@
-from django.shortcuts import redirect, render, get_object_or_404
-
+from django.contrib.contenttypes.models import ContentType
+from django.core.exceptions import PermissionDenied
+from django.shortcuts import get_object_or_404, redirect, render
 from wagtail.wagtailcore.models import Page
 
-from ..models import NewsIndexMixin
+from ..models import NEWSINDEX_MODEL_CLASSES, NewsIndexMixin
+from ..permissions import user_can_edit_newsitem
 
 
 def choose(request):
-    newsindex_list = Page.objects.type(NewsIndexMixin)
+
+    user = request.user
+    allowed_news_types = [
+        NewsIndex for NewsIndex in NEWSINDEX_MODEL_CLASSES
+        if user_can_edit_newsitem(user, NewsIndex.get_newsitem_model())]
+
+    allowed_cts = ContentType.objects.get_for_models(*allowed_news_types)\
+        .values()
+    newsindex_list = Page.objects.filter(content_type__in=allowed_cts)
     newsindex_count = newsindex_list.count()
+
+    if newsindex_count == 0:
+        raise PermissionDenied()
+
     if newsindex_count == 1:
         newsindex = newsindex_list.first()
         return redirect('wagtailnews_index', pk=newsindex.pk)
@@ -23,6 +37,10 @@ def index(request, pk):
     newsindex = get_object_or_404(
         Page.objects.specific().type(NewsIndexMixin), pk=pk)
     NewsItem = newsindex.get_newsitem_model()
+
+    if not user_can_edit_newsitem(request.user, NewsItem):
+        raise PermissionDenied()
+
     newsitem_list = NewsItem.objects.filter(newsindex=newsindex)
 
     return render(request, 'wagtailnews/index.html', {

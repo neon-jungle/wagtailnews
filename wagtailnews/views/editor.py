@@ -1,22 +1,24 @@
 from django.conf import settings
-from wagtail.wagtailadmin import messages
-from django.core.urlresolvers import reverse
+from django.core.exceptions import PermissionDenied
 from django.core.handlers.base import BaseHandler
 from django.core.handlers.wsgi import WSGIRequest
+from django.core.urlresolvers import reverse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.lru_cache import lru_cache
 from django.utils.six import StringIO
 from django.utils.six.moves.urllib.parse import urlparse
 from django.utils.translation import ugettext_lazy as _
+from wagtail.wagtailadmin import messages
 from wagtail.wagtailadmin.edit_handlers import (
     ObjectList, extract_panel_definitions_from_model_class)
 from wagtail.wagtailcore.models import Page
 
 from ..forms import SaveActionSet
 from ..models import NewsIndexMixin
-
+from ..permissions import format_perms
 
 OPEN_PREVIEW_PARAM = 'do_preview'
+
 
 @lru_cache(maxsize=None)
 def get_newsitem_edit_handler(NewsItem):
@@ -29,6 +31,9 @@ def create(request, pk):
     newsindex = get_object_or_404(
         Page.objects.specific().type(NewsIndexMixin), pk=pk)
     NewsItem = newsindex.get_newsitem_model()
+
+    if not request.user.has_perms(format_perms(NewsItem, ['add', 'change'])):
+        raise PermissionDenied()
 
     newsitem = NewsItem(newsindex=newsindex)
     EditHandler = get_newsitem_edit_handler(NewsItem)
@@ -78,6 +83,10 @@ def edit(request, pk, newsitem_pk):
     newsindex = get_object_or_404(
         Page.objects.specific().type(NewsIndexMixin), pk=pk)
     NewsItem = newsindex.get_newsitem_model()
+
+    if not request.user.has_perms(format_perms(NewsItem, ['change'])):
+        raise PermissionDenied()
+
     newsitem = get_object_or_404(NewsItem, newsindex=newsindex, pk=newsitem_pk)
     newsitem = newsitem.get_latest_revision_as_newsitem()
 
@@ -129,6 +138,10 @@ def unpublish(request, pk, newsitem_pk):
     newsindex = get_object_or_404(
         Page.objects.specific().type(NewsIndexMixin), pk=pk)
     NewsItem = newsindex.get_newsitem_model()
+
+    if not request.user.has_perms(format_perms(NewsItem, ['change'])):
+        raise PermissionDenied()
+
     newsitem = get_object_or_404(NewsItem, newsindex=newsindex, pk=newsitem_pk)
 
     if request.method == 'POST':
@@ -148,6 +161,10 @@ def delete(request, pk, newsitem_pk):
     newsindex = get_object_or_404(
         Page.objects.specific().type(NewsIndexMixin), pk=pk)
     NewsItem = newsindex.get_newsitem_model()
+
+    if not request.user.has_perms(format_perms(NewsItem, ['delete'])):
+        raise PermissionDenied()
+
     newsitem = get_object_or_404(NewsItem, newsindex=newsindex, pk=newsitem_pk)
 
     if request.method == 'POST':
