@@ -46,7 +46,8 @@ class PermissionTestCase(TestCase, WagtailTestUtils):
 
     def setUp(self):
         super(PermissionTestCase, self).setUp()
-        self.user = self.login()
+        self.user = self.create_test_user()
+        self.client.login(username='test@email.com', password='password')
 
     @staticmethod
     def create_test_user():

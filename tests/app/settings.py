@@ -1,6 +1,7 @@
-import sys
 import os
-from django.conf import global_settings
+import sys
+
+import wagtail.wagtailcore
 
 
 def env(name, default=None):
@@ -29,6 +30,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.staticfiles',
 ]
+
+wagtail_version = tuple(map(int, wagtail.wagtailcore.__version__.split('.')))
+if wagtail_version < (1, 4):
+    INSTALLED_APPS += ['compressor']
 
 SECRET_KEY = 'not a secret'
 
