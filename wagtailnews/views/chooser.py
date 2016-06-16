@@ -2,11 +2,11 @@ from django.shortcuts import redirect, render, get_object_or_404
 
 from wagtail.wagtailcore.models import Page
 
-from ..models import get_newsindex_content_types
+from ..models import NewsIndexMixin
 
 
 def choose(request):
-    newsindex_list = Page.objects.filter(content_type__in=get_newsindex_content_types())
+    newsindex_list = Page.objects.type(NewsIndexMixin)
     newsindex_count = newsindex_list.count()
     if newsindex_count == 1:
         newsindex = newsindex_list.first()
@@ -20,7 +20,8 @@ def choose(request):
 
 
 def index(request, pk):
-    newsindex = get_object_or_404(Page, pk=pk, content_type__in=get_newsindex_content_types()).specific
+    newsindex = get_object_or_404(
+        Page.objects.specific().type(NewsIndexMixin), pk=pk)
     NewsItem = newsindex.get_newsitem_model()
     newsitem_list = NewsItem.objects.filter(newsindex=newsindex)
 

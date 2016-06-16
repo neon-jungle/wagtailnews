@@ -1,15 +1,12 @@
 from __future__ import absolute_import, unicode_literals
 
-from modelcluster.models import ClusterableModel
-
 from django.conf import settings
-from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.utils import timezone
-from django.utils.lru_cache import lru_cache
 from django.utils.six import string_types, text_type
 from django.utils.text import slugify
 from django.utils.translation import ugettext_lazy as _
+from modelcluster.models import ClusterableModel
 from wagtail.contrib.wagtailroutablepage.models import RoutablePageMixin, route
 from wagtail.wagtailadmin.edit_handlers import FieldPanel
 from wagtail.wagtailcore.models import Page
@@ -21,13 +18,6 @@ from .utils.views import ModelViewProxy
 frontend = ModelViewProxy('wagtailnews.views.frontend')
 
 NEWSINDEX_MODEL_CLASSES = []
-
-
-@lru_cache()
-def get_newsindex_content_types():
-    return [
-        ContentType.objects.get_for_model(cls)
-        for cls in NEWSINDEX_MODEL_CLASSES]
 
 
 class NewsIndexMixin(RoutablePageMixin):

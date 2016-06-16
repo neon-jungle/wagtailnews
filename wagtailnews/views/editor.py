@@ -13,7 +13,7 @@ from wagtail.wagtailadmin.edit_handlers import (
 from wagtail.wagtailcore.models import Page
 
 from ..forms import SaveActionSet
-from ..models import get_newsindex_content_types
+from ..models import NewsIndexMixin
 
 
 OPEN_PREVIEW_PARAM = 'do_preview'
@@ -26,7 +26,8 @@ def get_newsitem_edit_handler(NewsItem):
 
 
 def create(request, pk):
-    newsindex = get_object_or_404(Page, pk=pk, content_type__in=get_newsindex_content_types()).specific
+    newsindex = get_object_or_404(
+        Page.objects.specific().type(NewsIndexMixin), pk=pk)
     NewsItem = newsindex.get_newsitem_model()
 
     newsitem = NewsItem(newsindex=newsindex)
@@ -74,7 +75,8 @@ def create(request, pk):
 
 
 def edit(request, pk, newsitem_pk):
-    newsindex = get_object_or_404(Page, pk=pk, content_type__in=get_newsindex_content_types()).specific
+    newsindex = get_object_or_404(
+        Page.objects.specific().type(NewsIndexMixin), pk=pk)
     NewsItem = newsindex.get_newsitem_model()
     newsitem = get_object_or_404(NewsItem, newsindex=newsindex, pk=newsitem_pk)
     newsitem = newsitem.get_latest_revision_as_newsitem()
@@ -124,7 +126,8 @@ def edit(request, pk, newsitem_pk):
 
 
 def unpublish(request, pk, newsitem_pk):
-    newsindex = get_object_or_404(Page, pk=pk, content_type__in=get_newsindex_content_types()).specific
+    newsindex = get_object_or_404(
+        Page.objects.specific().type(NewsIndexMixin), pk=pk)
     NewsItem = newsindex.get_newsitem_model()
     newsitem = get_object_or_404(NewsItem, newsindex=newsindex, pk=newsitem_pk)
 
@@ -142,7 +145,8 @@ def unpublish(request, pk, newsitem_pk):
 
 
 def delete(request, pk, newsitem_pk):
-    newsindex = get_object_or_404(Page, pk=pk, content_type__in=get_newsindex_content_types()).specific
+    newsindex = get_object_or_404(
+        Page.objects.specific().type(NewsIndexMixin), pk=pk)
     NewsItem = newsindex.get_newsitem_model()
     newsitem = get_object_or_404(NewsItem, newsindex=newsindex, pk=newsitem_pk)
 
@@ -157,7 +161,8 @@ def delete(request, pk, newsitem_pk):
 
 
 def view_draft(request, pk, newsitem_pk):
-    newsindex = get_object_or_404(Page, pk=pk, content_type__in=get_newsindex_content_types()).specific
+    newsindex = get_object_or_404(
+        Page.objects.specific().type(NewsIndexMixin), pk=pk)
     NewsItem = newsindex.get_newsitem_model()
     newsitem = get_object_or_404(NewsItem, newsindex=newsindex, pk=newsitem_pk)
     newsitem = newsitem.get_latest_revision_as_newsitem()
