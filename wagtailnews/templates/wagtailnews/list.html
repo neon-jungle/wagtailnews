@@ -1,0 +1,24 @@
+{% load i18n %}
+<table class="listing">
+	<col />
+	<col  />
+	<col width="16%" />
+	<thead>
+		<tr class="table-headers">
+			<th>{% trans "Title" %}</th>
+		</tr>
+	</thead>
+	<tbody>
+		{% for snippet in items %}
+			<tr>
+				<td class="title">
+					{% if choosing %}
+						<h2><a class="snippet-choice" href="{% url 'wagtailnews_chosen' pk=pk newsitem_pk=snippet.pk %}">{{ snippet }}</a></h2>
+					{% else %}
+						<h2><a href="{% url 'wagtailnews_chooser' pk=pk %}">{{ snippet }}</a></h2>
+					{% endif %}
+				</td>
+			</tr>
+		{% endfor %}
+	</tbody>
+</table>

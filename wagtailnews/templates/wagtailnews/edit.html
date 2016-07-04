@@ -53,6 +53,9 @@
 {% endblock %}
 {% block extra_js %}
     {% include "wagtailadmin/pages/_editor_js.html" %}
+    <script>
+    window.NEWS_PK = {{newsindex.pk}};
+    </script>
     {% if do_preview %}
     <script>
     $(function() {
