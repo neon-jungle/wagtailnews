@@ -13,7 +13,7 @@ function createNewsChooser(id) {
 		ModalWorkflow({
 			url: newsChooser,
 			responses: {
-				carChosen: function(newsData) {
+				newsItemChosen: function(newsData) {
 					input.val(newsData.id);
 					docTitle.text(newsData.string);
 					chooserElement.removeClass('blank');
