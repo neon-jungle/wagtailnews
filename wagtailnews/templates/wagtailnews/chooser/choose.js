@@ -1,7 +1,7 @@
 function initModal(modal) {
 
 	function ajaxifyLinks(context) {
-		$('a.snippet-choice', modal.body).click(function() {
+		$('a.newsitem-choice', modal.body).click(function() {
 			modal.loadUrl(this.href);
 			return false;
 		});
@@ -13,7 +13,7 @@ function initModal(modal) {
 		});
 	}
 
-	var searchUrl = $('form.snippet-search', modal.body).attr('action');
+	var searchUrl = $('form.newsitem-search', modal.body).attr('action');
 
 	function search() {
 		$.ajax({
@@ -45,7 +45,7 @@ function initModal(modal) {
 		return false;
 	}
 
-	$('form.snippet-search', modal.body).submit(search);
+	$('form.newsitem-search', modal.body).submit(search);
 
 	$('#id_q').on('input', function() {
 		clearTimeout($.data(this, 'timer'));

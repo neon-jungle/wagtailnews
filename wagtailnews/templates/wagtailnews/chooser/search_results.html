@@ -10,7 +10,7 @@
 		</h2>
 	{% endif %}
 
-	{% include "wagtailnews/list.html" %}
+	{% include "wagtailnews/chooser/list.html" %}
 
 	{% include "wagtailadmin/shared/pagination_nav.html" with items=items is_searching=is_searching linkurl=wagtailnews_chooser %}
 {% else %}

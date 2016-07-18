@@ -86,7 +86,7 @@ def choose_modal(request, pk):
 
     # If paginating or searching, render "results.html"
     if request.GET.get('results', None) == 'true':
-        return render(request, "wagtailnews/search_results.html", {
+        return render(request, "wagtailnews/chooser/search_results.html", {
             'items': paginated_items,
             'query_string': search_query,
             'is_searching': is_searching,
@@ -94,7 +94,7 @@ def choose_modal(request, pk):
 
     return render_modal_workflow(
         request,
-        'wagtailnews/chooser.html', 'wagtailnews/choose.js',
+        'wagtailnews/chooser/chooser.html', 'wagtailnews/chooser/choose.js',
         {
             'snippet_type_name': 'Car',
             'items': paginated_items,
@@ -121,7 +121,7 @@ def chosen_modal(request, pk, newsitem_pk):
 
     return render_modal_workflow(
         request,
-        None, 'wagtailnews/chosen.js',
+        None, 'wagtailnews/chooser/chosen.js',
         {
             'snippet_json': snippet_json,
         }

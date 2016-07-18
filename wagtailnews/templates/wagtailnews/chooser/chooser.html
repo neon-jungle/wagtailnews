@@ -1,5 +1,5 @@
 {% load i18n %}
-{% trans "Choose a newsitem" as choose_str %}
+{% trans "Choose a news item" as choose_str %}
 {% include "wagtailadmin/shared/header.html" with title=choose_str icon="icon icon-grip" %}
 
 <div class="nice-padding">
@@ -17,6 +17,6 @@
 	</form>
 
 	<div id="search-results" class="listing snippets">
-		{% include "wagtailnews/search_results.html" with choosing=1 %}
+		{% include "wagtailnews/chooser/search_results.html" with choosing=1 %}
 	</div>
 </div>
