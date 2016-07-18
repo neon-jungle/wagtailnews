@@ -10,7 +10,6 @@ class BaseNewsChooserPanel(BaseChooserPanel):
     object_type_name = 'item'
 
     _target_model = None
-    _target_content_type = None
 
     @classmethod
     def widget_overrides(cls):

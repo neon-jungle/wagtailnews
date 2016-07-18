@@ -8,7 +8,6 @@ from wagtail.wagtailadmin.widgets import AdminChooser
 
 
 class AdminNewsChooser(AdminChooser):
-    target_content_type = None
 
     class Media():
         js = ['js/news_chooser.js']
