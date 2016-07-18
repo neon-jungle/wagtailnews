@@ -4,11 +4,11 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.six import text_type
+from wagtail.utils.pagination import paginate
 from wagtail.wagtailadmin.forms import SearchForm as AdminSearchForm
 from wagtail.wagtailadmin.modal_workflow import render_modal_workflow
 from wagtail.wagtailcore.models import Page
 from wagtail.wagtailsearch.backends import get_search_backend
-from wagtailnews.utils.pagination import paginate
 
 from ..models import NEWSINDEX_MODEL_CLASSES, NewsIndexMixin
 from ..permissions import (perms_for_template, user_can_edit_news,
