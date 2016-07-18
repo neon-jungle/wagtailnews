@@ -17,7 +17,7 @@
 	{% if is_searching %}
 		 <p>{% blocktrans %}Sorry, no news items match "<em>{{ query_string }}</em>"{% endblocktrans %}</p>
 	{% else %}
-		{% url 'wagtailnews_create' pk=pk as wagtailsnippets_create_url %}
-		<p class="no-results-message">{% blocktrans %}No {{ snippet_type_name_plural }} have been created. Why not <a href="{{ wagtailsnippets_create_url }}">add one</a>?{% endblocktrans %}</p>
+		{% url 'wagtailnews_create' pk=pk as wagtailnews_create_url %}
+		<p class="no-results-message">{% blocktrans %}No {{ newsitem_type_name_plural }} have been created. Why not <a href="{{ wagtailnews_create_url }}">add one</a>?{% endblocktrans %}</p>
 	{% endif %}
 {% endif %}

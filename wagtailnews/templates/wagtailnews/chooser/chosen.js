@@ -1,4 +1,4 @@
 function(modal) {
-    modal.respond('newsItemChosen', {{ snippet_json|safe }});
+    modal.respond('newsItemChosen', {{ newsitem_json|safe }});
     modal.close();
 }

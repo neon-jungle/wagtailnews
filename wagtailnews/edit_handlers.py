@@ -27,22 +27,22 @@ class BaseNewsChooserPanel(BaseChooserPanel):
         return mark_safe(render_to_string(self.field_template, {
             'field': self.bound_field,
             self.object_type_name: instance_obj,
-            'snippet_type_name': self.get_snippet_type_name(),
+            'newsitem_type_name': self.get_newsitem_type_name(),
         }))
 
     @classmethod
-    def get_snippet_type_name(cls):
+    def get_newsitem_type_name(cls):
         return force_text(cls.target_model()._meta.verbose_name)
 
 
 class NewsChooserPanel(object):
-    def __init__(self, field_name, snippet_type=None):
+    def __init__(self, field_name, newsitem_type=None):
         self.field_name = field_name
-        self.snippet_type = snippet_type
+        self.newsitem_type = newsitem_type
 
     def bind_to_model(self, model):
         return type(str('_NewsChooserPanel'), (BaseNewsChooserPanel,), {
             'model': model,
             'field_name': self.field_name,
-            'snippet_type': self.snippet_type,
+            'newsitem_type': self.newsitem_type,
         })

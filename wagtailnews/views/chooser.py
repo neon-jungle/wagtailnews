@@ -67,8 +67,8 @@ def choose_modal(request, pk):
     is_searching = False
     search_query = None
     if 'q' in request.GET:
-        search_form = AdminSearchForm(request.GET, placeholder=("Search %(snippet_type_name)s") % {
-            'snippet_type_name': 'News'
+        search_form = AdminSearchForm(request.GET, placeholder=("Search %(newsitem_type_name)s") % {
+            'newsitem_type_name': 'News'
         })
 
         if search_form.is_valid():
@@ -96,7 +96,7 @@ def choose_modal(request, pk):
         request,
         'wagtailnews/chooser/chooser.html', 'wagtailnews/chooser/choose.js',
         {
-            'snippet_type_name': 'Car',
+            'newsitem_type_name': 'NewsItem',
             'items': paginated_items,
             'is_searchable': True,
             'search_form': search_form,
@@ -114,7 +114,7 @@ def chosen_modal(request, pk, newsitem_pk):
 
     item = get_object_or_404(NewsItem, newsindex=newsindex, pk=newsitem_pk)
 
-    snippet_json = json.dumps({
+    newsitem_json = json.dumps({
         'id': item.id,
         'string': text_type(item),
     })
@@ -123,6 +123,6 @@ def chosen_modal(request, pk, newsitem_pk):
         request,
         None, 'wagtailnews/chooser/chosen.js',
         {
-            'snippet_json': snippet_json,
+            'newsitem_json': newsitem_json,
         }
     )
