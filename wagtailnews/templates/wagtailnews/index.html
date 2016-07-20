@@ -8,6 +8,27 @@
         <div class="row row-flush">
             <div class="left">
                 <h1 class="col icon icon-grip">{% blocktrans %}News{% endblocktrans %} <span>{{ newsindex.url }}</span></h1>
+                <form class="col search-form" action="" method="GET">
+                    <ul class="fields">
+                        <li class="required">
+                            <div class="field char_field text_input field-small iconfield">
+                                <label for="id_q">
+                                    Search jobs
+                                </label>
+                                <div class="field-content">
+                                    <div class="input icon-search">
+                                        <input id="id_q"
+                                              name="q"
+                                              value="{{ request.GET.q }}"
+                                              placeholder="Search news"
+                                              type="text" />
+                                        <span></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                </form>
             </div>
             <div class="right">
                 {% if newsitem_perms.add and newsitem_perms.change %}

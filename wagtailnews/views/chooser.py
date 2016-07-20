@@ -34,7 +34,6 @@ def choose(request):
 
         LOGGER.debug("Searching for '%s'", query)
 
-
         # FIXME: this is crap, need to construct a single query for all types
         # to search by relevance however that's not currently possible in
         # a backend agnostic way :(
