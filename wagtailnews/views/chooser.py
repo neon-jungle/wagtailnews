@@ -28,6 +28,28 @@ def choose(request):
     newsindex_list = Page.objects.filter(content_type__in=allowed_cts)
     newsindex_count = newsindex_list.count()
 
+    try:
+        query = request.GET['q']
+        backend = get_search_backend()
+
+        LOGGER.debug("Searching for '%s'", query)
+
+
+        # FIXME: this is crap, need to construct a single query for all types
+        # to search by relevance however that's not currently possible in
+        # a backend agnostic way :(
+        newsitem_list = []
+        for news_type in allowed_news_types:
+            newsitem_list += \
+                list(backend.search(query, news_type.get_newsitem_model()))
+
+        return render(request, 'wagtailnews/index.html', {
+            'newsitem_list': newsitem_list,
+        })
+
+    except KeyError:
+        pass
+
     if newsindex_count == 1:
         newsindex = newsindex_list.first()
         return redirect('wagtailnews_index', pk=newsindex.pk)

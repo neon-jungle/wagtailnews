@@ -7,6 +7,7 @@ from django.core import urlresolvers
 from django.utils.translation import ugettext_lazy as _
 from wagtail.wagtailadmin.menu import MenuItem
 from wagtail.wagtailcore import hooks
+from wagtail.wagtailadmin.search import SearchArea
 
 from . import urls
 from .models import NEWSINDEX_MODEL_CLASSES
@@ -27,6 +28,16 @@ def construct_main_menu(request, menu_items):
             MenuItem(_('News'), urlresolvers.reverse('wagtailnews_choose'),
                      classnames='icon icon-grip', order=250)
         )
+
+
+@hooks.register('register_admin_search_area')
+def register_news_search():
+    """Register news search."""
+
+    return SearchArea(_('News'),
+                      urlresolvers.reverse('wagtailnews_choose'),
+                      classnames='icon icon-grip',
+                      order=250)
 
 
 @hooks.register('register_permissions')
