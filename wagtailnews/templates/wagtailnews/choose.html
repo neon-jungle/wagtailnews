@@ -14,11 +14,12 @@
                     <li>
                         <div class="row row-flush title">
                             <h2>
-                                <a href="{% url 'wagtailnews_index' pk=newsindex.pk %}" class="col6">
+                                <a href="{% url 'wagtailnews_index' pk=newsindex.pk %}" class="col4">
                                     {{ newsindex.title }}
                                 </a>
                             </h2>
-                            <small class="col6">{{ model_type|title }}</small>
+                            <a class="col6" href="{{ newsindex.url }}">{{ newsindex.url }}</a>
+                            <small class="col2">{{ model_type|title }}</small>
                         </div>
                     </li>
                 {% endfor %}
