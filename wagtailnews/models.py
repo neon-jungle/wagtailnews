@@ -118,7 +118,7 @@ class NewsItemQuerySet(models.QuerySet):
         return self.filter(live=True)
 
 
-class AbstractNewsItem(ClusterableModel):
+class AbstractNewsItem(index.Indexed, ClusterableModel):
 
     newsindex = models.ForeignKey(Page)
     date = models.DateTimeField('Published date', default=timezone.now)
@@ -133,7 +133,10 @@ class AbstractNewsItem(ClusterableModel):
         FieldPanel('date'),
     ]
 
-    search_fields = (index.FilterField('date'),)
+    search_fields = (
+        index.FilterField('date'),
+        index.FilterField('newsindex_id'),
+    )
 
     class Meta:
         ordering = ('-date',)

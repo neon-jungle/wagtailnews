@@ -1,11 +1,17 @@
+import logging
+
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404, redirect, render
+
 from wagtail.wagtailcore.models import Page
+from wagtail.wagtailsearch.backends import get_search_backend
 
 from ..models import NEWSINDEX_MODEL_CLASSES, NewsIndexMixin
 from ..permissions import (
     perms_for_template, user_can_edit_news, user_can_edit_newsitem)
+
+LOGGER = logging.getLogger(__name__)
 
 
 def choose(request):
@@ -42,6 +48,17 @@ def index(request, pk):
         raise PermissionDenied()
 
     newsitem_list = NewsItem.objects.filter(newsindex=newsindex)
+
+    try:
+        query = request.GET['q']
+        backend = get_search_backend()
+
+        LOGGER.debug("Searching for '%s'", query)
+
+        newsitem_list = backend.search(query, newsitem_list)
+
+    except KeyError:
+        pass
 
     return render(request, 'wagtailnews/index.html', {
         'newsindex': newsindex,
