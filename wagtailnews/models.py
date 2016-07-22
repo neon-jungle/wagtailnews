@@ -136,6 +136,7 @@ class AbstractNewsItem(index.Indexed, ClusterableModel):
     search_fields = (
         index.FilterField('date'),
         index.FilterField('newsindex_id'),
+        index.FilterField('live'),
     )
 
     class Meta:
