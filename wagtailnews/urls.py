@@ -20,8 +20,6 @@ urlpatterns = [
     url(r'^(?P<pk>\d+)/view_draft/(?P<newsitem_pk>.*)/$', editor.view_draft,
         name='wagtailnews_view_draft'),
     # Choosers
-    url(r'^chooser/(?P<pk>\d+)/$', chooser.choose_modal,
-        name='wagtailnews_chooser'),
-    url(r'^chooser/(?P<pk>\d+)/(\w+)/(\w+)/$', chooser.choose_modal, name='wagtailnews_chooser_specific'),
+    url(r'^chooser/$', chooser.choose_modal, name='wagtailnews_chooser'),
     url(r'^chooser/(?P<pk>\d+)/(?P<newsitem_pk>\d+)/$', chooser.chosen_modal, name='wagtailnews_chosen'),
 ]

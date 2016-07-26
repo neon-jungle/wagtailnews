@@ -1,17 +1,13 @@
-function createNewsChooser(id) {
+function createNewsChooser(id, type) {
 	var chooserElement = $('#' + id + '-chooser');
 	var docTitle = chooserElement.find('.title');
 	var input = $('#' + id);
 	var editLink = chooserElement.find('.edit-link');
-	if (NEWS_PK) {
-		var newsChooser = "/admin/news/chooser/" + NEWS_PK + '/';
-	} else {
-		var newsChooser = "/admin/news/chooser/";
-	}
+	var url = window.chooserUrls.newsChooser + '?type=' + type;
 
 	$('.action-choose', chooserElement).click(function() {
 		ModalWorkflow({
-			url: newsChooser,
+			url: url,
 			responses: {
 				newsItemChosen: function(newsData) {
 					input.val(newsData.id);

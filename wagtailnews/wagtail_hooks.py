@@ -5,7 +5,8 @@ from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.staticfiles.templatetags.staticfiles import static
 from django.core import urlresolvers
-from django.utils.html import format_html_join
+from django.core.urlresolvers import reverse
+from django.utils.html import format_html, format_html_join
 from django.utils.translation import ugettext_lazy as _
 from wagtail.wagtailadmin.menu import MenuItem
 from wagtail.wagtailcore import hooks
@@ -48,4 +49,7 @@ def editor_js():
         '\n', '<script src="{0}"></script>\n',
         ((filename, ) for filename in js_files)
     )
-    return js_includes
+    urls = format_html(
+        '<script>window.chooserUrls.newsChooser = "{}";</script>',
+        reverse('wagtailnews_chooser'))
+    return js_includes + urls

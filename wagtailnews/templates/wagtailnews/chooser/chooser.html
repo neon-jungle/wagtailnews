@@ -5,9 +5,10 @@
 <div class="nice-padding">
 	{# Need to keep the form in the HTML, even if it is not searchable #}
 	{# This is to allow pagination links to be generated from the form action URL #}
-	<form class="newsitem-search search-bar" action="{% url 'wagtailnews_chooser' pk=pk %}" method="GET">
+	<form class="newsitem-search search-bar" action="{% url 'wagtailnews_chooser' %}" method="GET">
 		{% if is_searchable %}
 			<ul class="fields">
+				<input type="hidden" name="type" id="id_type" value="{{ newsitem_type }}">
 				{% for field in search_form %}
 					{% include "wagtailadmin/shared/field_as_li.html" with field=field %}
 				{% endfor %}

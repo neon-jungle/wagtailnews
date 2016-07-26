@@ -1,4 +1,6 @@
 function initModal(modal) {
+	var query = $("#id_q");
+	var type = $("#id_type");
 
 	function ajaxifyLinks(context) {
 		$('a.newsitem-choice', modal.body).click(function() {
@@ -15,10 +17,18 @@ function initModal(modal) {
 
 	var searchUrl = $('form.newsitem-search', modal.body).attr('action');
 
+	function makeQueryData() {
+		return {
+			q: query.val(),
+			type: type.val(),
+			results: 'true',
+		};
+	}
+
 	function search() {
 		$.ajax({
 			url: searchUrl,
-			data: {q: $('#id_q').val(), results: 'true'},
+			data: makeQueryData(),
 			success: function(data, status) {
 				$('#search-results').html(data);
 				ajaxifyLinks($('#search-results'));
@@ -28,11 +38,8 @@ function initModal(modal) {
 	}
 
 	function setPage(page) {
-		var dataObj = {p: page, results: 'true'};
-
-		if ($('#id_q').length && $('#id_q').val().length) {
-			dataObj.q = $('#id_q').val();
-		}
+		var dataObj = makeQueryData();
+		dataObj.p = page;
 
 		$.ajax({
 			url: searchUrl,
