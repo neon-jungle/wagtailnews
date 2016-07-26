@@ -5,6 +5,7 @@ from modelcluster.fields import ParentalKey
 from taggit.models import TaggedItemBase
 from wagtail.wagtailadmin.edit_handlers import FieldPanel, PageChooserPanel
 from wagtail.wagtailcore.models import Page
+from wagtail.wagtailsearch import index
 from wagtail.wagtailsnippets.models import register_snippet
 
 from wagtailnews.decorators import newsindex
@@ -39,7 +40,7 @@ class NewsIndex(NewsIndexMixin, Page):
 
 @register_snippet
 @python_2_unicode_compatible
-class NewsItem(AbstractNewsItem):
+class NewsItem(index.Indexed, AbstractNewsItem):
     title = models.CharField(max_length=32)
     page = models.ForeignKey('wagtailcore.Page', related_name='+', null=True,
                              blank=True)
@@ -51,6 +52,12 @@ class NewsItem(AbstractNewsItem):
         PageChooserPanel('page'),
         FieldPanel('tags'),
         FieldPanel('date'),
+    ]
+
+    search_fields = [
+        index.SearchField('title'),
+        index.SearchField('page__title'),
+        index.SearchField('tags__name'),
     ]
 
     def __str__(self):
