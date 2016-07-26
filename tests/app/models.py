@@ -8,6 +8,7 @@ from wagtail.wagtailcore.models import Page
 from wagtail.wagtailsnippets.models import register_snippet
 
 from wagtailnews.decorators import newsindex
+from wagtailnews.edit_handlers import NewsChooserPanel
 from wagtailnews.models import (
     AbstractNewsItem, AbstractNewsItemRevision, NewsIndexMixin)
 
@@ -23,6 +24,12 @@ class NewsItemTag(TaggedItemBase):
 @newsindex
 class NewsIndex(NewsIndexMixin, Page):
     newsitem_model = 'NewsItem'
+    featured_newsitem = models.ForeignKey(
+        'NewsItem', null=True, on_delete=models.SET_NULL, related_name='+')
+
+    content_panels = Page.content_panels + [
+        NewsChooserPanel('featured_newsitem'),
+    ]
 
     def get_context(self, request, *args, **kwargs):
         context = super(NewsIndex, self).get_context(request, *args, **kwargs)
