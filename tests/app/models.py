@@ -26,7 +26,8 @@ class NewsItemTag(TaggedItemBase):
 class NewsIndex(NewsIndexMixin, Page):
     newsitem_model = 'NewsItem'
     featured_newsitem = models.ForeignKey(
-        'NewsItem', null=True, on_delete=models.SET_NULL, related_name='+')
+        'NewsItem', blank=True, null=True, on_delete=models.SET_NULL,
+        related_name='+')
 
     content_panels = Page.content_panels + [
         NewsChooserPanel('featured_newsitem'),
