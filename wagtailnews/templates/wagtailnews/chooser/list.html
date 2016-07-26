@@ -12,11 +12,7 @@
 		{% for newsitem in items %}
 			<tr>
 				<td class="title">
-					{% if choosing %}
-						<h2><a class="newsitem-choice" href="{% url 'wagtailnews_chosen' pk=pk newsitem_pk=newsitem.pk %}">{{ newsitem }}</a></h2>
-					{% else %}
-						<h2><a class='newsitem-choice' href="{% url 'wagtailnews_chosen' pk=pk newsitem_pk=newsitem.pk %}">{{ newsitem }}</a></h2>
-					{% endif %}
+					<h2><a class="newsitem-choice" href="{% url 'wagtailnews_chosen' pk=newsitem.newsindex_id newsitem_pk=newsitem.pk %}">{{ newsitem }}</a></h2>
 				</td>
 			</tr>
 		{% endfor %}

@@ -21,6 +21,7 @@ function createNewsChooser(id, type) {
 
 	$('.action-clear', chooserElement).click(function() {
 		input.val('');
+		docTitle.text('');
 		chooserElement.addClass('blank');
 	});
 }
