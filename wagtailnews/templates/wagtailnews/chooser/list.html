@@ -1,0 +1,20 @@
+{% load i18n %}
+<table class="listing">
+	<col />
+	<col  />
+	<col width="16%" />
+	<thead>
+		<tr class="table-headers">
+			<th>{% trans "Title" %}</th>
+		</tr>
+	</thead>
+	<tbody>
+		{% for newsitem in items %}
+			<tr>
+				<td class="title">
+					<h2><a class="newsitem-choice" href="{% url 'wagtailnews_chosen' pk=newsitem.newsindex_id newsitem_pk=newsitem.pk %}">{{ newsitem }}</a></h2>
+				</td>
+			</tr>
+		{% endfor %}
+	</tbody>
+</table>

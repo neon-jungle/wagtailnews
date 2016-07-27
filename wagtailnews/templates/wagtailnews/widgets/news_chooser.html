@@ -1,0 +1,11 @@
+{% extends "wagtailadmin/widgets/chooser.html" %}
+
+{% block chooser_class %}news-chooser{% endblock %}
+
+{% block chosen_state_view %}
+    <span class='title'>{{item}}</span>
+{% endblock %}
+
+{% block edit_chosen_item_url %}{% url "wagtailnews_edit" pk=item.newsindex_id newsitem_pk=item.pk %}{% endblock %}
+
+{% block icon %}icon icon-grip{% endblock %}

@@ -1,0 +1,23 @@
+{% load i18n %}
+{% trans "Choose a news item" as choose_str %}
+{% include "wagtailadmin/shared/header.html" with title=choose_str icon="icon icon-grip" %}
+
+<div class="nice-padding">
+	{# Need to keep the form in the HTML, even if it is not searchable #}
+	{# This is to allow pagination links to be generated from the form action URL #}
+	<form class="newsitem-search search-bar" action="{% url 'wagtailnews_chooser' %}" method="GET">
+		{% if is_searchable %}
+			<ul class="fields">
+				<input type="hidden" name="type" id="id_type" value="{{ newsitem_type }}">
+				{% for field in search_form %}
+					{% include "wagtailadmin/shared/field_as_li.html" with field=field %}
+				{% endfor %}
+				<li class="submit"><button class='button' type="submit">Search</button></li>
+			</ul>
+		{% endif %}
+	</form>
+
+	<div id="search-results" class="listing">
+		{% include "wagtailnews/chooser/search_results.html" with choosing=1 %}
+	</div>
+</div>
