@@ -6,6 +6,6 @@
     <span class='title'>{{item}}</span>
 {% endblock %}
 
-{% block edit_chosen_item_url %}{% url "wagtailnews_edit" pk=item.newsindex_id newsitem_pk=item.pk %}{% endblock %}
+{% block edit_chosen_item_url %}{% if item %}{% url "wagtailnews_edit" pk=item.newsindex_id newsitem_pk=item.pk %}{% endif %}{% endblock %}
 
 {% block icon %}icon icon-grip{% endblock %}
