@@ -13,6 +13,7 @@ from wagtail.wagtailcore.models import Page
 from wagtail.wagtailcore.utils import resolve_model_string
 from wagtail.wagtailsearch import index
 
+from . import feeds
 from .utils.views import ModelViewProxy
 
 frontend = ModelViewProxy('wagtailnews.views.frontend')
@@ -25,6 +26,7 @@ class NewsIndexMixin(RoutablePageMixin):
     class Meta:
         pass
 
+    feed_class = feeds.LatestEnteriesFeed
     newsitem_model = None
     subpage_types = []
 
@@ -47,6 +49,10 @@ class NewsIndexMixin(RoutablePageMixin):
     @route(r'^(?P<year>\d{4})/(?P<month>\d{1,2})/(?P<day>\d{1,2})/(?P<pk>\d+)-(?P<slug>.*)/$', name='post')
     def v_post(s, r, **k):
         return frontend.newsitem_detail(s, r, **k)
+
+    @route(r'^rss/$', name='feed')
+    def newsfeed(self, request):
+        return self.feed_class(self)(request)
 
     @classmethod
     def get_newsitem_model(cls):

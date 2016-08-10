@@ -6,11 +6,12 @@ from taggit.models import TaggedItemBase
 from wagtail.wagtailadmin.edit_handlers import FieldPanel, PageChooserPanel
 from wagtail.wagtailcore.models import Page
 from wagtail.wagtailsearch import index
-
 from wagtailnews.decorators import newsindex
 from wagtailnews.edit_handlers import NewsChooserPanel
-from wagtailnews.models import (
-    AbstractNewsItem, AbstractNewsItemRevision, NewsIndexMixin)
+from wagtailnews.models import (AbstractNewsItem, AbstractNewsItemRevision,
+                                NewsIndexMixin)
+
+from . import feeds
 
 
 class NewsIndexTag(TaggedItemBase):
@@ -23,6 +24,7 @@ class NewsItemTag(TaggedItemBase):
 
 @newsindex
 class NewsIndex(NewsIndexMixin, Page):
+    feed_class = feeds.LatestEnteriesTestFeed
     newsitem_model = 'NewsItem'
     featured_newsitem = models.ForeignKey(
         'NewsItem', blank=True, null=True, on_delete=models.SET_NULL,
@@ -66,6 +68,9 @@ class NewsItem(index.Indexed, AbstractNewsItem):
         context = super(NewsItem, self).get_context(request, *args, **kwargs)
         context['foo'] = 'bar'
         return context
+
+    def get_description(self):
+        return "This post was published on {0}, with a title of {1}".format(self.date, self.title)
 
 
 class NewsItemRevision(AbstractNewsItemRevision):
