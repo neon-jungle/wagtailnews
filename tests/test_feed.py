@@ -59,5 +59,5 @@ class TestCustomFeed(TestCase, WagtailTestUtils):
     def test_custom_view(self):
         response = self.client.get(self.index.url + self.index.reverse_subpage('feed'))
 
-        # check description exists
+        # check descriptions
         self.assertContains(response, self.newsitem.get_description())
