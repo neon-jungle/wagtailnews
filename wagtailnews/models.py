@@ -133,11 +133,11 @@ class AbstractNewsItem(index.Indexed, ClusterableModel):
         FieldPanel('date'),
     ]
 
-    search_fields = (
+    search_fields = [
         index.FilterField('date'),
         index.FilterField('newsindex_id'),
         index.FilterField('live'),
-    )
+    ]
 
     class Meta:
         ordering = ('-date',)

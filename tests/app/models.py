@@ -5,6 +5,7 @@ from modelcluster.fields import ParentalKey
 from taggit.models import TaggedItemBase
 from wagtail.wagtailadmin.edit_handlers import FieldPanel, PageChooserPanel
 from wagtail.wagtailcore.models import Page
+from wagtail.wagtailsearch import index
 from wagtail.wagtailsnippets.models import register_snippet
 
 from wagtailnews.decorators import newsindex
@@ -44,6 +45,10 @@ class NewsItem(AbstractNewsItem):
         PageChooserPanel('page'),
         FieldPanel('tags'),
         FieldPanel('date'),
+    ]
+
+    search_fields = AbstractNewsItem.search_fields + [
+        index.SearchField('title'),
     ]
 
     def __str__(self):
