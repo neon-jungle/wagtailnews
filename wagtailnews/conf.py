@@ -1,7 +1,6 @@
 from django.conf import settings
 from django.utils.module_loading import import_string
 
-
 try:
     name = settings.WAGTAILNEWS_PAGINATOR
 except AttributeError:

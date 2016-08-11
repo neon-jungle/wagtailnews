@@ -1,10 +1,10 @@
 from __future__ import absolute_import, unicode_literals
 
-from django.shortcuts import render, get_object_or_404, redirect
+from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
+from django.utils.six.moves.urllib.parse import urlparse
 
 from ..conf import paginate
-from django.utils.six.moves.urllib.parse import urlparse
 
 
 def _newsitem_list(request, newsindex, newsitem_list, extra_context):
