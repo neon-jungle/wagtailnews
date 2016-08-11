@@ -1,0 +1,55 @@
+{% load i18n %}
+
+<table class="listing full-width">
+    <colgroup>
+    <thead><tr class="table-headers">
+        <th class="title">Title</th>
+        <th class="date">Date</th>
+        <th class="date">Status</th>
+    </tr></thead>
+    <tbody>
+    {% for newsitem in newsitem_list %}
+        <tr>
+            <td class="title">
+                <h2>
+                    {% if newsitem_perms.change %}
+                        <a href="{% url 'wagtailnews_edit' pk=newsitem.newsindex_id newsitem_pk=newsitem.pk %}">
+                            {{ newsitem }}
+                        </a>
+                    {% else %}
+                        {{ newsitem }}
+                    {% endif %}
+                </h2>
+                <ul class="actions">
+                    {% if newsitem_perms.change %}
+                        <li><a href="{% url 'wagtailnews_edit' pk=newsitem.newsindex_id newsitem_pk=newsitem.pk %}" class="button button-small">{% trans 'Edit' %}</a></li>
+                    {% endif %}
+                    <li><a href="{% url 'wagtailnews_view_draft' pk=newsitem.newsindex_id newsitem_pk=newsitem.pk %}" class="button button-small button-secondary">{% trans 'View' %}</a></li>
+                    {% if newsitem_perms.delete %}
+                        <li><a href="{% url 'wagtailnews_delete' pk=newsitem.newsindex_id newsitem_pk=newsitem.pk %}" class="button button-small button-secondary no">{% trans 'Delete' %}</a></li>
+                    {% endif %}
+                    {% if newsitem.live and newsitem_perms.change %}
+                        <li><a href="{% url 'wagtailnews_unpublish' pk=newsitem.newsindex_id newsitem_pk=newsitem.pk %}" class="button button-small button-secondary no">{% trans 'Unpublish' %}</a></li>
+                    {% endif %}
+                </ul>
+            </td>
+            <td class="date" valign="top">
+                {{ newsitem.date }}
+            </td>
+            <td class="status" valign="top">
+                {% if newsitem.live %}
+                    {% if newsitem.has_unpublished_changes %}
+                        <a href="{{ newsitem.url }}" target="_blank" class="status-tag primary">{% trans "live" %}</a>
+                        +
+                        <a href="{% url 'wagtailnews_view_draft' pk=newsitem.newsindex_id newsitem_pk=newsitem.pk %}" class="status-tag">{% trans 'draft' %}</a>
+                    {% else %}
+                        <a href="{{ newsitem.url }}" target="_blank" class="status-tag primary">{% trans "live" %}</a>
+                    {% endif %}
+                {% else %}
+                    <a href="{% url 'wagtailnews_view_draft' pk=newsitem.newsindex_id newsitem_pk=newsitem.pk %}" class="status-tag">{% trans 'draft' %}</a>
+                {% endif %}
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>

@@ -7,6 +7,8 @@ from .views import chooser, editor
 urlpatterns = [
     url(r'^$', chooser.choose,
         name='wagtailnews_choose'),
+    url(r'^search/$', chooser.search,
+        name='wagtailnews_search'),
     url(r'^(?P<pk>\d+)/$', chooser.index,
         name='wagtailnews_index'),
     url(r'^(?P<pk>\d+)/create/$', editor.create,

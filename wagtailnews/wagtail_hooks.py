@@ -6,8 +6,8 @@ from django.contrib.contenttypes.models import ContentType
 from django.core import urlresolvers
 from django.utils.translation import ugettext_lazy as _
 from wagtail.wagtailadmin.menu import MenuItem
-from wagtail.wagtailcore import hooks
 from wagtail.wagtailadmin.search import SearchArea
+from wagtail.wagtailcore import hooks
 
 from . import urls
 from .models import NEWSINDEX_MODEL_CLASSES
@@ -35,7 +35,7 @@ def register_news_search():
     """Register news search."""
 
     return SearchArea(_('News'),
-                      urlresolvers.reverse('wagtailnews_choose'),
+                      urlresolvers.reverse('wagtailnews_search'),
                       classnames='icon icon-grip',
                       order=250)
 
