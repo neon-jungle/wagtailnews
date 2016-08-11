@@ -13,11 +13,20 @@ with open('wagtailnews/version.py', 'r') as f:
 with open('README.rst', 'r') as f:
     readme = f.read()
 
-
-
 install_requires = ['wagtail>=1.0']
 if sys.version_info < (3,):
     install_requires += ['enum34>=1,<2']
+
+# Documentation dependencies
+documentation_extras = [
+    # intersphinx references were broken in 1.4.3, 1.4.4, 1.4.5.
+    # Should be fixed in 1.4.6, when it is released.
+    'Sphinx>=1.3.1,!=1.4.5,!=1.4.4,!=1.4.3',
+    'sphinx-autobuild>=0.5.2',
+    'sphinx_rtd_theme>=0.1.8',
+    'sphinxcontrib-spelling==2.1.1',
+    'pyenchant==1.6.6',
+]
 
 setup(
     name='wagtailnews',
@@ -29,6 +38,9 @@ setup(
     url='https://bitbucket.org/takeflight/wagtailnews',
 
     install_requires=install_requires,
+    extras_require={
+        'docs': documentation_extras
+    },
     zip_safe=False,
     license='BSD License',
 

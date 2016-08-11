@@ -24,6 +24,7 @@ INSTALLED_APPS = [
     'wagtail.wagtailsites',
     'wagtail.wagtailsnippets',
     'wagtail.wagtailsearch',
+    'wagtail.contrib.wagtailroutablepage',
 
     'django.contrib.admin',
     'django.contrib.auth',
