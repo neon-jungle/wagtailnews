@@ -2,7 +2,6 @@ import json
 import logging
 
 from django.apps import apps
-from django.contrib.auth.decorators import user_passes_test
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse
@@ -10,7 +9,7 @@ from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.six import text_type
 from wagtail.utils.pagination import paginate
-from wagtail.wagtailadmin.forms import SearchForm as AdminSearchForm
+from wagtail.wagtailadmin.forms import SearchForm
 from wagtail.wagtailadmin.modal_workflow import render_modal_workflow
 from wagtail.wagtailcore.models import Page
 from wagtail.wagtailsearch.backends import get_search_backend
@@ -139,18 +138,17 @@ def choose_modal(request):
     is_searching = False
     search_query = None
     if 'q' in request.GET:
-        search_form = AdminSearchForm(request.GET, placeholder="Search news")
+        search_form = SearchForm(request.GET, placeholder="Search news")
 
         if search_form.is_valid():
             search_query = search_form.cleaned_data['q']
 
             search_backend = get_search_backend()
-            print(search_query)
             newsitem_list = search_backend.search(search_query, newsitem_list)
             is_searching = True
 
     else:
-        search_form = AdminSearchForm()
+        search_form = SearchForm()
 
     # Pagination
     paginator, paginated_items = paginate(request, newsitem_list, per_page=10)

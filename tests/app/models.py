@@ -6,7 +6,6 @@ from taggit.models import TaggedItemBase
 from wagtail.wagtailadmin.edit_handlers import FieldPanel, PageChooserPanel
 from wagtail.wagtailcore.models import Page
 from wagtail.wagtailsearch import index
-from wagtail.wagtailsnippets.models import register_snippet
 
 from wagtailnews.decorators import newsindex
 from wagtailnews.edit_handlers import NewsChooserPanel
