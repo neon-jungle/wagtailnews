@@ -2,22 +2,26 @@ import datetime
 
 from django.test import TestCase
 from django.utils import timezone
-from tests.app.models import NewsIndex, NewsItem
 from wagtail.tests.utils import WagtailTestUtils
 from wagtail.wagtailcore.models import Site
 
+from tests.app.models import NewsIndex, NewsItem
+
 
 class TestFeed(TestCase, WagtailTestUtils):
+    """
+    Test that the RSS feed contains relevant results
+    """
 
     def setUp(self):
         site = Site.objects.get(is_default_site=True)
-        root_page = site.root_page
-        self.index = NewsIndex(
-            title='News', slug='news')
-        root_page.add_child(instance=self.index)
+        self.root_page = site.root_page
+        self.index = self.root_page.add_child(instance=NewsIndex(
+            title='News', slug='news'))
+
         now = timezone.now()
         for items in range(5):
-            self.newsitem = NewsItem.objects.create(
+            NewsItem.objects.create(
                 newsindex=self.index,
                 title='post number {}'.format(items),
                 date=now - datetime.timedelta(days=items))
@@ -33,7 +37,11 @@ class TestFeed(TestCase, WagtailTestUtils):
             live=False
         )
 
-    def test_view(self):
+    def test_statuses(self):
+        """
+        Check that live posts are included, but future posts and draft posts
+        are not included
+        """
         response = self.client.get(self.index.url + self.index.reverse_subpage('feed'))
 
         # Check first and last post exist and that future and unpublished posts do not.
@@ -42,8 +50,31 @@ class TestFeed(TestCase, WagtailTestUtils):
         self.assertNotContains(response, self.future_newsitem.title)
         self.assertNotContains(response, self.unpublished_newsitem.title)
 
+    def test_multiple_newsindexes(self):
+        """
+        Check that the news items for the correct news index are used
+        """
+        second_index = self.root_page.add_child(instance=NewsIndex(
+            title='News II', slug='news-2'))
+        newsitem = NewsItem.objects.create(
+            newsindex=second_index,
+            title='Post on the second index',
+            date=timezone.now())
+
+        first_response = self.client.get(self.index.url + self.index.reverse_subpage('feed'))
+        second_response = self.client.get(second_index.url + second_index.reverse_subpage('feed'))
+
+        self.assertContains(first_response, 'post number 0')
+        self.assertNotContains(first_response, newsitem.title)
+
+        self.assertNotContains(second_response, 'post number 0')
+        self.assertContains(second_response, newsitem.title)
+
 
 class TestCustomFeed(TestCase, WagtailTestUtils):
+    """
+    Test custom Feed classes on the NewsIndex are used
+    """
     def setUp(self):
         site = Site.objects.get(is_default_site=True)
         root_page = site.root_page
