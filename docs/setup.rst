@@ -1,4 +1,4 @@
-.. _installing:
+.. _setup:
 
 =====
 Setup

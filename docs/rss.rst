@@ -1,4 +1,4 @@
-.. _installing:
+.. _rss:
 
 ========
 RSS Feed
