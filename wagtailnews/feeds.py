@@ -2,7 +2,7 @@ from django.contrib.syndication.views import Feed
 from django.utils import timezone
 
 
-class LatestEnteriesFeed(Feed):
+class LatestEntriesFeed(Feed):
 
     def items(self):
         now = timezone.now()
@@ -23,7 +23,7 @@ class LatestEnteriesFeed(Feed):
         return item.date
 
     def __init__(self, news_index):
-        super(LatestEnteriesFeed, self).__init__()
+        super(LatestEntriesFeed, self).__init__()
         self.news_index = news_index
 
         self.title = news_index.title

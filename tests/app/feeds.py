@@ -1,6 +1,6 @@
-from wagtailnews.feeds import LatestEnteriesFeed
+from wagtailnews.feeds import LatestEntriesFeed
 
 
-class LatestEnteriesTestFeed(LatestEnteriesFeed):
+class LatestEntriesTestFeed(LatestEntriesFeed):
     def item_description(self, item):
         return item.get_description()

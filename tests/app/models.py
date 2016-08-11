@@ -24,7 +24,7 @@ class NewsItemTag(TaggedItemBase):
 
 @newsindex
 class NewsIndex(NewsIndexMixin, Page):
-    feed_class = feeds.LatestEnteriesTestFeed
+    feed_class = feeds.LatestEntriesTestFeed
     newsitem_model = 'NewsItem'
     featured_newsitem = models.ForeignKey(
         'NewsItem', blank=True, null=True, on_delete=models.SET_NULL,

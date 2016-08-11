@@ -26,7 +26,7 @@ class NewsIndexMixin(RoutablePageMixin):
     class Meta:
         pass
 
-    feed_class = feeds.LatestEnteriesFeed
+    feed_class = feeds.LatestEntriesFeed
     newsitem_model = None
     subpage_types = []
 
