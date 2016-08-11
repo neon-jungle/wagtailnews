@@ -4,7 +4,7 @@
 Setup
 =====
 
-``wagtailnews`` is compatible with Wagtail 0.7 and higher,
+``wagtailnews`` is compatible with Wagtail 1.4 and higher,
 and Python 2.7 and Python 3.4 and higher.
 
 Step 1

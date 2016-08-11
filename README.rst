@@ -11,7 +11,7 @@ Install using pip::
 
     pip install wagtailnews
 
-It works with Wagtail 0.7 and upwards.
+It works with Wagtail 1.4 and upwards.
 
 Using
 =====
