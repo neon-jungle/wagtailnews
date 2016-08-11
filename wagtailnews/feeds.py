@@ -3,7 +3,6 @@ from django.utils import timezone
 
 
 class LatestEnteriesFeed(Feed):
-    description = "Latest news"
 
     def items(self):
         now = timezone.now()
@@ -13,13 +12,22 @@ class LatestEnteriesFeed(Feed):
         return newsitem_list
 
     def item_link(self, item):
-        return item.url()
+        return item.full_url()
+
+    def item_guid(self, item):
+        return item.full_url()
+
+    item_guid_is_permalink = True
+
+    def item_pubdate(self, item):
+        return item.date
 
     def __init__(self, news_index):
         super(LatestEnteriesFeed, self).__init__()
         self.news_index = news_index
-        self.title = news_index.title
-        self.link = news_index.url
 
-    def item_pubdate(self, item):
-        return item.date
+        self.title = news_index.title
+        self.description = news_index.title
+
+        self.link = news_index.full_url
+        self.feed_url = self.link + news_index.reverse_subpage('feed')
