@@ -9,6 +9,7 @@ from django.core.urlresolvers import reverse
 from django.utils.html import format_html, format_html_join
 from django.utils.translation import ugettext_lazy as _
 from wagtail.wagtailadmin.menu import MenuItem
+from wagtail.wagtailadmin.search import SearchArea
 from wagtail.wagtailcore import hooks
 
 from . import urls
@@ -30,6 +31,16 @@ def construct_main_menu(request, menu_items):
             MenuItem(_('News'), urlresolvers.reverse('wagtailnews_choose'),
                      classnames='icon icon-grip', order=250)
         )
+
+
+@hooks.register('register_admin_search_area')
+def register_news_search():
+    """Register news search."""
+
+    return SearchArea(_('News'),
+                      urlresolvers.reverse('wagtailnews_search'),
+                      classnames='icon icon-grip',
+                      order=250)
 
 
 @hooks.register('register_permissions')

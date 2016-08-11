@@ -1,6 +1,8 @@
 import json
+import logging
 
 from django.apps import apps
+from django.contrib.auth.decorators import user_passes_test
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse
@@ -17,15 +19,21 @@ from ..models import NEWSINDEX_MODEL_CLASSES, AbstractNewsItem, NewsIndexMixin
 from ..permissions import (
     perms_for_template, user_can_edit_news, user_can_edit_newsitem)
 
+LOGGER = logging.getLogger(__name__)
 
-def choose(request):
-    user = request.user
-    if not user_can_edit_news(user):
-        raise PermissionDenied
 
-    allowed_news_types = [
+def get_allowed_news_types(user):
+    """Get a list of all NewsIndex models that the user can edit"""
+    return [
         NewsIndex for NewsIndex in NEWSINDEX_MODEL_CLASSES
         if user_can_edit_newsitem(user, NewsIndex.get_newsitem_model())]
+
+
+def choose(request):
+    if not user_can_edit_news(request.user):
+        raise PermissionDenied
+
+    allowed_news_types = get_allowed_news_types(request.user)
 
     allowed_cts = ContentType.objects.get_for_models(*allowed_news_types)\
         .values()
@@ -43,6 +51,41 @@ def choose(request):
     })
 
 
+def _search_newsitems(request, newsitem_models, query):
+    backend = get_search_backend()
+
+    for NewsItem in newsitem_models:
+        results = backend.search(query, NewsItem)[:10]
+        if results:
+            yield (
+                NewsItem._meta.verbose_name_plural,
+                perms_for_template(request, NewsItem),
+                results)
+
+
+def search(request):
+    if not user_can_edit_news(request.user):
+        raise PermissionDenied
+
+    allowed_news_types = get_allowed_news_types(request.user)
+
+    query = request.GET.get('q', '')
+
+    # FIXME: this is crap, need to construct a single query for all types
+    # to search by relevance however that's not currently possible in
+    # a backend agnostic way :(
+    newsitem_models = [NewsIndex.get_newsitem_model()
+                       for NewsIndex in allowed_news_types]
+    newsitem_results = list(_search_newsitems(request, newsitem_models, query))
+
+    return render(request, 'wagtailnews/search.html', {
+        'single_newsitem_model': len(newsitem_models) == 1,
+        'newsitem_results': newsitem_results,
+        'search_form': SearchForm(request.GET if request.GET else None),
+        'query_string': query,
+    })
+
+
 def index(request, pk):
     newsindex = get_object_or_404(
         Page.objects.specific().type(NewsIndexMixin), pk=pk)
@@ -53,10 +96,20 @@ def index(request, pk):
 
     newsitem_list = NewsItem.objects.filter(newsindex=newsindex)
 
+    query = None
+    try:
+        query = request.GET['q']
+    except KeyError:
+        pass
+    else:
+        backend = get_search_backend()
+        newsitem_list = backend.search(query, newsitem_list)
+
     return render(request, 'wagtailnews/index.html', {
         'newsindex': newsindex,
         'newsitem_list': newsitem_list,
         'newsitem_perms': perms_for_template(request, NewsItem),
+        'query_string': query,
     })
 
 

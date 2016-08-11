@@ -1,0 +1,37 @@
+{% load i18n wagtailadmin_tags %}
+
+
+{% if newsitem_results %}
+    <div class="nice-padding">
+    {% if single_newsitem_model %}
+        {% with
+        <h2>{% blocktrans count counter=newsitem_results.0.2 %}
+            There is one matching news item
+        {% plural %}
+            There are {{ counter }} matching news items
+        {% endblocktrans %}</h2>
+    {% else %}
+        <h2>News search results</h2>
+    {% endif %}
+
+    {% search_other %}
+    </div>
+
+    {% for name, newsitem_perms, newsitem_list in newsitem_results %}
+    {% if not single_newsitem_model %}
+        <div class="nice-padding">
+            <h2>{{ name|capfirst }}</h2>
+        </div>
+    {% endif %}
+    {% include "wagtailnews/newsitem_list.html" %}
+    {% endfor %}
+{% else %}
+    <div class="nice-padding">
+    {% if query_string %}
+        <h2>{% blocktrans %}Sorry, no news items match <em>"{{ query_string }}"</em>{% endblocktrans %}</h2>
+        {% search_other %}
+    {% else %}
+        <p>{% trans 'Enter a search term above' %}</p>
+    {% endif %}
+    </div>
+{% endif %}
