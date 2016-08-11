@@ -1,12 +1,10 @@
-from django.test import TestCase
 from django.core.urlresolvers import reverse
+from django.test import TestCase
+from taggit.models import Tag
+from wagtail.tests.utils import WagtailTestUtils
+from wagtail.wagtailcore.models import Page
 
 from tests.app.models import NewsIndex, NewsItem
-
-from taggit.models import Tag
-
-from wagtail.wagtailcore.models import Page
-from wagtail.tests.utils import WagtailTestUtils
 
 
 class TestNewsItemWithTags(TestCase, WagtailTestUtils):

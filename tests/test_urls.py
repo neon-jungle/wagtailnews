@@ -2,11 +2,10 @@ import datetime
 
 from django.test import TestCase
 from django.utils import timezone
+from wagtail.tests.utils import WagtailTestUtils
+from wagtail.wagtailcore.models import Page, Site
 
 from tests.app.models import NewsIndex, NewsItem
-
-from wagtail.wagtailcore.models import Page, Site
-from wagtail.tests.utils import WagtailTestUtils
 
 
 def dt(*args):
