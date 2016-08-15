@@ -13,8 +13,13 @@ Install using pip::
 
 It works with Wagtail 1.4 and upwards.
 
-Using
-=====
+Documentation
+=============
+
+`Documentation for Wagtail news <http://wagtail-news.readthedocs.org>`_ can be found on Read The Docs
+
+Quick start
+===========
 
 Create news models for your application that inherit from the relevant ``wagtailnews`` models:
 
@@ -49,7 +54,7 @@ Create news models for your application that inherit from the relevant ``wagtail
             FieldPanel('body', classname='full'),
         ] + AbstractNewsItem.panels
 
-        def __unicode__(self):
+        def __str__(self):
             return self.title
 
 
