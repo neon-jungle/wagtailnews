@@ -12,7 +12,9 @@ Contents:
    :maxdepth: 1
 
    setup
+   usage
    rss
+   reference
 
 
 

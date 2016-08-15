@@ -1,7 +1,23 @@
 # -*- coding: utf-8 -*-
 
+import django
 import sphinx_rtd_theme
+from django.conf import settings
+
 import wagtailnews.version
+
+# The minimal Django config that allows Sphinx to import our models to pull out
+# the docstrings.
+settings.configure(
+    INSTALLED_APPS=[
+        'wagtailnews',
+        'wagtail.wagtailcore',
+        'taggit',
+        'django.contrib.contenttypes',
+        'django.contrib.auth',
+    ],
+)
+django.setup()
 
 # -- General configuration ------------------------------------------------
 

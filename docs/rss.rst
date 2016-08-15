@@ -19,7 +19,7 @@ ______________________
       def item_description(self, item):
           return item.description
 
-Your custom ``Feed`` class can then be added to your news index by setting the ``feed_class`` attribute:
+Your custom ``Feed`` class can then be added to your news index by setting the :attr:`~wagtailnews.models.NewsIndexMixin.feed_class` attribute:
 
 .. code-block:: python
 
