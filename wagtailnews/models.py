@@ -3,7 +3,7 @@ from __future__ import absolute_import, unicode_literals
 from django.conf import settings
 from django.db import models
 from django.utils import timezone
-from django.utils.six import string_types, text_type
+from django.utils.six import text_type
 from django.utils.text import slugify
 from django.utils.translation import ugettext_lazy as _
 from modelcluster.models import ClusterableModel
@@ -56,13 +56,7 @@ class NewsIndexMixin(RoutablePageMixin):
 
     @classmethod
     def get_newsitem_model(cls):
-        if isinstance(cls.newsitem_model, models.Model):
-            return cls.newsitem_model
-        elif isinstance(cls.newsitem_model, string_types):
-            return resolve_model_string(cls.newsitem_model, cls._meta.app_label)
-        else:
-            raise ValueError('Can not resolve {0}.newsitem_model in to a model: {1!r}'.format(
-                cls.__name__, cls.newsitem_model))
+        return resolve_model_string(cls.newsitem_model, cls._meta.app_label)
 
 
 class AbstractNewsItemRevision(models.Model):
