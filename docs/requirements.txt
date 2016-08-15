@@ -1,0 +1,5 @@
+# This is used by RTD, and is run relative to the project root
+# Hence, the path `.` refers to the project root.
+# To build the docs locally, just do `pip install -e .[docs]`
+# from the project root manually.
+-e .[docs]
