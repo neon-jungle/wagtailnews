@@ -1,4 +1,5 @@
 {% load i18n %}
+{% load wagtailadmin_tags %}
 {% if items %}
 	{% if is_searching %}
 		<h2>
@@ -12,7 +13,7 @@
 
 	{% include "wagtailnews/chooser/list.html" %}
 
-	{% include "wagtailadmin/shared/pagination_nav.html" with items=items is_searching=is_searching linkurl=wagtailnews_chooser %}
+	{% paginate items %}
 {% else %}
 	{% if is_searching %}
 		 <p>{% blocktrans %}Sorry, no news items match "<em>{{ query_string }}</em>"{% endblocktrans %}</p>
