@@ -4,7 +4,8 @@
 Setup
 =====
 
-``wagtailnews`` is compatible with Wagtail 1.4 and higher,
+``wagtailnews`` is compatible with Wagtail 1.5 and higher,
+Django 1.9 and higher,
 and Python 2.7 and Python 3.4 and higher.
 
 Step 1
