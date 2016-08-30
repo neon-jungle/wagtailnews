@@ -9,8 +9,8 @@ fi
 
 tox
 
-python2 -m virtualenv venv2
-python3 -m venv venv3
+python3 -m virtualenv --python python2 venv2
+python3 -m virtualenv --python python3 venv3
 
 for v in 2 3 ; do
 	venv="venv${v}"
