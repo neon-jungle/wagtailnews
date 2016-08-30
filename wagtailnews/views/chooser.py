@@ -104,9 +104,13 @@ def index(request, pk):
         backend = get_search_backend()
         newsitem_list = backend.search(query, newsitem_list)
 
+    paginator, page = paginate(request, newsitem_list)
+
     return render(request, 'wagtailnews/index.html', {
         'newsindex': newsindex,
-        'newsitem_list': newsitem_list,
+        'page': page,
+        'paginator': paginator,
+        'newsitem_list': page.object_list,
         'newsitem_perms': perms_for_template(request, NewsItem),
         'query_string': query,
     })
