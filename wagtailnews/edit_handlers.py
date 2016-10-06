@@ -52,11 +52,9 @@ class NewsChooserPanel(object):
     """
     def __init__(self, field_name):
         self.field_name = field_name
-        self.newsitem_type = newsitem_type
 
     def bind_to_model(self, model):
         return type(str('_NewsChooserPanel'), (BaseNewsChooserPanel,), {
             'model': model,
             'field_name': self.field_name,
-            'newsitem_type': self.newsitem_type,
         })
