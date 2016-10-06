@@ -13,6 +13,7 @@ Contents:
 
    setup
    usage
+   forms
    rss
    reference
 

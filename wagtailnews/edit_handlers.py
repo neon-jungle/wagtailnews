@@ -36,7 +36,21 @@ class BaseNewsChooserPanel(BaseChooserPanel):
 
 
 class NewsChooserPanel(object):
-    def __init__(self, field_name, newsitem_type=None):
+    """
+    An edit handler for editors to pick a news item.
+    Takes the field name as the only argument.
+    For example:
+
+    .. code-block:: python
+
+        class FooPage(Page):
+            news_item = models.ForeignKey('news.NewsItem')
+
+            content_panels = Page.content_panels + [
+                NewsChooserPanel('news_item')
+            }
+    """
+    def __init__(self, field_name):
         self.field_name = field_name
         self.newsitem_type = newsitem_type
 

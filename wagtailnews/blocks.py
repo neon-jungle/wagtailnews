@@ -6,6 +6,19 @@ from wagtail.wagtailcore.utils import resolve_model_string
 
 
 class NewsChooserBlock(ChooserBlock):
+    """
+    A StreamField block for editors to pick a news item.
+    Takes the news item class as its only argument.
+    For example:
+
+    .. code-block:: python
+
+        class FooPage(Page):
+            content = StreamField([
+                ('text', RichTextField()),
+                ('news', NewsChooserBlock('news.NewsItem')),
+            ])
+    """
     def __init__(self, target_model, **kwargs):
         super(NewsChooserBlock, self).__init__(**kwargs)
         self._target_model = target_model
