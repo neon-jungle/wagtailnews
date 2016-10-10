@@ -33,14 +33,21 @@ def construct_main_menu(request, menu_items):
         )
 
 
+class NewsItemSearchArea(SearchArea):
+    """Admin search for news items."""
+    def __init__(self, **kwargs):
+        super(NewsItemSearchArea, self).__init__(
+            _('News'), urlresolvers.reverse('wagtailnews:search'),
+            classnames='icon icon-grip', order=250, **kwargs)
+
+    def is_shown(self, request):
+        return user_can_edit_news(request.user)
+
+
 @hooks.register('register_admin_search_area')
 def register_news_search():
     """Register news search."""
-
-    return SearchArea(_('News'),
-                      urlresolvers.reverse('wagtailnews:search'),
-                      classnames='icon icon-grip',
-                      order=250)
+    return NewsItemSearchArea()
 
 
 @hooks.register('register_permissions')

@@ -290,3 +290,27 @@ class TestDeleteNewsItem(WithNewsItemTestCase, PermissionTestCase):
         response = self.client.get(reverse('wagtailnews:edit', kwargs={
             'pk': self.index.pk, 'newsitem_pk': self.newsitem.pk}))
         self.assertNotContains(response, self.url)
+
+
+class TestSearchNewsItem(WithNewsItemTestCase, PermissionTestCase):
+    def setUp(self):
+        super(TestSearchNewsItem, self).setUp()
+        self.url = reverse('wagtailnews:search')
+        self.search_url = reverse('wagtailadmin_pages:search') + '?q=hello'
+
+    @grant_permissions(['app.change_newsitem'])
+    def test_has_permission(self):
+        self.assertStatusCode(self.url, 200)
+
+    def test_no_permission(self):
+        self.assertStatusCode(self.url, 403)
+
+    @grant_permissions(['app.add_newsitem', 'app.change_newsitem'])
+    def test_search_area_appears_permission(self):
+        response = self.client.get(self.search_url)
+        self.assertContains(response, self.url)
+
+    def test_search_area_hidden_no_permission(self):
+        response = self.client.get(self.search_url)
+        self.assertNotContains(response, 'News')
+        self.assertNotContains(response, self.url)
