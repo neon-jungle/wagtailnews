@@ -81,7 +81,7 @@ class TestChooseNewsIndex(PermissionTestCase):
         secondary_news = root_page.add_child(instance=SecondaryNewsIndex(
             title='Secondary News', slug='secondary-news'))
 
-        response = self.client.get(reverse('wagtailnews_choose'))
+        response = self.client.get(reverse('wagtailnews:choose'))
         self.assertContains(response, news1.title)
         self.assertContains(response, news2.title)
         self.assertNotContains(response, secondary_news.title)
@@ -98,8 +98,8 @@ class TestChooseNewsIndex(PermissionTestCase):
         root_page.add_child(instance=SecondaryNewsIndex(
             title='Secondary News', slug='secondary-news'))
 
-        response = self.client.get(reverse('wagtailnews_choose'))
-        self.assertRedirects(response, reverse('wagtailnews_index', kwargs={
+        response = self.client.get(reverse('wagtailnews:choose'))
+        self.assertRedirects(response, reverse('wagtailnews:index', kwargs={
             'pk': news.pk}))
 
     def test_chooser_no_perms(self):
@@ -112,7 +112,7 @@ class TestChooseNewsIndex(PermissionTestCase):
         root_page.add_child(instance=SecondaryNewsIndex(
             title='Secondary News', slug='secondary-news'))
 
-        response = self.client.get(reverse('wagtailnews_choose'))
+        response = self.client.get(reverse('wagtailnews:choose'))
         self.assertEqual(response.status_code, 403)
 
     @grant_permissions(['app.add_newsitem', 'app.change_newsitem'])
@@ -121,7 +121,7 @@ class TestChooseNewsIndex(PermissionTestCase):
         Test the chooser when there are no news items, but the user has
         relevant permissions.
         """
-        response = self.client.get(reverse('wagtailnews_choose'))
+        response = self.client.get(reverse('wagtailnews:choose'))
         self.assertEqual(response.status_code, 200)
 
 
@@ -129,7 +129,7 @@ class TestNewsIndex(WithNewsIndexTestCase, PermissionTestCase):
 
     def setUp(self):
         super(TestNewsIndex, self).setUp()
-        self.url = reverse('wagtailnews_index', kwargs={'pk': self.index.pk})
+        self.url = reverse('wagtailnews:index', kwargs={'pk': self.index.pk})
 
     @grant_permissions(['app.add_newsitem', 'app.change_newsitem'])
     def test_news_index_has_perm(self):
@@ -149,7 +149,7 @@ class TestCreateNewsItem(WithNewsIndexTestCase, PermissionTestCase):
 
     def setUp(self):
         super(TestCreateNewsItem, self).setUp()
-        self.url = reverse('wagtailnews_create', kwargs={'pk': self.index.pk})
+        self.url = reverse('wagtailnews:create', kwargs={'pk': self.index.pk})
 
     @grant_permissions(['app.add_newsitem', 'app.change_newsitem'])
     def test_has_permission(self):
@@ -173,14 +173,14 @@ class TestCreateNewsItem(WithNewsIndexTestCase, PermissionTestCase):
     @grant_permissions(['app.add_newsitem', 'app.change_newsitem'])
     def test_add_button_appears(self):
         """Test that the add button appears"""
-        response = self.client.get(reverse('wagtailnews_index', kwargs={
+        response = self.client.get(reverse('wagtailnews:index', kwargs={
             'pk': self.index.pk}))
         self.assertContains(response, self.url)
 
     @grant_permissions(['app.change_newsitem'])
     def test_no_add_button_appears(self):
         """Test that the add button does not appear"""
-        response = self.client.get(reverse('wagtailnews_index', kwargs={
+        response = self.client.get(reverse('wagtailnews:index', kwargs={
             'pk': self.index.pk}))
         self.assertNotContains(response, self.url)
 
@@ -189,7 +189,7 @@ class TestEditNewsItem(WithNewsItemTestCase, PermissionTestCase):
 
     def setUp(self):
         super(TestEditNewsItem, self).setUp()
-        self.url = reverse('wagtailnews_edit', kwargs={
+        self.url = reverse('wagtailnews:edit', kwargs={
             'pk': self.index.pk, 'newsitem_pk': self.newsitem.pk})
 
     @grant_permissions(['app.change_newsitem'])
@@ -204,14 +204,14 @@ class TestEditNewsItem(WithNewsItemTestCase, PermissionTestCase):
     @grant_permissions(['app.change_newsitem'])
     def test_edit_button_appears(self):
         """Test that the edit button appears"""
-        response = self.client.get(reverse('wagtailnews_index', kwargs={
+        response = self.client.get(reverse('wagtailnews:index', kwargs={
             'pk': self.index.pk}))
         self.assertContains(response, self.url)
 
     @grant_permissions(['app.delete_newsitem'])
     def test_no_edit_button_appears(self):
         """Test that the edit button does not appear"""
-        response = self.client.get(reverse('wagtailnews_index', kwargs={
+        response = self.client.get(reverse('wagtailnews:index', kwargs={
             'pk': self.index.pk}))
         self.assertNotContains(response, self.url)
 
@@ -220,7 +220,7 @@ class TestUnpublishNewsItem(WithNewsItemTestCase, PermissionTestCase):
 
     def setUp(self):
         super(TestUnpublishNewsItem, self).setUp()
-        self.url = reverse('wagtailnews_unpublish', kwargs={
+        self.url = reverse('wagtailnews:unpublish', kwargs={
             'pk': self.index.pk, 'newsitem_pk': self.newsitem.pk})
 
     @grant_permissions(['app.change_newsitem'])
@@ -235,14 +235,14 @@ class TestUnpublishNewsItem(WithNewsItemTestCase, PermissionTestCase):
     @grant_permissions(['app.change_newsitem'])
     def test_unpublish_button_appears(self):
         """Test that the unpublish button appears"""
-        response = self.client.get(reverse('wagtailnews_index', kwargs={
+        response = self.client.get(reverse('wagtailnews:index', kwargs={
             'pk': self.index.pk}))
         self.assertContains(response, self.url)
 
     @grant_permissions(['app.delete_newsitem'])
     def test_no_unpublish_button_appears(self):
         """Test that the unpublish button does not appear"""
-        response = self.client.get(reverse('wagtailnews_index', kwargs={
+        response = self.client.get(reverse('wagtailnews:index', kwargs={
             'pk': self.index.pk}))
         self.assertNotContains(response, self.url)
 
@@ -251,7 +251,7 @@ class TestDeleteNewsItem(WithNewsItemTestCase, PermissionTestCase):
 
     def setUp(self):
         super(TestDeleteNewsItem, self).setUp()
-        self.url = reverse('wagtailnews_delete', kwargs={
+        self.url = reverse('wagtailnews:delete', kwargs={
             'pk': self.index.pk, 'newsitem_pk': self.newsitem.pk})
 
     @grant_permissions(['app.delete_newsitem'])
@@ -266,27 +266,27 @@ class TestDeleteNewsItem(WithNewsItemTestCase, PermissionTestCase):
     @grant_permissions(['app.delete_newsitem'])
     def test_delete_button_appears_index(self):
         """Test that the delete button appears on the index page"""
-        response = self.client.get(reverse('wagtailnews_index', kwargs={
+        response = self.client.get(reverse('wagtailnews:index', kwargs={
             'pk': self.index.pk}))
         self.assertContains(response, self.url)
 
     @grant_permissions(['app.change_newsitem'])
     def test_no_delete_button_appears_index(self):
         """Test that the delete button does not appear on the index page"""
-        response = self.client.get(reverse('wagtailnews_index', kwargs={
+        response = self.client.get(reverse('wagtailnews:index', kwargs={
             'pk': self.index.pk}))
         self.assertNotContains(response, self.url)
 
     @grant_permissions(['app.change_newsitem', 'app.delete_newsitem'])
     def test_delete_button_appears_edit(self):
         """Test that the delete button appears on the edit page"""
-        response = self.client.get(reverse('wagtailnews_edit', kwargs={
+        response = self.client.get(reverse('wagtailnews:edit', kwargs={
             'pk': self.index.pk, 'newsitem_pk': self.newsitem.pk}))
         self.assertContains(response, self.url)
 
     @grant_permissions(['app.change_newsitem'])
     def test_no_delete_button_appears_edit(self):
         """Test that the delete button does not appear on the edit page"""
-        response = self.client.get(reverse('wagtailnews_edit', kwargs={
+        response = self.client.get(reverse('wagtailnews:edit', kwargs={
             'pk': self.index.pk, 'newsitem_pk': self.newsitem.pk}))
         self.assertNotContains(response, self.url)

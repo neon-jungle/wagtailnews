@@ -16,7 +16,7 @@
 
     {% trans "Search" as search_str %}
 
-    {% include "wagtailadmin/shared/header.html" with title=search_str search_url="wagtailnews_search" icon="search" %}
+    {% include "wagtailadmin/shared/header.html" with title=search_str search_url="wagtailnews:search" icon="search" %}
 
     <div id="news-results">
         {% include "wagtailnews/search_results.html" %}

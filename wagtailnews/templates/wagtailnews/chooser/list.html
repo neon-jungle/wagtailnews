@@ -12,7 +12,7 @@
 		{% for newsitem in items %}
 			<tr>
 				<td class="title">
-					<h2><a class="newsitem-choice" href="{% url 'wagtailnews_chosen' pk=newsitem.newsindex_id newsitem_pk=newsitem.pk %}">{{ newsitem }}</a></h2>
+					<h2><a class="newsitem-choice" href="{% url 'wagtailnews:chosen' pk=newsitem.newsindex_id newsitem_pk=newsitem.pk %}">{{ newsitem }}</a></h2>
 				</td>
 			</tr>
 		{% endfor %}

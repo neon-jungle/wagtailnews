@@ -7,7 +7,7 @@
     {% trans "Edit" as new_str %}
     {% include "wagtailadmin/shared/header.html" with title=new_str subtitle=newsitem icon="news" %}
 
-    <form action="{% url 'wagtailnews_edit' pk=newsindex.pk newsitem_pk=newsitem.pk %}" method="POST">
+    <form action="{% url 'wagtailnews:edit' pk=newsindex.pk newsitem_pk=newsitem.pk %}" method="POST">
         {% csrf_token %}
         {{ edit_handler.render_form_content }}
 
@@ -19,10 +19,10 @@
                         <div class="dropdown-toggle icon icon-arrow-up"></div>
                         <ul role="menu">
                             {% if newsitem.live %}
-                                <li><a href="{% url 'wagtailnews_unpublish' pk=newsindex.pk newsitem_pk=newsitem.pk %}" class="button no">{% trans 'Unpublish' %}</a></li>
+                                <li><a href="{% url 'wagtailnews:unpublish' pk=newsindex.pk newsitem_pk=newsitem.pk %}" class="button no">{% trans 'Unpublish' %}</a></li>
                             {% endif %}
                             {% if newsitem_perms.delete %}
-                                <li><a href="{% url 'wagtailnews_delete' pk=newsindex.pk newsitem_pk=newsitem.pk %}" class="button no">{% trans 'Delete' %}</a></li>
+                                <li><a href="{% url 'wagtailnews:delete' pk=newsindex.pk newsitem_pk=newsitem.pk %}" class="button no">{% trans 'Delete' %}</a></li>
                             {% endif %}
                             <li><hr class="dropdown-separator"></li>
                             <li><input class="button" type="submit" name="action-publish" value="{% trans 'Publish' %}" /></li>
@@ -57,8 +57,8 @@
     <script>
     $(function() {
         setTimeout(function() {
-            var url = "{% url 'wagtailnews_view_draft' pk=newsindex.pk newsitem_pk=newsitem.pk %}";
-            var previewWindow = window.open(url, "wagtailnews_edit")
+            var url = "{% url 'wagtailnews:view_draft' pk=newsindex.pk newsitem_pk=newsitem.pk %}";
+            var previewWindow = window.open(url, "wagtailnews:edit")
             previewWindow.focus();
         }, 10);
     });

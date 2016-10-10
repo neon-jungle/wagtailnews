@@ -21,7 +21,7 @@ class TestCreateNewsItem(TestCase, WagtailTestUtils):
 
         # Make a news item
         response = self.client.post(
-            reverse('wagtailnews_create', kwargs={'pk': self.index.pk}), {
+            reverse('wagtailnews:create', kwargs={'pk': self.index.pk}), {
                 'title': 'test title',
                 'tags': '',
                 'date': '2015-11-03 17:12',
@@ -42,7 +42,7 @@ class TestCreateNewsItem(TestCase, WagtailTestUtils):
                          newsitem_revision.to_json())
 
         # Make sure the user is redirected to the index
-        self.assertRedirects(response, reverse('wagtailnews_index', kwargs={
+        self.assertRedirects(response, reverse('wagtailnews:index', kwargs={
             'pk': self.index.pk}))
 
     def test_create_newsitem_draft(self):
@@ -50,7 +50,7 @@ class TestCreateNewsItem(TestCase, WagtailTestUtils):
 
         # Make a news item
         response = self.client.post(
-            reverse('wagtailnews_create', kwargs={'pk': self.index.pk}), {
+            reverse('wagtailnews:create', kwargs={'pk': self.index.pk}), {
                 'title': 'test title',
                 'tags': '',
                 'date': '2015-11-03 17:12',
@@ -72,7 +72,7 @@ class TestCreateNewsItem(TestCase, WagtailTestUtils):
                          newsitem_revision.to_json())
 
         # Make sure the user is redirected to the edit page
-        self.assertRedirects(response, reverse('wagtailnews_edit', kwargs={
+        self.assertRedirects(response, reverse('wagtailnews:edit', kwargs={
             'pk': self.index.pk, 'newsitem_pk': newsitem.pk}))
 
 
@@ -91,7 +91,7 @@ class TestEditNewsItem(TestCase, WagtailTestUtils):
     def test_publish_changes(self):
         # Make a news item
         response = self.client.post(
-            reverse('wagtailnews_edit', kwargs={
+            reverse('wagtailnews:edit', kwargs={
                 'pk': self.index.pk,
                 'newsitem_pk': self.newsitem.pk}),
             {
@@ -99,7 +99,7 @@ class TestEditNewsItem(TestCase, WagtailTestUtils):
                 'tags': '',
                 'date': '2015-11-03 17:12',
                 'action-publish': 'publish'})
-        self.assertRedirects(response, reverse('wagtailnews_index', kwargs={
+        self.assertRedirects(response, reverse('wagtailnews:index', kwargs={
             'pk': self.index.pk}))
 
         # Check that no new NewsItem was created
@@ -118,7 +118,7 @@ class TestEditNewsItem(TestCase, WagtailTestUtils):
     def test_save_draft_changes(self):
         # Make a news item
         self.client.post(
-            reverse('wagtailnews_edit', kwargs={
+            reverse('wagtailnews:edit', kwargs={
                 'pk': self.index.pk,
                 'newsitem_pk': self.newsitem.pk}),
             {
@@ -150,13 +150,13 @@ class TestEditNewsItem(TestCase, WagtailTestUtils):
     def test_actions_present(self):
         """ Ensure that all the required actions are present """
         response = self.client.get(
-            reverse('wagtailnews_edit', kwargs={
+            reverse('wagtailnews:edit', kwargs={
                 'pk': self.index.pk,
                 'newsitem_pk': self.newsitem.pk}))
 
         url_kwargs = {'pk': self.index.pk, 'newsitem_pk': self.newsitem.pk}
-        self.assertContains(response, reverse('wagtailnews_delete', kwargs=url_kwargs))
-        self.assertContains(response, reverse('wagtailnews_unpublish', kwargs=url_kwargs))
+        self.assertContains(response, reverse('wagtailnews:delete', kwargs=url_kwargs))
+        self.assertContains(response, reverse('wagtailnews:unpublish', kwargs=url_kwargs))
 
 
 class TestPreviewDraft(TestCase, WagtailTestUtils):
@@ -172,7 +172,7 @@ class TestPreviewDraft(TestCase, WagtailTestUtils):
         newsitem = NewsItem.objects.create(
             newsindex=self.index,
             title='Preview me')
-        response = self.client.get(reverse('wagtailnews_view_draft', kwargs={
+        response = self.client.get(reverse('wagtailnews:view_draft', kwargs={
             'pk': self.index.pk, 'newsitem_pk': newsitem.pk}))
 
         self.assertEqual(response.status_code, 200)
@@ -189,7 +189,7 @@ class TestPreviewDraft(TestCase, WagtailTestUtils):
         draft_newsitem.title = 'Draft title'
         draft_newsitem.save_revision(user=self.user)
 
-        response = self.client.get(reverse('wagtailnews_view_draft', kwargs={
+        response = self.client.get(reverse('wagtailnews:view_draft', kwargs={
             'pk': self.index.pk, 'newsitem_pk': draft_newsitem.pk}))
         self.assertContains(response, 'Draft title')
 
@@ -203,7 +203,7 @@ class TestPreviewDraft(TestCase, WagtailTestUtils):
 
         # Make a news item
         response = self.client.post(
-            reverse('wagtailnews_create', kwargs={'pk': self.index.pk}),
+            reverse('wagtailnews:create', kwargs={'pk': self.index.pk}),
             follow=True, data={
                 'title': 'test title',
                 'tags': '',
@@ -212,11 +212,11 @@ class TestPreviewDraft(TestCase, WagtailTestUtils):
             })
 
         newsitem = NewsItem.objects.get(title='test title')
-        edit_url = reverse('wagtailnews_edit', kwargs={
+        edit_url = reverse('wagtailnews:edit', kwargs={
             'pk': self.index.pk, 'newsitem_pk': newsitem.pk})
         self.assertRedirects(response, '{}?{}=1'.format(edit_url, OPEN_PREVIEW_PARAM))
 
-        preview_url = reverse('wagtailnews_view_draft', kwargs={
+        preview_url = reverse('wagtailnews:view_draft', kwargs={
             'pk': self.index.pk, 'newsitem_pk': newsitem.pk})
         self.assertContains(response, 'url = "{}"'.format(preview_url))
         self.assertContains(response, 'window.open(url,')
@@ -228,13 +228,13 @@ class TestPreviewDraft(TestCase, WagtailTestUtils):
             title='Live title')
 
         response = self.client.post(
-            reverse('wagtailnews_edit', kwargs={
+            reverse('wagtailnews:edit', kwargs={
                 'pk': self.index.pk, 'newsitem_pk': newsitem.pk}),
             data={
                 'title': 'Draft title', 'date': '2015-11-03 17:12',
                 'action-preview': 'preview'})
 
-        preview_url = reverse('wagtailnews_view_draft', kwargs={
+        preview_url = reverse('wagtailnews:view_draft', kwargs={
             'pk': self.index.pk, 'newsitem_pk': newsitem.pk})
         self.assertContains(response, 'url = "{}"'.format(preview_url))
         self.assertContains(response, 'window.open(url,')

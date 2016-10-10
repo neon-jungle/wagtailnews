@@ -28,7 +28,7 @@ def register_admin_urls():
 def construct_main_menu(request, menu_items):
     if user_can_edit_news(request.user):
         menu_items.append(
-            MenuItem(_('News'), urlresolvers.reverse('wagtailnews_choose'),
+            MenuItem(_('News'), urlresolvers.reverse('wagtailnews:choose'),
                      classnames='icon icon-grip', order=250)
         )
 
@@ -38,7 +38,7 @@ def register_news_search():
     """Register news search."""
 
     return SearchArea(_('News'),
-                      urlresolvers.reverse('wagtailnews_search'),
+                      urlresolvers.reverse('wagtailnews:search'),
                       classnames='icon icon-grip',
                       order=250)
 
@@ -62,5 +62,5 @@ def editor_js():
     )
     urls = format_html(
         '<script>window.chooserUrls.newsChooser = "{}";</script>',
-        reverse('wagtailnews_chooser'))
+        reverse('wagtailnews:chooser'))
     return js_includes + urls

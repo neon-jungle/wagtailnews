@@ -41,7 +41,7 @@ def choose(request):
 
     if newsindex_count == 1:
         newsindex = newsindex_list.first()
-        return redirect('wagtailnews_index', pk=newsindex.pk)
+        return redirect('wagtailnews:index', pk=newsindex.pk)
 
     return render(request, 'wagtailnews/choose.html', {
         'has_news': newsindex_count != 0,
@@ -191,7 +191,7 @@ def chosen_modal(request, pk, newsitem_pk):
         'newsitem_json': json.dumps({
             'id': newsitem.id,
             'string': text_type(newsitem),
-            'edit_link': reverse('wagtailnews_edit', kwargs={
+            'edit_link': reverse('wagtailnews:edit', kwargs={
                 'pk': newsindex.pk, 'newsitem_pk': newsitem.pk}),
         }),
     })

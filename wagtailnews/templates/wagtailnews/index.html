@@ -33,7 +33,7 @@
             </div>
             <div class="right">
                 {% if newsitem_perms.add and newsitem_perms.change %}
-                    <a href="{% url 'wagtailnews_create' newsindex.pk %}" class="col button bicolor icon icon-plus">{% blocktrans %}Add news post{% endblocktrans %}</a>
+                    <a href="{% url 'wagtailnews:create' newsindex.pk %}" class="col button bicolor icon icon-plus">{% blocktrans %}Add news post{% endblocktrans %}</a>
                 {% endif %}
             </div>
         </div>

@@ -52,14 +52,14 @@ def create(request, pk):
 
             if action is SaveActionSet.publish:
                 messages.success(request, _('The news post "{0!s}" has been published').format(newsitem))
-                return redirect('wagtailnews_index', pk=newsindex.pk)
+                return redirect('wagtailnews:index', pk=newsindex.pk)
 
             elif action is SaveActionSet.draft:
                 messages.success(request, _('A draft news post "{0!s}" has been created').format(newsitem))
-                return redirect('wagtailnews_edit', pk=newsindex.pk, newsitem_pk=newsitem.pk)
+                return redirect('wagtailnews:edit', pk=newsindex.pk, newsitem_pk=newsitem.pk)
 
             elif action is SaveActionSet.preview:
-                edit_url = reverse('wagtailnews_edit', kwargs={
+                edit_url = reverse('wagtailnews:edit', kwargs={
                     'pk': newsindex.pk, 'newsitem_pk': newsitem.pk})
                 return redirect("{url}?{param}=1".format(
                     url=edit_url, param=OPEN_PREVIEW_PARAM))
@@ -107,11 +107,11 @@ def edit(request, pk, newsitem_pk):
             if action is SaveActionSet.publish:
                 revision.publish()
                 messages.success(request, _('Your changes to "{0!s}" have been published').format(newsitem))
-                return redirect('wagtailnews_index', pk=newsindex.pk)
+                return redirect('wagtailnews:index', pk=newsindex.pk)
 
             elif action is SaveActionSet.draft:
                 messages.success(request, _('Your changes to "{0!s}" have been saved as a draft').format(newsitem))
-                return redirect('wagtailnews_edit', pk=newsindex.pk, newsitem_pk=newsitem.pk)
+                return redirect('wagtailnews:edit', pk=newsindex.pk, newsitem_pk=newsitem.pk)
 
             elif action is SaveActionSet.preview:
                 do_preview = True
@@ -149,9 +149,9 @@ def unpublish(request, pk, newsitem_pk):
     if request.method == 'POST':
         newsitem.unpublish()
         messages.success(request, _('{} has been unpublished').format(newsitem), [
-            (reverse('wagtailnews_edit', kwargs={'pk': pk, 'newsitem_pk': newsitem_pk}), _('Edit')),
+            (reverse('wagtailnews:edit', kwargs={'pk': pk, 'newsitem_pk': newsitem_pk}), _('Edit')),
         ])
-        return redirect('wagtailnews_index', pk=pk)
+        return redirect('wagtailnews:index', pk=pk)
 
     return render(request, 'wagtailnews/unpublish.html', {
         'newsindex': newsindex,
@@ -172,7 +172,7 @@ def delete(request, pk, newsitem_pk):
 
     if request.method == 'POST':
         newsitem.delete()
-        return redirect('wagtailnews_index', pk=pk)
+        return redirect('wagtailnews:index', pk=pk)
 
     return render(request, 'wagtailnews/delete.html', {
         'newsindex': newsindex,

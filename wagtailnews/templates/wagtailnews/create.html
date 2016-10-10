@@ -7,7 +7,7 @@
     {% trans "news post" as newspost_str %}
     {% include "wagtailadmin/shared/header.html" with title=new_str subtitle=newspost_str icon="news" %}
 
-    <form action="{% url 'wagtailnews_create' pk=newsindex.pk %}" method="POST">
+    <form action="{% url 'wagtailnews:create' pk=newsindex.pk %}" method="POST">
         {% csrf_token %}
         {{ edit_handler.render_form_content }}
 

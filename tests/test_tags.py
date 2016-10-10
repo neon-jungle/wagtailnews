@@ -27,7 +27,7 @@ class TestNewsItemWithTags(TestCase, WagtailTestUtils):
                                  Tag.objects.order_by('name'))
 
     def test_create_item_admin(self):
-        create_url = reverse('wagtailnews_create', kwargs={'pk': self.index.pk})
+        create_url = reverse('wagtailnews:create', kwargs={'pk': self.index.pk})
         self.login()
         tags = ['hello', 'world']
 
