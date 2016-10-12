@@ -35,7 +35,7 @@ setup(
     long_description=readme,
     author='Tim Heap',
     author_email='tim@takeflight.com.au',
-    url='https://bitbucket.org/takeflight/wagtailnews',
+    url='https://github.com/takeflight/wagtailnews/',
 
     install_requires=install_requires,
     extras_require={
