@@ -5,7 +5,7 @@
 {% block content %}
 
     {% trans "Edit" as new_str %}
-    {% include "wagtailadmin/shared/header.html" with title=new_str subtitle=newsitem icon="news" %}
+    {% include "wagtailadmin/shared/header.html" with title=new_str subtitle=newsitem icon="news" merged=True %}
 
     <form action="{% url 'wagtailnews:edit' pk=newsindex.pk newsitem_pk=newsitem.pk %}" method="POST">
         {% csrf_token %}

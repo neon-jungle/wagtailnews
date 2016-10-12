@@ -97,6 +97,7 @@ class Migration(migrations.Migration):
                 ('live', models.BooleanField(default=True, editable=False, verbose_name='Live')),
                 ('has_unpublished_changes', models.BooleanField(default=False, editable=False, verbose_name='Has unpublished changes')),
                 ('newsindex', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='wagtailcore.Page')),
+                ('title', models.CharField(max_length=32)),
             ],
             options={
                 'ordering': ('-date',),
