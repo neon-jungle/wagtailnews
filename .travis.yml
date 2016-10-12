@@ -1,0 +1,42 @@
+language: python
+cache: pip
+
+# Matrix of build options
+matrix:
+  include:
+    - python: 2.7
+      env: DJANGO=19 WAGTAIL=15
+    - python: 3.4
+      env: DJANGO=19 WAGTAIL=15
+    - python: 3.5
+      env: DJANGO=19 WAGTAIL=15
+    - python: 2.7
+      env: DJANGO=110 WAGTAIL=15
+    - python: 3.4
+      env: DJANGO=110 WAGTAIL=15
+    - python: 3.5
+      env: DJANGO=110 WAGTAIL=15
+    - python: 2.7
+      env: DJANGO=19 WAGTAIL=15
+    - python: 3.4
+      env: DJANGO=19 WAGTAIL=15
+    - python: 3.5
+      env: DJANGO=19 WAGTAIL=15
+    - python: 2.7
+      env: DJANGO=110 WAGTAIL=16
+    - python: 3.4
+      env: DJANGO=110 WAGTAIL=16
+    - python: 3.5
+      env: DJANGO=110 WAGTAIL=16
+    - python: 3.5
+      env: TOX_ENV=isort,flake8,docs
+
+install:
+  - pip install --upgrade pip wheel tox setuptools
+
+script:
+  # Run tox using either a specific environment from TOX_ENV,
+  # or building one from the environment variables
+  - tox -e "${TOX_ENV:-py${TRAVIS_PYTHON_VERSION/./}-dj${DJANGO}-wt${WAGTAIL}}"
+
+# vim: sw=2
