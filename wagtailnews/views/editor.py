@@ -22,6 +22,9 @@ OPEN_PREVIEW_PARAM = 'do_preview'
 
 @lru_cache(maxsize=None)
 def get_newsitem_edit_handler(NewsItem):
+    if hasattr(NewsItem, 'edit_handler'):
+        return NewsItem.edit_handler.bind_to_model(NewsItem)
+
     panels = extract_panel_definitions_from_model_class(
         NewsItem, exclude=['newsindex'])
     return ObjectList(panels).bind_to_model(NewsItem)

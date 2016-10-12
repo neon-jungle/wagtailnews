@@ -35,6 +35,10 @@ Add any fields that you want to this model:
         # be named 'newsitem', and have a related_name='revisions'
         newsitem = models.ForeignKey(NewsItem, related_name='revisions')
 
+The panels can be customised using the ``panels`` attribute,
+or a completely custom edit handler can be used by setting the ``edit_handler`` attribute.
+See :ref:`the Wagtail docs <wagtail:customising_the_tabbed_interface>` for more information.
+
 The news index model is a subclass of the Wagtail Page model.
 This page defines where your news page appears on your site.
 You can define any extra fields you need on this page.

@@ -3,7 +3,7 @@ from django.test import TestCase
 from wagtail.tests.utils import WagtailTestUtils
 from wagtail.wagtailcore.models import Page
 
-from tests.app.models import NewsIndex, NewsItem
+from tests.app.models import NewsIndex, NewsItem, SecondaryNewsIndex
 from wagtailnews.views.editor import OPEN_PREVIEW_PARAM
 
 
@@ -163,9 +163,10 @@ class TestPreviewDraft(TestCase, WagtailTestUtils):
     def setUp(self):
         self.user = self.login()
         root_page = Page.objects.get(pk=2)
-        self.index = NewsIndex(
-            title='News', slug='news')
-        root_page.add_child(instance=self.index)
+        self.index = root_page.add_child(instance=NewsIndex(
+            title='News', slug='news'))
+        self.second_index = root_page.add_child(instance=SecondaryNewsIndex(
+            title='Secondary news', slug='news-the-second'))
 
     def test_preview_live_item(self):
         " Preview a live item with no draft "
@@ -245,3 +246,11 @@ class TestPreviewDraft(TestCase, WagtailTestUtils):
         live_newsitem = NewsItem.objects.get(pk=newsitem.pk)
         response = self.client.get(live_newsitem.url())
         self.assertContains(response, 'Live title')
+
+    def test_edit_handlers(self):
+        """Test custom edit handlers using NewsItem.edit_handler."""
+        response = self.client.get(
+            reverse('wagtailnews:create', kwargs={'pk': self.second_index.pk}))
+        self.assertContains(response, 'tab-content')
+        self.assertContains(response, 'Tab the first')
+        self.assertContains(response, 'Tab the second')

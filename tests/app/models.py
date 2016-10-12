@@ -3,7 +3,8 @@ from django.utils.encoding import python_2_unicode_compatible
 from modelcluster.contrib.taggit import ClusterTaggableManager
 from modelcluster.fields import ParentalKey
 from taggit.models import TaggedItemBase
-from wagtail.wagtailadmin.edit_handlers import FieldPanel, PageChooserPanel
+from wagtail.wagtailadmin.edit_handlers import (
+    FieldPanel, ObjectList, PageChooserPanel, TabbedInterface)
 from wagtail.wagtailcore.models import Page
 from wagtail.wagtailsearch import index
 
@@ -82,7 +83,12 @@ class SecondaryNewsIndex(NewsIndexMixin, Page):
 
 
 class SecondaryNewsItem(AbstractNewsItem):
-    pass
+    title = models.CharField(max_length=32)
+
+    edit_handler = TabbedInterface([
+        ObjectList([FieldPanel('title')], heading='Tab the first'),
+        ObjectList([FieldPanel('date')], heading='Tab the second'),
+    ])
 
 
 class SecondaryNewsItemRevision(AbstractNewsItemRevision):
