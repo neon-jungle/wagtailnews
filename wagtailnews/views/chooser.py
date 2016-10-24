@@ -78,6 +78,7 @@ def search(request):
     newsitem_results = list(_search_newsitems(request, newsitem_models, query))
 
     return render(request, 'wagtailnews/search.html', {
+        'single_result_type': len(newsitem_results) == 1,
         'single_newsitem_model': len(newsitem_models) == 1,
         'newsitem_results': newsitem_results,
         'search_form': SearchForm(request.GET if request.GET else None),

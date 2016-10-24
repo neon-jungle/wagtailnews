@@ -3,9 +3,8 @@
 
 {% if newsitem_results %}
     <div class="nice-padding">
-    {% if single_newsitem_model %}
-        {% with
-        <h2>{% blocktrans count counter=newsitem_results.0.2 %}
+    {% if single_result_type %}
+        <h2>{% blocktrans count counter=newsitem_results.0.2.count %}
             There is one matching news item
         {% plural %}
             There are {{ counter }} matching news items
