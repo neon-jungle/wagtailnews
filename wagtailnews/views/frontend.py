@@ -9,13 +9,12 @@ from ..conf import paginate
 
 def _newsitem_list(request, newsindex, newsitem_list, extra_context):
     paginator, page = paginate(request, newsitem_list)
-    context = {
-        'self': newsindex,
-        'page': newsindex,
+    context = newsindex.get_context(request)
+    context.update({
         'paginator': paginator,
         'newsitem_page': page,
         'newsitem_list': page.object_list,
-    }
+    })
     context.update(extra_context)
     return render(request, newsindex.get_template(request), context)
 
