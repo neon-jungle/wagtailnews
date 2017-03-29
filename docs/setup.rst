@@ -6,7 +6,7 @@ Setup
 
 ``wagtailnews`` is compatible with Wagtail 1.6 and higher,
 Django 1.9 and higher,
-and Python 2.7 and Python 3.4 and higher.
+and Python 3.4 and higher.
 
 Step 1
 ______

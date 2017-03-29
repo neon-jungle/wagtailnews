@@ -2,8 +2,6 @@
 """
 Install wagtailnews using setuptools
 """
-import sys
-
 from setuptools import find_packages, setup
 
 with open('wagtailnews/version.py', 'r') as f:
@@ -12,10 +10,6 @@ with open('wagtailnews/version.py', 'r') as f:
 
 with open('README.rst', 'r') as f:
     readme = f.read()
-
-install_requires = ['wagtail>=1.5']
-if sys.version_info < (3,):
-    install_requires += ['enum34>=1,<2']
 
 # Documentation dependencies
 documentation_extras = [
@@ -35,7 +29,9 @@ setup(
     author_email='tim@takeflight.com.au',
     url='https://github.com/takeflight/wagtailnews/',
 
-    install_requires=install_requires,
+    install_requires=[
+        'wagtail>=1.5',
+    ],
     extras_require={
         'docs': documentation_extras
     },
