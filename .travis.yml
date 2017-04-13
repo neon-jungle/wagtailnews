@@ -2,20 +2,15 @@ language: python
 cache: pip
 
 python:
+  - 2.7
   - 3.4
   - 3.5
 
 env:
-  - TOXENV=dj19-wt15
-  - TOXENV=dj110-wt15
-  - TOXENV=dj19-wt16
-  - TOXENV=dj110-wt16
-  - TOXENV=dj19-wt17
-  - TOXENV=dj110-wt17
-  - TOXENV=dj19-wt18
   - TOXENV=dj110-wt18
-  - TOXENV=dj19-wt19
   - TOXENV=dj110-wt19
+  - TOXENV=dj111-wt18
+  - TOXENV=dj111-wt19
 
 # Matrix of build options
 matrix:
