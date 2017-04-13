@@ -84,6 +84,8 @@ class SecondaryNewsIndex(NewsIndexMixin, Page):
     def get_admin_display_title(self):
         return 'Title for admin - ' + self.title
 
+    template = 'app/secondaryindex.jade'
+
 
 class SecondaryNewsItem(AbstractNewsItem):
     title = models.CharField(max_length=32)
