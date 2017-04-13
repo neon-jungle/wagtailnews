@@ -8,11 +8,11 @@ from django.core import urlresolvers
 from django.core.urlresolvers import reverse
 from django.utils.html import format_html, format_html_join
 from django.utils.translation import ugettext_lazy as _
-from wagtail.wagtailadmin.menu import MenuItem
 from wagtail.wagtailadmin.search import SearchArea
 from wagtail.wagtailcore import hooks
 
 from . import urls
+from .menu import NewsMenuItem
 from .models import NEWSINDEX_MODEL_CLASSES
 from .permissions import user_can_edit_news
 
@@ -27,10 +27,7 @@ def register_admin_urls():
 @hooks.register('construct_main_menu')
 def construct_main_menu(request, menu_items):
     if user_can_edit_news(request.user):
-        menu_items.append(
-            MenuItem(_('News'), urlresolvers.reverse('wagtailnews:choose'),
-                     classnames='icon icon-grip', order=250)
-        )
+        menu_items.append(NewsMenuItem())
 
 
 class NewsItemSearchArea(SearchArea):
