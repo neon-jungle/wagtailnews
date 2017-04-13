@@ -15,7 +15,7 @@
                         <div class="row row-flush title">
                             <h2>
                                 <a href="{% url 'wagtailnews:index' pk=newsindex.pk %}" class="col4">
-                                    {{ newsindex.title }}
+                                    {{ newsindex.get_admin_display_title }}
                                 </a>
                             </h2>
                             <a class="col6" href="{{ newsindex.url }}">{{ newsindex.url }}</a>
