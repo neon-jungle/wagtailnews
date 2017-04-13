@@ -11,11 +11,12 @@ tox
 
 python3 -m virtualenv --python python3 venv3
 
-for v in 3 ; do
+for v in 2 3 ; do
 	venv="venv${v}"
 	python="$venv/bin/python${v}"
 	pip="$venv/bin/pip${v}"
 
+	python3 -m virtualenv --python python$v $venv
 	$pip install --upgrade pip wheel -e .
 	$python setup.py bdist_wheel upload
 	rm -rf "$venv"

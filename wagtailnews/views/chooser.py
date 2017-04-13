@@ -36,7 +36,7 @@ def choose(request):
 
     allowed_cts = ContentType.objects.get_for_models(*allowed_news_types)\
         .values()
-    newsindex_list = Page.objects.filter(content_type__in=allowed_cts)
+    newsindex_list = Page.objects.filter(content_type__in=allowed_cts).specific()
     newsindex_count = newsindex_list.count()
 
     if newsindex_count == 1:

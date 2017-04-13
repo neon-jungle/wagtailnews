@@ -6,8 +6,6 @@ from django.template.loader import render_to_string
 from django.utils.translation import ugettext_lazy as _
 from wagtail.wagtailadmin.widgets import AdminChooser
 
-from wagtailnews.utils import model_string
-
 
 class AdminNewsChooser(AdminChooser):
 
@@ -39,4 +37,4 @@ class AdminNewsChooser(AdminChooser):
     def render_js_init(self, id_, name, value):
         return "createNewsChooser({id}, {type});".format(
             id=json.dumps(id_),
-            type=json.dumps(model_string(self.target_model)))
+            type=json.dumps(str(self.target_model._meta)))

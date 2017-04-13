@@ -1,9 +1,17 @@
 from __future__ import absolute_import, unicode_literals
 
+import datetime
+import os
+import warnings
+
 from django.conf import settings
 from django.db import models
+from django.http import Http404
+from django.shortcuts import get_object_or_404, redirect
+from django.template.response import TemplateResponse
 from django.utils import timezone
 from django.utils.six import text_type
+from django.utils.six.moves.urllib.parse import urlparse
 from django.utils.text import slugify
 from django.utils.translation import ugettext_lazy as _
 from modelcluster.models import ClusterableModel
@@ -14,11 +22,17 @@ from wagtail.wagtailcore.utils import resolve_model_string
 from wagtail.wagtailsearch import index
 
 from . import feeds
-from .utils.views import ModelViewProxy
-
-frontend = ModelViewProxy('wagtailnews.views.frontend')
+from .conf import paginate
 
 NEWSINDEX_MODEL_CLASSES = []
+
+
+def get_date_or_404(year, month, day):
+    """Try to make a date from the given inputs, raising Http404 on error"""
+    try:
+        return datetime.date(int(year), int(month), int(day))
+    except ValueError:
+        raise Http404
 
 
 class NewsIndexMixin(RoutablePageMixin):
@@ -30,25 +44,83 @@ class NewsIndexMixin(RoutablePageMixin):
     newsitem_model = None
     subpage_types = []
 
+    def get_newsitems(self):
+        """Get all the news items for this news index"""
+        return self.get_newsitem_model().objects.filter(newsindex=self)
+
+    def get_newsitems_for_display(self):
+        """
+        Get the news items that should be shown on for this news index, before
+        filtering and pagination.
+        """
+        return self.get_newsitems().live().filter(date__lte=timezone.now())
+
+    def get_template(self, request, view='all', **kwargs):
+        template = super(NewsIndexMixin, self).get_template(
+            request, view=view, **kwargs)
+
+        base, ext = os.path.splitext(template)
+
+        # Will make something like:
+        # ["news/news_index_month.html", "news/news_index.html"]
+        return ['{}_{}{}'.format(base, view, ext), template]
+
+    def get_context(self, request, view, **kwargs):
+        context = super(NewsIndexMixin, self).get_context(request, **kwargs)
+        context.update({'newsitem_view': view})
+        return context
+
+    def paginate_newsitems(self, request, newsitem_list):
+        paginator, page = paginate(request, newsitem_list)
+        return {
+            'paginator': paginator,
+            'newsitem_page': page,
+            'newsitem_list': page.object_list,
+        }
+
+    def respond(self, request, view, newsitems, extra_context={}):
+        """A helper that takes some news items and returns an HttpResponse"""
+        context = self.get_context(request, view=view)
+        context.update(self.paginate_newsitems(request, newsitems))
+        context.update(extra_context)
+        template = self.get_template(request, view=view)
+        return TemplateResponse(request, template, context)
+
     @route(r'^$', name='index')
-    def v_index(s, r):
-        return frontend.news_index(s, r)
+    def v_index(self, request):
+        return self.respond(request, 'all', self.get_newsitems_for_display())
 
     @route(r'^(?P<year>\d{4})/$', name='year')
-    def v_year(s, r, **k):
-        return frontend.news_year(s, r, **k)
+    def v_year(self, request, year):
+        date = get_date_or_404(year, 1, 1)
+        newsitems = self.get_newsitems_for_display().filter(date__year=year)
+        return self.respond(request, 'year', newsitems, {'date': date})
 
     @route(r'^(?P<year>\d{4})/(?P<month>\d{1,2})/$', name='month')
-    def v_month(s, r, **k):
-        return frontend.news_month(s, r, **k)
+    def v_month(self, request, year, month):
+        date = get_date_or_404(year, month, 1)
+        newsitems = self.get_newsitems_for_display().filter(
+            date__year=year, date__month=month)
+        return self.respond(request, 'month', newsitems, {'date': date})
 
     @route(r'^(?P<year>\d{4})/(?P<month>\d{1,2})/(?P<day>\d{1,2})/$', name='day')
-    def v_day(s, r, **k):
-        return frontend.news_day(s, r, **k)
+    def v_day(self, request, year, month, day):
+        date = get_date_or_404(year, month, day)
+        newsitems = self.get_newsitems_for_display().filter(
+            date__year=year, date__month=month, date__day=day)
+        return self.respond(request, 'day', newsitems, {'date': date})
 
     @route(r'^(?P<year>\d{4})/(?P<month>\d{1,2})/(?P<day>\d{1,2})/(?P<pk>\d+)-(?P<slug>.*)/$', name='post')
-    def v_post(s, r, **k):
-        return frontend.newsitem_detail(s, r, **k)
+    def v_post(self, request, year, month, day, pk, slug):
+        newsitem = get_object_or_404(self.get_newsitems_for_display(), pk=pk)
+
+        # Check the URL date and slug are still correct
+        newsitem_path = urlparse(newsitem.url(), allow_fragments=True).path
+        if request.path != newsitem_path:
+            return redirect(newsitem.url())
+
+        # Get the newsitem to serve itself
+        return newsitem.serve(request)
 
     @route(r'^rss/$', name='feed')
     def newsfeed(self, request):
@@ -146,6 +218,12 @@ class AbstractNewsItem(index.Indexed, ClusterableModel):
     objects = NewsItemQuerySet.as_manager()
 
     def get_nice_url(self):
+        warnings.warn(
+            'AbstractNewsItem.get_nice_url() has been renamed to AbstractNewsItem.get_slug()',
+            DeprecationWarning)
+        return self.get_slug()
+
+    def get_slug(self):
         return slugify(text_type(self))
 
     def get_template(self, request):
@@ -155,18 +233,21 @@ class AbstractNewsItem(index.Indexed, ClusterableModel):
             return '{0}/{1}.html'.format(self._meta.app_label, self._meta.model_name)
 
     def get_context(self, request, *args, **kwargs):
-        context = self.newsindex.specific.get_context(request, *args, **kwargs)
-        context.update({
-            'newsitem': self
-        })
+        context = self.newsindex.specific.get_context(request, view='newsitem', *args, **kwargs)
+        context['newsitem'] = self
         return context
+
+    def serve(self, request):
+        template = self.get_template(request)
+        context = self.get_context(request)
+        return TemplateResponse(request, template, context)
 
     def url_suffix(self):
         newsindex = self.newsindex.specific
         ldate = timezone.localtime(self.date)
         return newsindex.reverse_subpage('post', kwargs={
             'year': ldate.year, 'month': ldate.month, 'day': ldate.day,
-            'pk': self.pk, 'slug': self.get_nice_url()})
+            'pk': self.pk, 'slug': self.get_slug()})
 
     def url(self):
         return self.newsindex.specific.url + self.url_suffix()

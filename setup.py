@@ -31,6 +31,7 @@ setup(
 
     install_requires=[
         'wagtail>=1.5',
+        'enum34~=1.1.6;python_version<"3.4"',
     ],
     extras_require={
         'docs': documentation_extras
