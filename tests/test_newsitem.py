@@ -1,5 +1,9 @@
+# -*- coding: utf8 -*-
+from __future__ import absolute_import, unicode_literals
+
 from django.test import TestCase
 from django.utils import timezone
+from django.utils.http import urlquote
 from wagtail.tests.utils import WagtailTestUtils
 from wagtail.wagtailcore.models import Site
 
@@ -17,7 +21,7 @@ class TestNewsItem(TestCase, WagtailTestUtils):
         self.newsitem = NewsItem.objects.create(
             newsindex=self.index,
             title='A post',
-            date=timezone.now())
+            date=timezone.now().replace(2017, 4, 13))
 
     def test_view(self):
         response = self.client.get(self.newsitem.url())
@@ -35,3 +39,30 @@ class TestNewsItem(TestCase, WagtailTestUtils):
 
         # Check the context can be overridden using NewsItem.get_context()
         self.assertEqual(response.context['foo'], 'bar')
+
+    def test_bad_url_redirect(self):
+        response = self.client.get(
+            '/news/1234/2/3/{}-bad-title/'.format(self.newsitem.pk),
+            follow=True)
+
+        self.assertEqual(
+            self.newsitem.url(),
+            urlquote('/news/2017/4/13/{}-a-post/'.format(self.newsitem.pk)))
+        self.assertEqual(
+            response.redirect_chain,
+            [(self.newsitem.url(), 301)])
+
+    def test_bad_url_redirect_unicode(self):
+        self.newsitem.title = '你好，世界！'
+        self.newsitem.save()
+
+        response = self.client.get(
+            '/news/1234/2/3/{}-bad-title/'.format(self.newsitem.pk),
+            follow=True)
+
+        self.assertEqual(
+            self.newsitem.url(),
+            urlquote('/news/2017/4/13/{}-你好世界/'.format(self.newsitem.pk)))
+        self.assertEqual(
+            response.redirect_chain,
+            [(self.newsitem.url(), 301)])
