@@ -10,6 +10,7 @@ from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect
 from django.template.response import TemplateResponse
 from django.utils import timezone
+from django.utils.http import urlquote
 from django.utils.six import text_type
 from django.utils.six.moves.urllib.parse import urlparse
 from django.utils.text import slugify
@@ -115,9 +116,10 @@ class NewsIndexMixin(RoutablePageMixin):
         newsitem = get_object_or_404(self.get_newsitems_for_display(), pk=pk)
 
         # Check the URL date and slug are still correct
-        newsitem_path = urlparse(newsitem.url(), allow_fragments=True).path
-        if request.path != newsitem_path:
-            return redirect(newsitem.url())
+        newsitem_url = newsitem.url()
+        newsitem_path = urlparse(newsitem_url, allow_fragments=True).path
+        if urlquote(request.path) != newsitem_path:
+            return redirect(newsitem_url, permanent=True)
 
         # Get the newsitem to serve itself
         return newsitem.serve(request)
@@ -224,7 +226,8 @@ class AbstractNewsItem(index.Indexed, ClusterableModel):
         return self.get_slug()
 
     def get_slug(self):
-        return slugify(text_type(self))
+        allow_unicode = getattr(settings, 'WAGTAIL_ALLOW_UNICODE_SLUGS', True)
+        return slugify(text_type(self), allow_unicode=allow_unicode)
 
     def get_template(self, request):
         try:

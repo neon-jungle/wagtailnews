@@ -14,6 +14,7 @@ class TestFeed(TestCase, WagtailTestUtils):
     """
 
     def setUp(self):
+        super(TestFeed, self).setUp()
         site = Site.objects.get(is_default_site=True)
         self.root_page = site.root_page
         self.index = self.root_page.add_child(instance=NewsIndex(
@@ -76,6 +77,7 @@ class TestCustomFeed(TestCase, WagtailTestUtils):
     Test custom Feed classes on the NewsIndex are used
     """
     def setUp(self):
+        super(TestCustomFeed, self).setUp()
         site = Site.objects.get(is_default_site=True)
         root_page = site.root_page
         self.index = NewsIndex(

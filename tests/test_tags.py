@@ -10,6 +10,7 @@ from tests.app.models import NewsIndex, NewsItem
 class TestNewsItemWithTags(TestCase, WagtailTestUtils):
 
     def setUp(self):
+        super(TestNewsItemWithTags, self).setUp()
         root_page = Page.objects.get(pk=2)
         self.index = NewsIndex(
             title='News', slug='news')

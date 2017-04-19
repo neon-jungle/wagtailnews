@@ -1,5 +1,6 @@
 import datetime
 
+from django.core.cache import cache
 from django.test import TestCase
 from django.utils import timezone
 from wagtail.tests.utils import WagtailTestUtils
@@ -19,6 +20,7 @@ def noop(x):
 class TestNewsList(TestCase, WagtailTestUtils):
 
     def setUp(self):
+        super(TestNewsList, self).setUp()
         site = Site.objects.get(is_default_site=True)
         root_page = site.root_page
         self.index = NewsIndex(
@@ -119,6 +121,7 @@ class TestNewsList(TestCase, WagtailTestUtils):
 class TestMultipleSites(TestCase, WagtailTestUtils):
 
     def setUp(self):
+        super(TestMultipleSites, self).setUp()
         root = Page.objects.get(pk=1)
         root_a = Page(
             title='Home A', slug='home-a')
@@ -146,6 +149,13 @@ class TestMultipleSites(TestCase, WagtailTestUtils):
             newsindex=self.index_a, title='Post A', date=dt(2015, 8, 1))
         self.item_b = NewsItem.objects.create(
             newsindex=self.index_b, title='Post B', date=dt(2015, 8, 2))
+
+    @classmethod
+    def tearDownClass(cls):
+        super(TestMultipleSites, cls).tearDownClass()
+        # Clear site cache when the tests finish to prevent other tests being
+        # polluted by a stale cache.
+        cache.delete('wagtail_site_root_paths')
 
     def test_index(self):
         response = self.client.get(self.index_a.url,

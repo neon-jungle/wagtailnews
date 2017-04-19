@@ -10,6 +10,7 @@ from wagtailnews.views.editor import OPEN_PREVIEW_PARAM
 class TestCreateNewsItem(TestCase, WagtailTestUtils):
 
     def setUp(self):
+        super(TestCreateNewsItem, self).setUp()
         self.login()
         root_page = Page.objects.get(pk=2)
         self.index = NewsIndex(
@@ -79,6 +80,7 @@ class TestCreateNewsItem(TestCase, WagtailTestUtils):
 class TestEditNewsItem(TestCase, WagtailTestUtils):
 
     def setUp(self):
+        super(TestEditNewsItem, self).setUp()
         self.login()
         root_page = Page.objects.get(pk=2)
         self.index = NewsIndex(
@@ -161,6 +163,7 @@ class TestEditNewsItem(TestCase, WagtailTestUtils):
 
 class TestPreviewDraft(TestCase, WagtailTestUtils):
     def setUp(self):
+        super(TestPreviewDraft, self).setUp()
         self.user = self.login()
         root_page = Page.objects.get(pk=2)
         self.index = root_page.add_child(instance=NewsIndex(
