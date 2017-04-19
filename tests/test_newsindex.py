@@ -12,7 +12,7 @@ from tests.app.models import (
 
 class TestNewsIndex(TestCase, WagtailTestUtils):
     def setUp(self):
-        super(TestNewsIndex, self).setUpClass()
+        super(TestNewsIndex, self).setUp()
         self.root = Page.objects.get(pk=2)
         self.rf = RequestFactory()
 

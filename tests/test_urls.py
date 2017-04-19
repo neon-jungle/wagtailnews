@@ -20,6 +20,7 @@ def noop(x):
 class TestNewsList(TestCase, WagtailTestUtils):
 
     def setUp(self):
+        super(TestNewsList, self).setUp()
         site = Site.objects.get(is_default_site=True)
         root_page = site.root_page
         self.index = NewsIndex(
@@ -120,6 +121,7 @@ class TestNewsList(TestCase, WagtailTestUtils):
 class TestMultipleSites(TestCase, WagtailTestUtils):
 
     def setUp(self):
+        super(TestMultipleSites, self).setUp()
         root = Page.objects.get(pk=1)
         root_a = Page(
             title='Home A', slug='home-a')

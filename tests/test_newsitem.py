@@ -13,6 +13,7 @@ from tests.app.models import NewsIndex, NewsItem
 class TestNewsItem(TestCase, WagtailTestUtils):
 
     def setUp(self):
+        super(TestNewsItem, self).setUp()
         site = Site.objects.get(is_default_site=True)
         root_page = site.root_page
         self.index = NewsIndex(
