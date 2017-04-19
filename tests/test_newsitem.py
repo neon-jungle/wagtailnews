@@ -22,7 +22,7 @@ class TestNewsItem(TestCase, WagtailTestUtils):
         self.newsitem = NewsItem.objects.create(
             newsindex=self.index,
             title='A post',
-            date=timezone.now().replace(2017, 4, 13))
+            date=timezone.localtime(timezone.now()).replace(2017, 4, 13))
 
     def test_view(self):
         response = self.client.get(self.newsitem.url())
