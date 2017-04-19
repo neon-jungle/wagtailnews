@@ -1,5 +1,6 @@
 import datetime
 
+from django.core.cache import cache
 from django.test import TestCase
 from django.utils import timezone
 from wagtail.tests.utils import WagtailTestUtils
@@ -146,6 +147,13 @@ class TestMultipleSites(TestCase, WagtailTestUtils):
             newsindex=self.index_a, title='Post A', date=dt(2015, 8, 1))
         self.item_b = NewsItem.objects.create(
             newsindex=self.index_b, title='Post B', date=dt(2015, 8, 2))
+
+    @classmethod
+    def tearDownClass(cls):
+        super(TestMultipleSites, cls).tearDownClass()
+        # Clear site cache when the tests finish to prevent other tests being
+        # polluted by a stale cache.
+        cache.delete('wagtail_site_root_paths')
 
     def test_index(self):
         response = self.client.get(self.index_a.url,
