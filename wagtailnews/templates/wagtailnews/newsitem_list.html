@@ -1,4 +1,5 @@
 {% load i18n %}
+{% load wagtailnews_admin_tags %}
 
 <table class="listing full-width">
     <colgroup>
@@ -37,17 +38,7 @@
                 {{ newsitem.date }}
             </td>
             <td class="status" valign="top">
-                {% if newsitem.live %}
-                    {% if newsitem.has_unpublished_changes %}
-                        <a href="{{ newsitem.url }}" target="_blank" class="status-tag primary">{% trans "live" %}</a>
-                        +
-                        <a href="{% url 'wagtailnews:view_draft' pk=newsitem.newsindex_id newsitem_pk=newsitem.pk %}" class="status-tag">{% trans 'draft' %}</a>
-                    {% else %}
-                        <a href="{{ newsitem.url }}" target="_blank" class="status-tag primary">{% trans "live" %}</a>
-                    {% endif %}
-                {% else %}
-                    <a href="{% url 'wagtailnews:view_draft' pk=newsitem.newsindex_id newsitem_pk=newsitem.pk %}" class="status-tag">{% trans 'draft' %}</a>
-                {% endif %}
+                {% newsitem_status newsitem %}
             </td>
         </tr>
     {% endfor %}
