@@ -4,8 +4,8 @@ import warnings
 
 from django.conf import settings
 from django.db import models
-from django.http import Http404
-from django.shortcuts import get_object_or_404, redirect
+from django.http import Http404, HttpResponsePermanentRedirect
+from django.shortcuts import get_object_or_404
 from django.template.response import TemplateResponse
 from django.utils import timezone
 from django.utils.http import urlquote
@@ -21,6 +21,7 @@ from wagtail.wagtailsearch import index
 
 from . import feeds
 from .conf import paginate
+from .deprecation import DeprecatedCallableStr
 
 NEWSINDEX_MODEL_CLASSES = []
 
@@ -113,10 +114,10 @@ class NewsIndexMixin(RoutablePageMixin):
         newsitem = get_object_or_404(self.get_newsitems_for_display(), pk=pk)
 
         # Check the URL date and slug are still correct
-        newsitem_url = newsitem.url()
+        newsitem_url = newsitem.url
         newsitem_path = urlparse(newsitem_url, allow_fragments=True).path
         if urlquote(request.path) != newsitem_path:
-            return redirect(newsitem_url, permanent=True)
+            return HttpResponsePermanentRedirect(newsitem_url)
 
         # Get the newsitem to serve itself
         return newsitem.serve(request)
@@ -249,11 +250,19 @@ class AbstractNewsItem(index.Indexed, ClusterableModel):
             'year': ldate.year, 'month': ldate.month, 'day': ldate.day,
             'pk': self.pk, 'slug': self.get_slug()})
 
+    @property
     def url(self):
-        return self.newsindex.specific.url + self.url_suffix()
+        return DeprecatedCallableStr(
+            self.newsindex.specific.url + self.url_suffix(),
+            warning="NewsItem.url is now a property, not a method.",
+            warning_cls=DeprecationWarning)
 
+    @property
     def full_url(self):
-        return self.newsindex.specific.full_url + self.url_suffix()
+        return DeprecatedCallableStr(
+            self.newsindex.specific.full_url + self.url_suffix(),
+            warning="NewsItem.full_url is now a property, not a method.",
+            warning_cls=DeprecationWarning)
 
     def save_revision(self, user=None, changed=True):
         # Create revision

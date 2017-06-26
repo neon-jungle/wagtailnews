@@ -208,7 +208,7 @@ def build_dummy_request(newsitem):
     display a view of this page in the admin interface without going
     through the regular page routing logic.
     """
-    url = newsitem.full_url()
+    url = newsitem.full_url
     if url:
         url_info = urlparse(url)
         hostname = url_info.hostname

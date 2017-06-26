@@ -47,10 +47,18 @@ Attributes
     The template to use for this news item.
     Defaults to ``app_label/model_name.html``.
 
+.. attribute:: AbstractNewsItem.url
+
+    The URL of this news item, using the news indexes :attr:`~wagtail.wagtailcore.models.Page.url` attribute.
+
+.. attribute:: AbstractNewsItem.full_url
+
+    The full URL of this news item, using the news indexes :attr:`~wagtail.wagtailcore.models.Page.full_url` attribute.
+
 Methods
 -------
 
-.. automethod:: AbstractNewsItem.get_nice_url
+.. automethod:: AbstractNewsItem.get_slug
 
     Make a slug to put in the URL.
     News items are fetched using their ID, which is also embedded in the URL,
@@ -80,14 +88,6 @@ Methods
         '2016/08/11/1234-my-news-item/'
 
     See also :meth:`AbstractNewsItem.get_nice_url`.
-
-.. automethod:: AbstractNewsItem.url
-
-    Return the URL of this news item, using the news indexes :attr:`~wagtail.wagtailcore.models.Page.url` attribute.
-
-.. automethod:: AbstractNewsItem.full_url
-
-    Return the URL of this news item, using the news indexes :attr:`~wagtail.wagtailcore.models.Page.full_url` attribute.
 
 News index
 ==========
