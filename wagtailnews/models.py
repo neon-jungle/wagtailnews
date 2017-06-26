@@ -133,7 +133,9 @@ class NewsIndexMixin(RoutablePageMixin):
 
 class AbstractNewsItemRevision(models.Model):
     created_at = models.DateTimeField(verbose_name=_('Created at'))
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name=_('User'), null=True, blank=True)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, verbose_name=_('User'),
+        null=True, blank=True, on_delete=models.SET_NULL)
     content_json = models.TextField(verbose_name=_('Content JSON'))
 
     objects = models.Manager()
@@ -192,7 +194,7 @@ class NewsItemQuerySet(models.QuerySet):
 
 class AbstractNewsItem(index.Indexed, ClusterableModel):
 
-    newsindex = models.ForeignKey(Page)
+    newsindex = models.ForeignKey(Page, on_delete=models.CASCADE)
     date = models.DateTimeField('Published date', default=timezone.now)
 
     live = models.BooleanField(
@@ -220,7 +222,8 @@ class AbstractNewsItem(index.Indexed, ClusterableModel):
     def get_nice_url(self):
         warnings.warn(
             'AbstractNewsItem.get_nice_url() has been renamed to AbstractNewsItem.get_slug()',
-            DeprecationWarning)
+            DeprecationWarning,
+            stacklevel=2)
         return self.get_slug()
 
     def get_slug(self):
