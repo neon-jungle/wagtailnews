@@ -31,7 +31,6 @@ setup(
 
     install_requires=[
         'wagtail>=1.5',
-        'enum34~=1.1.6;python_version<"3.4"',
     ],
     extras_require={
         'docs': documentation_extras
@@ -49,6 +48,7 @@ setup(
         'Intended Audience :: Developers',
         'Operating System :: OS Independent',
         'Programming Language :: Python',
+        'Programming Language :: Python :: 3',
         'Framework :: Django',
         'License :: OSI Approved :: BSD License',
     ],
