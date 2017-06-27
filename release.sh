@@ -11,7 +11,7 @@ tox
 
 python3 -m virtualenv --python python3 venv3
 
-for v in 2 3 ; do
+for v in 3 ; do
 	venv="venv${v}"
 	python="$venv/bin/python${v}"
 	pip="$venv/bin/pip${v}"
