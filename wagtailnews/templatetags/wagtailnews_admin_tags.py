@@ -12,7 +12,7 @@ def newsitem_status(newsitem, link=True):
     output = []
     if newsitem.live:
         buttons.append({
-            'href': newsitem.url(),
+            'href': newsitem.url,
             'primary': True,
             'text': _('live'),
         })

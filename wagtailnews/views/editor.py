@@ -196,7 +196,7 @@ def view_draft(request, pk, newsitem_pk):
     template = newsitem.get_template(dummy_request)
     context = newsitem.get_context(
         dummy_request, year=newsitem.date.year, month=newsitem.date.month,
-        day=newsitem.date.day, pk=newsitem.pk, slug=newsitem.get_nice_url())
+        day=newsitem.date.day, pk=newsitem.pk, slug=newsitem.get_slug())
     return render(dummy_request, template, context)
 
 
@@ -208,7 +208,7 @@ def build_dummy_request(newsitem):
     display a view of this page in the admin interface without going
     through the regular page routing logic.
     """
-    url = newsitem.full_url()
+    url = newsitem.full_url
     if url:
         url_info = urlparse(url)
         hostname = url_info.hostname

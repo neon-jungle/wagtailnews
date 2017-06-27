@@ -12,10 +12,10 @@ class LatestEntriesFeed(Feed):
         return newsitem_list
 
     def item_link(self, item):
-        return item.full_url()
+        return item.full_url
 
     def item_guid(self, item):
-        return item.full_url()
+        return item.full_url
 
     item_guid_is_permalink = True
 
