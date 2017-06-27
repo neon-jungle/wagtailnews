@@ -1,10 +1,10 @@
 from functools import wraps
 
-from django.contrib.auth.models import Permission, User
+from django.contrib.auth.models import Group, Permission, User
 from django.core.urlresolvers import reverse
 from django.test import TestCase
 from wagtail.tests.utils import WagtailTestUtils
-from wagtail.wagtailcore.models import Page
+from wagtail.wagtailcore.models import GroupPagePermission, Page
 
 from tests.app.models import NewsIndex, NewsItem, SecondaryNewsIndex
 
@@ -20,6 +20,7 @@ def grant_permissions(perms):
         @wraps(fn)
         def method(self):
             self.user.user_permissions.add(*[p(perm) for perm in perms])
+            self.user.save()
             return fn(self)
         return method
     return decorator
@@ -46,18 +47,27 @@ class PermissionTestCase(TestCase, WagtailTestUtils):
 
     def setUp(self):
         super(PermissionTestCase, self).setUp()
+
+        # Create a group with permission to edit pages
+        # Required to enable page searching
+        self.group = Group.objects.create(name='Test group')
+        GroupPagePermission.objects.create(
+            group=self.group, page=Page.objects.get(pk=1),
+            permission_type='add')
+
         self.user = self.create_test_user()
         self.client.login(username='test@email.com', password='password')
 
-    @staticmethod
-    def create_test_user():
+    def create_test_user(self):
         """
         Create a normal boring user, not a super user. This user has no news
         related permissions by default.
         """
         user = User.objects.create_user(
             username='test@email.com', password='password')
+        user.groups.add(self.group)
         user.user_permissions.add(p('wagtailadmin.access_admin'))
+        user.save()
         return user
 
     def assertStatusCode(self, url, status_code, msg=None):

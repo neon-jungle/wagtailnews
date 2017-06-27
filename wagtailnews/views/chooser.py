@@ -7,7 +7,6 @@ from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
-from django.utils.six import text_type
 from wagtail.utils.pagination import paginate
 from wagtail.wagtailadmin.forms import SearchForm
 from wagtail.wagtailadmin.modal_workflow import render_modal_workflow
@@ -191,7 +190,7 @@ def chosen_modal(request, pk, newsitem_pk):
     return render_modal_workflow(request, None, 'wagtailnews/chooser/chosen.js', {
         'newsitem_json': json.dumps({
             'id': newsitem.id,
-            'string': text_type(newsitem),
+            'string': str(newsitem),
             'edit_link': reverse('wagtailnews:edit', kwargs={
                 'pk': newsindex.pk, 'newsitem_pk': newsitem.pk}),
         }),

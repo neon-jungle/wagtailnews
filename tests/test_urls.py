@@ -1,7 +1,7 @@
 import datetime
 
 from django.core.cache import cache
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.utils import timezone
 from wagtail.tests.utils import WagtailTestUtils
 from wagtail.wagtailcore.models import Page, Site
@@ -118,6 +118,7 @@ class TestNewsList(TestCase, WagtailTestUtils):
             [item], transform=noop)
 
 
+@override_settings(ALLOWED_HOSTS=['localhost', 'site-a.com', 'site-b.org'])
 class TestMultipleSites(TestCase, WagtailTestUtils):
 
     def setUp(self):

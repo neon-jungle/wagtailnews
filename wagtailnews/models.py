@@ -1,5 +1,3 @@
-from __future__ import absolute_import, unicode_literals
-
 import datetime
 import os
 import warnings
@@ -11,7 +9,6 @@ from django.shortcuts import get_object_or_404, redirect
 from django.template.response import TemplateResponse
 from django.utils import timezone
 from django.utils.http import urlquote
-from django.utils.six import text_type
 from django.utils.six.moves.urllib.parse import urlparse
 from django.utils.text import slugify
 from django.utils.translation import ugettext_lazy as _
@@ -227,7 +224,7 @@ class AbstractNewsItem(index.Indexed, ClusterableModel):
 
     def get_slug(self):
         allow_unicode = getattr(settings, 'WAGTAIL_ALLOW_UNICODE_SLUGS', True)
-        return slugify(text_type(self), allow_unicode=allow_unicode)
+        return slugify(str(self), allow_unicode=allow_unicode)
 
     def get_template(self, request):
         try:

@@ -1,8 +1,6 @@
 import os
 import sys
 
-import wagtail.wagtailcore
-
 
 def env(name, default=None):
     if sys.version_info < (3,):
@@ -33,9 +31,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 ]
 
-wagtail_version = tuple(map(int, wagtail.wagtailcore.__version__.split('.')))
-if wagtail_version < (1, 4):
-    INSTALLED_APPS += ['compressor']
+ALLOWED_HOSTS = ['localhost']
 
 SECRET_KEY = 'not a secret'
 
