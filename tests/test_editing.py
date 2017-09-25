@@ -1,16 +1,19 @@
+from unittest.mock import MagicMock
+
 from django.core.urlresolvers import reverse
 from django.test import TestCase
 from wagtail.tests.utils import WagtailTestUtils
 from wagtail.wagtailcore.models import Page
 
 from tests.app.models import NewsIndex, NewsItem, SecondaryNewsIndex
+from wagtailnews import signals
 from wagtailnews.views.editor import OPEN_PREVIEW_PARAM
 
 
 class TestCreateNewsItem(TestCase, WagtailTestUtils):
 
     def setUp(self):
-        super(TestCreateNewsItem, self).setUp()
+        super().setUp()
         self.login()
         root_page = Page.objects.get(pk=2)
         self.index = NewsIndex(
@@ -19,6 +22,15 @@ class TestCreateNewsItem(TestCase, WagtailTestUtils):
 
     def test_create_newsitem(self):
         self.assertEqual(NewsItem.objects.count(), 0)
+
+        uncalled_handler = MagicMock()
+        handler = MagicMock()
+
+        signals.newsitem_published.connect(uncalled_handler, sender=object())
+        signals.newsitem_published.connect(handler, sender=NewsItem)
+
+        uncalled_handler.assert_not_called()
+        handler.assert_not_called()
 
         # Make a news item
         response = self.client.post(
@@ -46,8 +58,21 @@ class TestCreateNewsItem(TestCase, WagtailTestUtils):
         self.assertRedirects(response, reverse('wagtailnews:index', kwargs={
             'pk': self.index.pk}))
 
+        # Make sure siginals were called as expected
+        uncalled_handler.not_called()
+        handler.assert_called_once_with(
+            sender=NewsItem, signal=signals.newsitem_published,
+            instance=newsitem, created=True)
+
     def test_create_newsitem_draft(self):
         self.assertEqual(NewsItem.objects.count(), 0)
+
+        uncalled_handler = MagicMock()
+        handler = MagicMock()
+        signals.newsitem_published.connect(uncalled_handler, sender=NewsItem)
+        signals.newsitem_draft_saved.connect(handler, sender=NewsItem)
+        uncalled_handler.assert_not_called()
+        handler.assert_not_called()
 
         # Make a news item
         response = self.client.post(
@@ -76,11 +101,17 @@ class TestCreateNewsItem(TestCase, WagtailTestUtils):
         self.assertRedirects(response, reverse('wagtailnews:edit', kwargs={
             'pk': self.index.pk, 'newsitem_pk': newsitem.pk}))
 
+        # Make sure siginals were called as expected
+        uncalled_handler.not_called()
+        handler.assert_called_once_with(
+            sender=NewsItem, signal=signals.newsitem_draft_saved,
+            instance=newsitem, created=True)
+
 
 class TestEditNewsItem(TestCase, WagtailTestUtils):
 
     def setUp(self):
-        super(TestEditNewsItem, self).setUp()
+        super().setUp()
         self.login()
         root_page = Page.objects.get(pk=2)
         self.index = NewsIndex(
@@ -91,6 +122,10 @@ class TestEditNewsItem(TestCase, WagtailTestUtils):
             title='test title')
 
     def test_publish_changes(self):
+        handler = MagicMock()
+        signals.newsitem_published.connect(handler, sender=NewsItem)
+        handler.assert_not_called()
+
         # Make a news item
         response = self.client.post(
             reverse('wagtailnews:edit', kwargs={
@@ -117,7 +152,16 @@ class TestEditNewsItem(TestCase, WagtailTestUtils):
         self.assertEqual(newsitem.to_json(),
                          newsitem_revision.to_json())
 
+        # Make sure signal was called as expected
+        handler.assert_called_once_with(
+            sender=NewsItem, signal=signals.newsitem_published,
+            instance=newsitem, created=False)
+
     def test_save_draft_changes(self):
+        handler = MagicMock()
+        signals.newsitem_draft_saved.connect(handler, sender=NewsItem)
+        handler.assert_not_called()
+
         # Make a news item
         self.client.post(
             reverse('wagtailnews:edit', kwargs={
@@ -149,6 +193,35 @@ class TestEditNewsItem(TestCase, WagtailTestUtils):
         self.assertEqual(newsitem.title, 'draft title')
         self.assertTrue(newsitem.live)
 
+        # Make sure signal was called as expected
+        handler.assert_called_once_with(
+            sender=NewsItem, signal=signals.newsitem_draft_saved,
+            instance=newsitem, created=False)
+
+    def test_delete(self):
+        handler = MagicMock()
+        signals.newsitem_deleted.connect(handler, sender=NewsItem)
+        handler.assert_not_called()
+
+        # delete the news item
+        response = self.client.post(
+            reverse('wagtailnews:delete', kwargs={
+                'pk': self.index.pk,
+                'newsitem_pk': self.newsitem.pk}), {})
+        self.assertRedirects(response, reverse('wagtailnews:index', kwargs={
+            'pk': self.index.pk}))
+
+        # Check that the newsitem was deleted
+        self.assertEqual(NewsItem.objects.count(), 0)
+
+        # Make sure signal was called as expected.  Need to pull out the
+        # deleted instance, because it will not compare equal to an instance
+        # that isn't aware of its deletion
+        instance = handler.call_args[1]['instance']
+        handler.assert_called_once_with(
+            sender=NewsItem, signal=signals.newsitem_deleted,
+            instance=instance)
+
     def test_actions_present(self):
         """ Ensure that all the required actions are present """
         response = self.client.get(
@@ -163,7 +236,7 @@ class TestEditNewsItem(TestCase, WagtailTestUtils):
 
 class TestPreviewDraft(TestCase, WagtailTestUtils):
     def setUp(self):
-        super(TestPreviewDraft, self).setUp()
+        super().setUp()
         self.user = self.login()
         root_page = Page.objects.get(pk=2)
         self.index = root_page.add_child(instance=NewsIndex(

@@ -14,6 +14,7 @@ from wagtail.wagtailadmin.edit_handlers import (
     ObjectList, extract_panel_definitions_from_model_class)
 from wagtail.wagtailcore.models import Page
 
+from .. import signals
 from ..forms import SaveActionSet
 from ..models import NewsIndexMixin
 from ..permissions import format_perms, perms_for_template
@@ -56,10 +57,12 @@ def create(request, pk):
 
             if action is SaveActionSet.publish:
                 messages.success(request, _('The news post "{0!s}" has been published').format(newsitem))
+                signals.newsitem_published.send(sender=NewsItem, instance=newsitem, created=True)
                 return redirect('wagtailnews:index', pk=newsindex.pk)
 
             elif action is SaveActionSet.draft:
                 messages.success(request, _('A draft news post "{0!s}" has been created').format(newsitem))
+                signals.newsitem_draft_saved.send(sender=NewsItem, instance=newsitem, created=True)
                 return redirect('wagtailnews:edit', pk=newsindex.pk, newsitem_pk=newsitem.pk)
 
             elif action is SaveActionSet.preview:
@@ -111,10 +114,12 @@ def edit(request, pk, newsitem_pk):
             if action is SaveActionSet.publish:
                 revision.publish()
                 messages.success(request, _('Your changes to "{0!s}" have been published').format(newsitem))
+                signals.newsitem_published.send(sender=NewsItem, instance=newsitem, created=False)
                 return redirect('wagtailnews:index', pk=newsindex.pk)
 
             elif action is SaveActionSet.draft:
                 messages.success(request, _('Your changes to "{0!s}" have been saved as a draft').format(newsitem))
+                signals.newsitem_draft_saved.send(sender=NewsItem, instance=newsitem, created=False)
                 return redirect('wagtailnews:edit', pk=newsindex.pk, newsitem_pk=newsitem.pk)
 
             elif action is SaveActionSet.preview:
@@ -155,6 +160,7 @@ def unpublish(request, pk, newsitem_pk):
         messages.success(request, _('{} has been unpublished').format(newsitem), [
             (reverse('wagtailnews:edit', kwargs={'pk': pk, 'newsitem_pk': newsitem_pk}), _('Edit')),
         ])
+        signals.newsitem_unpublished.send(sender=NewsItem, instance=newsitem)
         return redirect('wagtailnews:index', pk=pk)
 
     return render(request, 'wagtailnews/unpublish.html', {
@@ -176,6 +182,7 @@ def delete(request, pk, newsitem_pk):
 
     if request.method == 'POST':
         newsitem.delete()
+        signals.newsitem_deleted.send(sender=NewsItem, instance=newsitem)
         return redirect('wagtailnews:index', pk=pk)
 
     return render(request, 'wagtailnews/delete.html', {
