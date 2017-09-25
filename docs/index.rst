@@ -15,6 +15,7 @@ Contents:
    usage
    forms
    rss
+   signals
    reference
 
 
