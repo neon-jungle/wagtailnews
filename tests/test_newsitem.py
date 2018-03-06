@@ -4,8 +4,8 @@ from __future__ import absolute_import, unicode_literals
 from django.test import TestCase
 from django.utils import timezone
 from django.utils.http import urlquote
+from wagtail.core.models import Site
 from wagtail.tests.utils import WagtailTestUtils
-from wagtail.wagtailcore.models import Site
 
 from tests.app.models import NewsIndex, NewsItem
 

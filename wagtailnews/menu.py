@@ -1,6 +1,6 @@
-from django.core.urlresolvers import reverse_lazy
+from django.urls import reverse_lazy
 from django.utils.translation import ugettext_lazy as _
-from wagtail.wagtailadmin.menu import MenuItem
+from wagtail.admin.menu import MenuItem
 
 from .permissions import user_can_edit_news
 

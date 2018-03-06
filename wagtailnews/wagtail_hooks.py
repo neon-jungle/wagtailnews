@@ -2,12 +2,11 @@ from django.conf.urls import include, url
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.staticfiles.templatetags.staticfiles import static
-from django.core import urlresolvers
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.utils.html import format_html, format_html_join
 from django.utils.translation import ugettext_lazy as _
-from wagtail.wagtailadmin.search import SearchArea
-from wagtail.wagtailcore import hooks
+from wagtail.admin.search import SearchArea
+from wagtail.core import hooks
 
 from . import urls
 from .menu import NewsMenuItem
@@ -32,7 +31,7 @@ class NewsItemSearchArea(SearchArea):
     """Admin search for news items."""
     def __init__(self, **kwargs):
         super(NewsItemSearchArea, self).__init__(
-            _('News'), urlresolvers.reverse('wagtailnews:search'),
+            _('News'), reverse('wagtailnews:search'),
             classnames='icon icon-grip', order=250, **kwargs)
 
     def is_shown(self, request):
