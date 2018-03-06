@@ -2,8 +2,8 @@ from unittest.mock import MagicMock
 
 from django.core.urlresolvers import reverse
 from django.test import TestCase
+from wagtail.core.models import Page
 from wagtail.tests.utils import WagtailTestUtils
-from wagtail.wagtailcore.models import Page
 
 from tests.app.models import NewsIndex, NewsItem, SecondaryNewsIndex
 from wagtailnews import signals

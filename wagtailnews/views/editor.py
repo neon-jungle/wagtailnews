@@ -9,10 +9,10 @@ from django.core.urlresolvers import reverse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.lru_cache import lru_cache
 from django.utils.translation import ugettext_lazy as _
-from wagtail.wagtailadmin import messages
-from wagtail.wagtailadmin.edit_handlers import (
+from wagtail.admin import messages
+from wagtail.admin.edit_handlers import (
     ObjectList, extract_panel_definitions_from_model_class)
-from wagtail.wagtailcore.models import Page
+from wagtail.core.models import Page
 
 from .. import signals
 from ..forms import SaveActionSet
@@ -41,8 +41,8 @@ def create(request, pk):
         raise PermissionDenied()
 
     newsitem = NewsItem(newsindex=newsindex)
-    EditHandler = get_newsitem_edit_handler(NewsItem)
-    EditForm = EditHandler.get_form_class(NewsItem)
+    edit_handler = get_newsitem_edit_handler(NewsItem)
+    EditForm = edit_handler.get_form_class()
 
     if request.method == 'POST':
         form = EditForm(request.POST, request.FILES, instance=newsitem)
@@ -73,10 +73,10 @@ def create(request, pk):
 
         else:
             messages.error(request, _('The news post could not be created due to validation errors'))
-            edit_handler = EditHandler(instance=newsitem, form=form)
     else:
         form = EditForm(instance=newsitem)
-        edit_handler = EditHandler(instance=newsitem, form=form)
+
+    edit_handler = edit_handler.bind_to_instance(instance=newsitem, form=form)
 
     return render(request, 'wagtailnews/create.html', {
         'newsindex': newsindex,
@@ -98,8 +98,8 @@ def edit(request, pk, newsitem_pk):
     newsitem = get_object_or_404(NewsItem, newsindex=newsindex, pk=newsitem_pk)
     newsitem = newsitem.get_latest_revision_as_newsitem()
 
-    EditHandler = get_newsitem_edit_handler(NewsItem)
-    EditForm = EditHandler.get_form_class(NewsItem)
+    edit_handler = get_newsitem_edit_handler(NewsItem)
+    EditForm = edit_handler.get_form_class()
 
     do_preview = False
 
@@ -127,12 +127,12 @@ def edit(request, pk, newsitem_pk):
         else:
             messages.error(request, _('The news post could not be updated due to validation errors'))
 
-        edit_handler = EditHandler(instance=newsitem, form=form)
     else:
         form = EditForm(instance=newsitem)
-        edit_handler = EditHandler(instance=newsitem, form=form)
         # The create view can set this param to open a preview on redirect
         do_preview = bool(request.GET.get(OPEN_PREVIEW_PARAM))
+
+    edit_handler = edit_handler.bind_to_instance(instance=newsitem, form=form)
 
     return render(request, 'wagtailnews/edit.html', {
         'newsindex': newsindex,

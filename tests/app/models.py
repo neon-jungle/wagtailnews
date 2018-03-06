@@ -3,10 +3,10 @@ from django.utils.encoding import python_2_unicode_compatible
 from modelcluster.contrib.taggit import ClusterTaggableManager
 from modelcluster.fields import ParentalKey
 from taggit.models import TaggedItemBase
-from wagtail.wagtailadmin.edit_handlers import (
+from wagtail.admin.edit_handlers import (
     FieldPanel, ObjectList, PageChooserPanel, TabbedInterface)
-from wagtail.wagtailcore.models import Page
-from wagtail.wagtailsearch import index
+from wagtail.core.models import Page
+from wagtail.search import index
 
 from wagtailnews.decorators import newsindex
 from wagtailnews.edit_handlers import NewsChooserPanel

@@ -6,7 +6,7 @@ import django.db.models.deletion
 import django.utils.timezone
 import modelcluster.contrib.taggit
 import modelcluster.fields
-import wagtail.wagtailsearch.index
+import wagtail.search.index
 from django.conf import settings
 from django.db import migrations, models
 
@@ -55,7 +55,7 @@ class Migration(migrations.Migration):
                 'ordering': ('-date',),
                 'abstract': False,
             },
-            bases=(wagtail.wagtailsearch.index.Indexed, models.Model),
+            bases=(wagtail.search.index.Indexed, models.Model),
         ),
         migrations.CreateModel(
             name='NewsItemRevision',
