@@ -1,5 +1,5 @@
-from django.core.urlresolvers import reverse
 from django.test import TestCase
+from django.urls import reverse
 from taggit.models import Tag
 from wagtail.core.models import Page
 from wagtail.tests.utils import WagtailTestUtils

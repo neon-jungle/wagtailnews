@@ -5,8 +5,8 @@ from django.conf import settings
 from django.core.exceptions import PermissionDenied
 from django.core.handlers.base import BaseHandler
 from django.core.handlers.wsgi import WSGIRequest
-from django.core.urlresolvers import reverse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.utils.lru_cache import lru_cache
 from django.utils.translation import ugettext_lazy as _
 from wagtail.admin import messages

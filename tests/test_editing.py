@@ -1,7 +1,7 @@
 from unittest.mock import MagicMock
 
-from django.core.urlresolvers import reverse
 from django.test import TestCase
+from django.urls import reverse
 from wagtail.core.models import Page
 from wagtail.tests.utils import WagtailTestUtils
 

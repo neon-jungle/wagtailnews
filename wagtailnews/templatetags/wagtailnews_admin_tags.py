@@ -1,5 +1,5 @@
-from django.core.urlresolvers import reverse
 from django.template.library import Library
+from django.urls import reverse
 from django.utils.html import format_html, mark_safe
 from django.utils.translation import ugettext as _
 

@@ -1,8 +1,8 @@
 from functools import wraps
 
 from django.contrib.auth.models import Group, Permission, User
-from django.core.urlresolvers import reverse
 from django.test import TestCase
+from django.urls import reverse
 from wagtail.core.models import GroupPagePermission, Page
 from wagtail.tests.utils import WagtailTestUtils
 

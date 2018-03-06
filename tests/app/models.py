@@ -45,8 +45,9 @@ class NewsIndex(NewsIndexMixin, Page):
 @python_2_unicode_compatible
 class NewsItem(AbstractNewsItem):
     title = models.CharField(max_length=32)
-    page = models.ForeignKey('wagtailcore.Page', related_name='+', null=True,
-                             blank=True)
+    page = models.ForeignKey(
+        'wagtailcore.Page', null=True, blank=True, on_delete=models.SET_NULL,
+        related_name='+')
 
     tags = ClusterTaggableManager(through=NewsItemTag, blank=True)
 
@@ -74,7 +75,8 @@ class NewsItem(AbstractNewsItem):
 
 
 class NewsItemRevision(AbstractNewsItemRevision):
-    newsitem = models.ForeignKey(NewsItem, related_name='revisions')
+    newsitem = models.ForeignKey(
+        NewsItem, related_name='revisions', on_delete=models.CASCADE)
 
 
 @newsindex
@@ -97,4 +99,5 @@ class SecondaryNewsItem(AbstractNewsItem):
 
 
 class SecondaryNewsItemRevision(AbstractNewsItemRevision):
-    newsitem = models.ForeignKey(SecondaryNewsItem, related_name='revisions')
+    newsitem = models.ForeignKey(
+        SecondaryNewsItem, related_name='revisions', on_delete=models.CASCADE)

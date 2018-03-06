@@ -2,7 +2,6 @@ import json
 import warnings
 
 from django.test import TestCase
-from django.utils import six
 
 from wagtailnews.deprecation import DeprecatedCallableStr
 
@@ -16,7 +15,6 @@ class TestDeprecatedCallableStr(TestCase):
         self.assertEqual(hash(s), hash('foo'))
         self.assertEqual(json.dumps(s), '"foo"')
         self.assertTrue(isinstance(s, str))
-        self.assertTrue(isinstance(s, six.string_types))
 
     def test_deprecation(self):
         with warnings.catch_warnings(record=True) as w:
