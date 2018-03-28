@@ -1,6 +1,7 @@
 import datetime
 import os
 import warnings
+from urllib.parse import urlparse
 
 from django.conf import settings
 from django.db import models
@@ -9,15 +10,14 @@ from django.shortcuts import get_object_or_404
 from django.template.response import TemplateResponse
 from django.utils import timezone
 from django.utils.http import urlquote
-from django.utils.six.moves.urllib.parse import urlparse
 from django.utils.text import slugify
 from django.utils.translation import ugettext_lazy as _
 from modelcluster.models import ClusterableModel
-from wagtail.contrib.wagtailroutablepage.models import RoutablePageMixin, route
-from wagtail.wagtailadmin.edit_handlers import FieldPanel
-from wagtail.wagtailcore.models import Page
-from wagtail.wagtailcore.utils import resolve_model_string
-from wagtail.wagtailsearch import index
+from wagtail.admin.edit_handlers import FieldPanel
+from wagtail.contrib.routable_page.models import RoutablePageMixin, route
+from wagtail.core.models import Page
+from wagtail.core.utils import resolve_model_string
+from wagtail.search import index
 
 from . import feeds
 from .conf import paginate
