@@ -13,6 +13,7 @@ from wagtail.admin import messages
 from wagtail.admin.edit_handlers import (
     ObjectList, extract_panel_definitions_from_model_class)
 from wagtail.core.models import Page
+from wagtail.core import __version__ as WAGTAIL_VERSION
 
 from .. import signals
 from ..forms import SaveActionSet
@@ -76,7 +77,14 @@ def create(request, pk):
     else:
         form = EditForm(instance=newsitem)
 
-    edit_handler = edit_handler.bind_to_instance(instance=newsitem, form=form, request=request)
+    if WAGTAIL_VERSION == '2.1':
+        edit_handler = edit_handler.bind_to_instance(
+            instance=newsitem, form=form, request=request
+        )
+    else:
+        edit_handler = edit_handler.bind_to_instance(
+            instance=newsitem, form=form
+        )
 
     return render(request, 'wagtailnews/create.html', {
         'newsindex': newsindex,
@@ -132,7 +140,14 @@ def edit(request, pk, newsitem_pk):
         # The create view can set this param to open a preview on redirect
         do_preview = bool(request.GET.get(OPEN_PREVIEW_PARAM))
 
-    edit_handler = edit_handler.bind_to_instance(instance=newsitem, form=form, request=request)
+    if WAGTAIL_VERSION == '2.1':
+        edit_handler = edit_handler.bind_to_instance(
+            instance=newsitem, form=form, request=request
+        )
+    else:
+        edit_handler = edit_handler.bind_to_instance(
+            instance=newsitem, form=form
+        )
 
     return render(request, 'wagtailnews/edit.html', {
         'newsindex': newsindex,
