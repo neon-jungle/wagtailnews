@@ -12,8 +12,8 @@ from django.utils.translation import ugettext_lazy as _
 from wagtail.admin import messages
 from wagtail.admin.edit_handlers import (
     ObjectList, extract_panel_definitions_from_model_class)
-from wagtail.core.models import Page
 from wagtail.core import __version__ as WAGTAIL_VERSION
+from wagtail.core.models import Page
 
 from .. import signals
 from ..forms import SaveActionSet
