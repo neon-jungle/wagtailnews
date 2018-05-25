@@ -6,3 +6,4 @@ dist/
 settings.py
 build/
 venv/
+.idea/

@@ -76,7 +76,7 @@ def create(request, pk):
     else:
         form = EditForm(instance=newsitem)
 
-    edit_handler = edit_handler.bind_to_instance(instance=newsitem, form=form)
+    edit_handler = edit_handler.bind_to_instance(instance=newsitem, form=form, request=request)
 
     return render(request, 'wagtailnews/create.html', {
         'newsindex': newsindex,
@@ -132,7 +132,7 @@ def edit(request, pk, newsitem_pk):
         # The create view can set this param to open a preview on redirect
         do_preview = bool(request.GET.get(OPEN_PREVIEW_PARAM))
 
-    edit_handler = edit_handler.bind_to_instance(instance=newsitem, form=form)
+    edit_handler = edit_handler.bind_to_instance(instance=newsitem, form=form, request=request)
 
     return render(request, 'wagtailnews/edit.html', {
         'newsindex': newsindex,
