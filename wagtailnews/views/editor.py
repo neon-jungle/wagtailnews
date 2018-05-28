@@ -9,10 +9,10 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils.lru_cache import lru_cache
 from django.utils.translation import ugettext_lazy as _
+from wagtail import VERSION
 from wagtail.admin import messages
 from wagtail.admin.edit_handlers import (
     ObjectList, extract_panel_definitions_from_model_class)
-from wagtail.core import __version__ as WAGTAIL_VERSION
 from wagtail.core.models import Page
 
 from .. import signals
@@ -77,7 +77,7 @@ def create(request, pk):
     else:
         form = EditForm(instance=newsitem)
 
-    if WAGTAIL_VERSION == '2.1':
+    if VERSION >= (2, 1):
         edit_handler = edit_handler.bind_to_instance(
             instance=newsitem, form=form, request=request
         )
@@ -140,7 +140,7 @@ def edit(request, pk, newsitem_pk):
         # The create view can set this param to open a preview on redirect
         do_preview = bool(request.GET.get(OPEN_PREVIEW_PARAM))
 
-    if WAGTAIL_VERSION == '2.1':
+    if VERSION >= (2, 1):
         edit_handler = edit_handler.bind_to_instance(
             instance=newsitem, form=form, request=request
         )
