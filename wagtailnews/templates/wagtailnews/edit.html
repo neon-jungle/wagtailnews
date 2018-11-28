@@ -7,9 +7,7 @@
   {% include "wagtailadmin/shared/header.html" with title=new_str subtitle=newsitem icon="news" merged=True %}
 {% endblock %}
 
-{% block form_action %}
-  {% url 'wagtailnews:edit' pk=newsindex.pk newsitem_pk=newsitem.pk %}
-{% endblock %}
+{% block form_action %}{% url 'wagtailnews:edit' pk=newsindex.pk newsitem_pk=newsitem.pk %}{% endblock %}
 
 {% block form_actions %}
 <div class="dropdown dropup dropdown-button match-width">
