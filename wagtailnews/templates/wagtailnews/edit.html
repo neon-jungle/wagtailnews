@@ -1,58 +1,33 @@
-{% extends "wagtailadmin/base.html" %}
+{% extends "wagtailnews/create.html" %}
 {% load i18n %}
+
 {% block titletag %}{% blocktrans with newsitem=newsitem type=newsitem_opts.verbose_name %}Editing {{ type }}: {{ newsitem }}{% endblocktrans %}{% endblock %}
-{% block bodyclass %}menu-news{% endblock %}
-{% block content %}
-
-    {% trans "Edit" as new_str %}
-    {% include "wagtailadmin/shared/header.html" with title=new_str subtitle=newsitem icon="news" merged=True %}
-
-    <form action="{% url 'wagtailnews:edit' pk=newsindex.pk newsitem_pk=newsitem.pk %}" method="POST">
-        {% csrf_token %}
-        {{ edit_handler.render_form_content }}
-
-        <footer>
-            <ul>
-                <li class="actions">
-                    <div class="dropdown dropup dropdown-button match-width">
-                        <button class="button" type="submit" name="action-draft" value="draft">{% trans 'Save draft' %}</button>
-                        <div class="dropdown-toggle icon icon-arrow-up"></div>
-                        <ul role="menu">
-                            {% if newsitem.live %}
-                                <li><a href="{% url 'wagtailnews:unpublish' pk=newsindex.pk newsitem_pk=newsitem.pk %}" class="button no">{% trans 'Unpublish' %}</a></li>
-                            {% endif %}
-                            {% if newsitem_perms.delete %}
-                                <li><a href="{% url 'wagtailnews:delete' pk=newsindex.pk newsitem_pk=newsitem.pk %}" class="button no">{% trans 'Delete' %}</a></li>
-                            {% endif %}
-                            <li><hr class="dropdown-separator"></li>
-                            <li><input class="button" type="submit" name="action-publish" value="{% trans 'Publish' %}" /></li>
-                        </ul>
-                    </div>
-                </li>
-                <li class="actions preview">
-                    <button class="button icon icon-view" name="action-preview" value="woop">
-                        {% trans 'Preview' %}
-                    </button>
-                </li>
-            </ul>
-        </footer>
-    </form>
+{% trans "Edit" as new_str %}
+{% block header %}
+  {% include "wagtailadmin/shared/header.html" with title=new_str subtitle=newsitem icon="news" merged=True %}
 {% endblock %}
 
-{% block extra_css %}
-    {% include "wagtailadmin/pages/_editor_css.html" %}
-    <style>
-        .dropdown-separator {
-            border: 0 none;
-            height: 1rem;
-            display: block;
-            background: #333333;
-            margin: 0;
-        }
-    </style>
+{% block form_action %}{% url 'wagtailnews:edit' pk=newsindex.pk newsitem_pk=newsitem.pk %}{% endblock %}
+
+{% block form_actions %}
+<div class="dropdown dropup dropdown-button match-width">
+    <button class="button" type="submit" name="action-draft" value="draft">{% trans 'Save draft' %}</button>
+    <div class="dropdown-toggle icon icon-arrow-up"></div>
+    <ul role="menu">
+        {% if newsitem.live %}
+            <li><a href="{% url 'wagtailnews:unpublish' pk=newsindex.pk newsitem_pk=newsitem.pk %}" class="button no">{% trans 'Unpublish' %}</a></li>
+        {% endif %}
+        {% if newsitem_perms.delete %}
+            <li><a href="{% url 'wagtailnews:delete' pk=newsindex.pk newsitem_pk=newsitem.pk %}" class="button no">{% trans 'Delete' %}</a></li>
+        {% endif %}
+        <li><input class="button" type="submit" name="action-publish" value="{% trans 'Publish' %}" /></li>
+    </ul>
+</div>
 {% endblock %}
+
+
 {% block extra_js %}
-    {% include "wagtailadmin/pages/_editor_js.html" %}
+    {{ block.super }}
     {% if do_preview %}
     <script>
     $(function() {
