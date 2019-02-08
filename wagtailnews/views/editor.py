@@ -259,7 +259,10 @@ def build_dummy_request(newsitem):
     handler = BaseHandler()
     handler.load_middleware()
     # call each middleware in turn and throw away any responses that they might return
-    for middleware_method in handler._request_middleware:
-        middleware_method(request)
+    if hasattr(handler, '_request_middleware'):
+        for middleware_method in handler._request_middleware:
+            middleware_method(request)
+    else:
+        handler.get_response(request)
 
     return request
