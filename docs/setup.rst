@@ -24,5 +24,5 @@ Add ``wagtailnews`` and ``wagtail.contrib.wagtailroutablepage`` to your ``INSTAL
 
   INSTALLED_APPS += [
       'wagtailnews',
-      'wagtail.contrib.wagtailroutablepage',
+      'wagtail.contrib.routable_page',
   ]
