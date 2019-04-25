@@ -4,9 +4,11 @@
 Setup
 =====
 
-``wagtailnews`` is compatible with Wagtail 1.6 and higher,
-Django 1.9 and higher,
+``wagtailnews`` is compatible with Wagtail 2.3 and higher,
+Django 1.11 and higher,
 and Python 3.4 and higher.
+
+For older version of Wagtail or Django, see past releases
 
 Step 1
 ______
