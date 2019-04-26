@@ -5,9 +5,9 @@ cache: pip
 matrix:
   include:
     - python: 3.5
-      env: TOXENV=py35-dj111-wt20,py35-dj111-wt21,py35-dj20-wt20,py35-dj20-wt21
+      env: TOXENV=py35-dj111-wt23,py35-dj20-wt23,py35-dj20-wt24,py35-dj20-wt25
     - python: 3.6
-      env: TOXENV=py36-dj111-wt20,py36-dj111-wt21,py36-dj20-wt20,py36-dj20-wt21
+      env: TOXENV=py36-dj111-wt23,py36-dj20-wt23,py36-dj20-wt24,py36-dj20-wt25
     - python: 3.6
       env: TOXENV=isort,flake8,docs
 

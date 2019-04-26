@@ -14,7 +14,7 @@ Add any fields that you want to this model:
 .. code-block:: python
 
     from wagtailnews.models import AbstractNewsItem, AbstractNewsItemRevision
-    from wagtail.wagtailcore.fields import RichTextField
+    from wagtail.core.fields import RichTextField
 
     class NewsItem(AbstractNewsItem):
         title = models.CharField(max_length=100)
@@ -48,7 +48,7 @@ The ``newsitem_model`` attribute defines which news item model to use for this n
 
 .. code-block:: python
 
-    from wagtail.wagtailcore.models import Page
+    from wagtail.core.models import Page
     from wagtailnews.decorators import newsindex
     from wagtailnews.models import NewsIndexMixin
 

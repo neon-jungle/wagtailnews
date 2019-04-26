@@ -30,7 +30,7 @@ setup(
     url='https://github.com/takeflight/wagtailnews/',
 
     install_requires=[
-        'wagtail>=2.0.0',
+        'wagtail>=2.3.0',
     ],
     extras_require={
         'docs': documentation_extras
