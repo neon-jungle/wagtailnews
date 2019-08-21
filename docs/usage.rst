@@ -33,7 +33,7 @@ Add any fields that you want to this model:
         # This is the only field you need to define on this model.
         # It must be a foreign key to your NewsItem model,
         # be named 'newsitem', and have a related_name='revisions'
-        newsitem = models.ForeignKey(NewsItem, related_name='revisions')
+        newsitem = models.ForeignKey(NewsItem, related_name='revisions', on_delete=models.CASCADE)
 
 The panels can be customised using the ``panels`` attribute,
 or a completely custom edit handler can be used by setting the ``edit_handler`` attribute.
