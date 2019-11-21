@@ -11,7 +11,7 @@ from wagtail.admin.forms.search import SearchForm
 from wagtail.admin.modal_workflow import render_modal_workflow
 from wagtail.core.models import Page
 from wagtail.search.backends import get_search_backend
-from wagtail.utils.pagination import paginate
+from wagtailnews.conf import paginate
 
 from ..models import NEWSINDEX_MODEL_CLASSES, AbstractNewsItem, NewsIndexMixin
 from ..permissions import (
