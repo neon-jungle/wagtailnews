@@ -26,11 +26,11 @@ OPEN_PREVIEW_PARAM = 'do_preview'
 @lru_cache(maxsize=None)
 def get_newsitem_edit_handler(NewsItem):
     if hasattr(NewsItem, 'edit_handler'):
-        return NewsItem.edit_handler.bind_to_model(NewsItem)
+        return NewsItem.edit_handler.bind_to(model=NewsItem)
 
     panels = extract_panel_definitions_from_model_class(
         NewsItem, exclude=['newsindex'])
-    return ObjectList(panels).bind_to_model(NewsItem)
+    return ObjectList(panels).bind_to(model=NewsItem)
 
 
 def create(request, pk):
@@ -78,11 +78,11 @@ def create(request, pk):
         form = EditForm(instance=newsitem)
 
     if VERSION >= (2, 1):
-        edit_handler = edit_handler.bind_to_instance(
+        edit_handler = edit_handler.bind_to(
             instance=newsitem, form=form, request=request
         )
     else:
-        edit_handler = edit_handler.bind_to_instance(
+        edit_handler = edit_handler.bind_to(
             instance=newsitem, form=form
         )
 
@@ -141,11 +141,11 @@ def edit(request, pk, newsitem_pk):
         do_preview = bool(request.GET.get(OPEN_PREVIEW_PARAM))
 
     if VERSION >= (2, 1):
-        edit_handler = edit_handler.bind_to_instance(
+        edit_handler = edit_handler.bind_to(
             instance=newsitem, form=form, request=request
         )
     else:
-        edit_handler = edit_handler.bind_to_instance(
+        edit_handler = edit_handler.bind_to(
             instance=newsitem, form=form
         )
 
