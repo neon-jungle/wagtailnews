@@ -22,11 +22,15 @@ from ..permissions import format_perms, perms_for_template
 
 OPEN_PREVIEW_PARAM = 'do_preview'
 
+
 # Wagtail < 2.6 compatibility
 def bind_to_instance(self, instance, form, request):
     return self.bind_to(instance=instance, form=form, request=request)
+
+
 def bind_to_model(self, model):
     return self.bind_to(model=model)
+
 
 if hasattr(EditHandler(), 'bind_to'):
     EditHandler.bind_to_model = bind_to_model
