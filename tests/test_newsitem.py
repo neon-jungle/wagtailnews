@@ -6,7 +6,6 @@ from django.utils import timezone
 from django.utils.http import urlquote
 from wagtail.core.models import Site
 from wagtail.tests.utils import WagtailTestUtils
-
 import datetime
 
 from tests.app.models import NewsIndex, NewsItem
