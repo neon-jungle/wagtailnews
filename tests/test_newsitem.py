@@ -21,7 +21,7 @@ class TestNewsItem(TestCase, WagtailTestUtils):
         self.index = NewsIndex(
             title='News', slug='news')
         root_page.add_child(instance=self.index)
-        ni_date = timezone.make_aware(datetime.datetime(2017,4,13,12,0,0))
+        ni_date = timezone.make_aware(datetime.datetime(2017, 4, 13, 12, 0, 0))
         self.newsitem = NewsItem.objects.create(
             newsindex=self.index,
             title='A post',
