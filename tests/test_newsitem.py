@@ -1,6 +1,8 @@
 # -*- coding: utf8 -*-
 from __future__ import absolute_import, unicode_literals
 
+import datetime
+
 from django.test import TestCase
 from django.utils import timezone
 from django.utils.http import urlquote
@@ -19,10 +21,11 @@ class TestNewsItem(TestCase, WagtailTestUtils):
         self.index = NewsIndex(
             title='News', slug='news')
         root_page.add_child(instance=self.index)
+        ni_date = timezone.make_aware(datetime.datetime(2017, 4, 13, 12, 0, 0))
         self.newsitem = NewsItem.objects.create(
             newsindex=self.index,
             title='A post',
-            date=timezone.localtime(timezone.now()).replace(2017, 4, 13))
+            date=ni_date)
 
     def test_view(self):
         response = self.client.get(self.newsitem.url())

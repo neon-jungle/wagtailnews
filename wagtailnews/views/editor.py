@@ -12,7 +12,7 @@ from django.utils.translation import ugettext_lazy as _
 from wagtail import VERSION
 from wagtail.admin import messages
 from wagtail.admin.edit_handlers import (
-    ObjectList, extract_panel_definitions_from_model_class)
+    EditHandler, ObjectList, extract_panel_definitions_from_model_class)
 from wagtail.core.models import Page
 
 from .. import signals
@@ -21,6 +21,21 @@ from ..models import NewsIndexMixin
 from ..permissions import format_perms, perms_for_template
 
 OPEN_PREVIEW_PARAM = 'do_preview'
+
+
+# Wagtail < 2.6 compatibility
+def bind_to_instance(self, instance, form, request):
+    return self.bind_to(instance=instance, form=form, request=request)
+
+
+def bind_to_model(self, model):
+    return self.bind_to(model=model)
+
+
+if hasattr(EditHandler(), 'bind_to'):
+    EditHandler.bind_to_model = bind_to_model
+    EditHandler.bind_to_instance = bind_to_instance
+# Wagtail < 2.6 compatibility ends
 
 
 @lru_cache(maxsize=None)
