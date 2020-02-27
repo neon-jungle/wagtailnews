@@ -1,3 +1,4 @@
+from functools import lru_cache
 from io import StringIO
 from urllib.parse import urlparse
 
@@ -7,7 +8,6 @@ from django.core.handlers.base import BaseHandler
 from django.core.handlers.wsgi import WSGIRequest
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
-from django.utils.lru_cache import lru_cache
 from django.utils.translation import ugettext_lazy as _
 from wagtail import VERSION
 from wagtail.admin import messages
