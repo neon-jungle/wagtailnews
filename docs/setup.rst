@@ -20,7 +20,7 @@ Install ``wagtailnews`` using pip::
 Step 2
 ______
 
-Add ``wagtailnews`` and ``wagtail.contrib.wagtailroutablepage`` to your ``INSTALLED_APPS`` in settings:
+Add ``wagtailnews`` and ``wagtail.contrib.routable_page`` to your ``INSTALLED_APPS`` in settings:
 
 .. code-block:: python
 
