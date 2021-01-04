@@ -59,4 +59,4 @@ Create news models for your application that inherit from the relevant ``wagtail
 
 
     class NewsItemRevision(AbstractNewsItemRevision):
-        newsitem = models.ForeignKey(NewsItem, related_name='revisions')
+        newsitem = models.ForeignKey(NewsItem, related_name='revisions', on_delete=models.CASCADE)
