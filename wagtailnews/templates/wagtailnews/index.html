@@ -41,7 +41,7 @@
 
     {% if newsitem_list %}
         {% include "wagtailnews/newsitem_list.html" %}
-        {% paginate page %}
+        {% paginate page page_key="page" %}
     {% else %}
         <div class="nice-padding">No news posts yet!</div>
     {% endif %}
