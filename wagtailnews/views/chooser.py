@@ -156,7 +156,7 @@ def choose_modal(request):
         search_form = SearchForm()
 
     # Pagination
-    paginator, paginated_items = paginate(request, newsitem_list, per_page=10)
+    paginator, paginated_items = paginate(request, newsitem_list)
 
     # If paginating or searching, render "results.html" - these views are
     # accessed via AJAX so do not need the modal wrapper
