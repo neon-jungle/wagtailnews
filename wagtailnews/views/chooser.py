@@ -169,7 +169,7 @@ def choose_modal(request):
 
     return render_modal_workflow(
         request,
-        'wagtailnews/chooser/chooser.html', 'wagtailnews/chooser/choose.js',
+        'wagtailnews/chooser/chooser.html', None,
         {
             'query_string': search_query,
             'newsitem_type': newsitem_model_string,
@@ -177,6 +177,9 @@ def choose_modal(request):
             'is_searchable': True,
             'is_searching': is_searching,
             'search_form': search_form,
+        },
+         json_data={
+            'step':'initModal',
         }
     )
 
@@ -187,12 +190,14 @@ def chosen_modal(request, pk, newsitem_pk):
     NewsItem = newsindex.get_newsitem_model()
 
     newsitem = get_object_or_404(NewsItem, pk=newsitem_pk)
-
-    return render_modal_workflow(request, None, 'wagtailnews/chooser/chosen.js', {
-        'newsitem_json': json.dumps({
-            'id': newsitem.id,
-            'string': str(newsitem),
-            'edit_link': reverse('wagtailnews:edit', kwargs={
-                'pk': newsindex.pk, 'newsitem_pk': newsitem.pk}),
-        }),
-    })
+    return render_modal_workflow(request, None, None,
+        json_data={
+            'step':'newsItemChosen',
+            'newsitem_json': {
+                'id': newsitem.id,
+                'string': str(newsitem),
+                'edit_link': reverse('wagtailnews:edit', kwargs={
+                    'pk': newsindex.pk, 'newsitem_pk': newsitem.pk}),
+            }
+        }
+    )
