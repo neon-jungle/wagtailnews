@@ -7,12 +7,17 @@ else:
   from django.utils.encoding import force_text as force_str
 
 from django.utils.safestring import mark_safe
-from wagtail.admin.edit_handlers import BaseChooserPanel
+
+import wagtail
+if wagtail.VERSION >= (3, 0):
+  from wagtail.admin.edit_handlers import FieldPanel
+else:
+  from wagtail.admin.edit_handlers import BaseChooserPanel as FieldPanel
 
 from .widgets import AdminNewsChooser
 
 
-class NewsChooserPanel(BaseChooserPanel):
+class NewsChooserPanel(FieldPanel):
     """
     An edit handler for editors to pick a news item.
     Takes the field name as the only argument.
