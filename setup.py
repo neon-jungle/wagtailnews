@@ -31,7 +31,7 @@ setup(
 
     install_requires=[
         'wagtail>=2.16,<3',
-        'django>=3,<4'
+        'django>=3'
     ],
     extras_require={
         'docs': documentation_extras
