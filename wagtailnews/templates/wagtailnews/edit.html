@@ -2,9 +2,10 @@
 {% load i18n %}
 
 {% block titletag %}{% blocktrans with newsitem=newsitem type=newsitem_opts.verbose_name %}Editing {{ type }}: {{ newsitem }}{% endblocktrans %}{% endblock %}
-{% trans "Edit" as new_str %}
+
 {% block header %}
-  {% include "wagtailadmin/shared/header.html" with title=new_str subtitle=newsitem icon="news" merged=True %}
+  {% trans "Edit" as new_str %}
+  {% include "wagtailadmin/shared/header.html" with title=new_str subtitle=newsitem.title icon="news" merged=1 %}
 {% endblock %}
 
 {% block form_action %}{% url 'wagtailnews:edit' pk=newsindex.pk newsitem_pk=newsitem.pk %}{% endblock %}

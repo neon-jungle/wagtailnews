@@ -5,10 +5,14 @@
 {% block bodyclass %}menu-news{% endblock %}
 {% block content %}
 
-    <header class="nice-padding merged">
+   {% block header %}
+        {% trans "News" as news_str %}
+        {% include "wagtailadmin/shared/header.html" with title=news_str subtitle=newsindex.url icon="grip" merged=1 %}
+    {% endblock %}
+
+    <header class="nice-padding">
         <div class="row row-flush">
             <div class="left">
-                <h1 class="col icon icon-grip">{% blocktrans %}News{% endblocktrans %} <span>{{ newsindex.url }}</span></h1>
                 <form class="col search-form" action="" method="GET">
                     <ul class="fields">
                         <li class="required">

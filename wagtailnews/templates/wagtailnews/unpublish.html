@@ -1,13 +1,19 @@
-{% extends "wagtailadmin/base.html" %}
+{% extends "wagtailadmin/generic/base.html" %}
 {% load i18n %}
 {% block titletag %}{% blocktrans with newsitem=newsitem %}Unpublish {{ newsitem }}{% endblocktrans %}{% endblock %}
 {% block bodyclass %}menu-news{% endblock %}
-{% block content %}
 
+{% block extra_css %}
+    {{ block.super }}
+{% endblock %}
+
+{% block header %}
     {% trans "Unpublish" as new_str %}
     {% include "wagtailadmin/shared/header.html" with title=new_str subtitle=newsitem icon="grip" %}
+{% endblock %}
 
-    <div class="row row-flush nice-padding">
+{% block main_content %}
+    <div class="row row-flush">
         <form action="{% url 'wagtailnews:unpublish' pk=newsindex.pk newsitem_pk=newsitem.pk %}" method="POST">
             {% csrf_token %}
             <p>{% blocktrans %}Are you sure you want to unpublish this news item?{% endblocktrans %}</p>
@@ -16,9 +22,6 @@
     </div>
 {% endblock %}
 
-{% block extra_css %}
-    {% include "wagtailadmin/pages/_editor_css.html" %}
-{% endblock %}
 {% block extra_js %}
     {% include "wagtailadmin/pages/_editor_js.html" %}
 {% endblock %}

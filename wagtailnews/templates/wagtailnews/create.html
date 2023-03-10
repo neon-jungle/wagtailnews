@@ -1,17 +1,22 @@
-{% extends "wagtailadmin/base.html" %}
+{% extends "wagtailadmin/generic/base.html" %}
 {% load i18n %}
 {% block titletag %}{% blocktrans with type=newsitem_opts.verbose_name %}Creating {{ type }}{% endblocktrans %}{% endblock %}
 
+{% block extra_css %}
+    {{ block.super }}
+    {{ edit_handler.form.media.css }}
+    {{ media.css }}
+{% endblock %}
+
 {% block bodyclass %}menu-news{% endblock %}
 
-{% block content %}
-    {% trans "New" as new_str %}
-    {% trans "news post" as newspost_str %}
+{% block header %}
+  {% trans "New" as new_str %}
+  {% trans "news post" as newspost_str %}
+  {% include "wagtailadmin/shared/header.html" with title=new_str subtitle=newspost_str icon="news" merged=1 %}
+{% endblock %}
 
-    {% block header %}
-      {% include "wagtailadmin/shared/header.html" with title=new_str subtitle=newspost_str icon="news" merged=True %}
-    {% endblock %}
-
+{% block main_content %}
     <form action="{% block form_action %}{% url 'wagtailnews:create' pk=newsindex.pk %}{% endblock %}" method="POST">
         {% csrf_token %}
         {{ edit_handler.render_form_content }}
@@ -38,11 +43,6 @@
     </form>
 {% endblock %}
 
-{% block extra_css %}
-    {% include "wagtailadmin/pages/_editor_css.html" %}
-    {{ edit_handler.form.media.css }}
-    {{ view.media.css }}
-{% endblock %}
 {% block extra_js %}
     {% include "wagtailadmin/pages/_editor_js.html" %}
     {{ edit_handler.form.media.js }}
