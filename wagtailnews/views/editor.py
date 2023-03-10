@@ -13,7 +13,7 @@ from wagtail import VERSION
 from wagtail.admin import messages
 if VERSION >= (3, 0):
   from wagtail.admin.panels import (
-    EditHandler, ObjectList, extract_panel_definitions_from_model_class)
+    ObjectList, extract_panel_definitions_from_model_class)
 else:
   from wagtail.admin.edit_handlers import (
     EditHandler, ObjectList, extract_panel_definitions_from_model_class)
