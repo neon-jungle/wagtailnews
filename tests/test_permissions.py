@@ -8,6 +8,7 @@ from wagtail.tests.utils import WagtailTestUtils
 
 from tests.app.models import NewsIndex, NewsItem, SecondaryNewsIndex
 
+UNAUTHORIZED=302
 
 def p(permission_string):
     app_label, codename = permission_string.split('.', 1)
@@ -56,7 +57,7 @@ class PermissionTestCase(TestCase, WagtailTestUtils):
             permission_type='add')
 
         self.user = self.create_test_user()
-        self.client.login(username='test@email.com', password='password')
+        self.client.force_login(self.user)
 
     def create_test_user(self):
         """
@@ -123,7 +124,7 @@ class TestChooseNewsIndex(PermissionTestCase):
             title='Secondary News', slug='secondary-news'))
 
         response = self.client.get(reverse('wagtailnews:choose'))
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, UNAUTHORIZED)
 
     @grant_permissions(['app.add_newsitem', 'app.change_newsitem'])
     def test_chooser_has_perms_no_news(self):
@@ -152,7 +153,7 @@ class TestNewsIndex(WithNewsIndexTestCase, PermissionTestCase):
         """
         Check the user is denied access to the news index list
         """
-        self.assertStatusCode(self.url, 403)
+        self.assertStatusCode(self.url, UNAUTHORIZED)
 
 
 class TestCreateNewsItem(WithNewsIndexTestCase, PermissionTestCase):
@@ -169,16 +170,16 @@ class TestCreateNewsItem(WithNewsIndexTestCase, PermissionTestCase):
     @grant_permissions(['app.add_newsitem'])
     def test_only_add_perm(self):
         """ Users need both add and edit. Add is not sufficient """
-        self.assertStatusCode(self.url, 403)
+        self.assertStatusCode(self.url, UNAUTHORIZED)
 
     @grant_permissions(['app.change_newsitem'])
     def test_only_edit_perm(self):
         """ Users need both add and edit. Edit is not sufficient """
-        self.assertStatusCode(self.url, 403)
+        self.assertStatusCode(self.url, UNAUTHORIZED)
 
     def test_no_permission(self):
         """ Test user can not create without permission """
-        self.assertStatusCode(self.url, 403)
+        self.assertStatusCode(self.url, UNAUTHORIZED)
 
     @grant_permissions(['app.add_newsitem', 'app.change_newsitem'])
     def test_add_button_appears(self):
@@ -209,7 +210,7 @@ class TestEditNewsItem(WithNewsItemTestCase, PermissionTestCase):
 
     def test_no_permission(self):
         """ Test user can not edit without permission """
-        self.assertStatusCode(self.url, 403)
+        self.assertStatusCode(self.url, UNAUTHORIZED)
 
     @grant_permissions(['app.change_newsitem'])
     def test_edit_button_appears(self):
@@ -240,7 +241,7 @@ class TestUnpublishNewsItem(WithNewsItemTestCase, PermissionTestCase):
 
     def test_no_permission(self):
         """ Test user can not unpublish without permission """
-        self.assertStatusCode(self.url, 403)
+        self.assertStatusCode(self.url, UNAUTHORIZED)
 
     @grant_permissions(['app.change_newsitem'])
     def test_unpublish_button_appears(self):
@@ -271,7 +272,7 @@ class TestDeleteNewsItem(WithNewsItemTestCase, PermissionTestCase):
 
     def test_no_permission(self):
         """ Test user can not delete without permission """
-        self.assertStatusCode(self.url, 403)
+        self.assertStatusCode(self.url, UNAUTHORIZED)
 
     @grant_permissions(['app.delete_newsitem'])
     def test_delete_button_appears_index(self):
@@ -313,7 +314,7 @@ class TestSearchNewsItem(WithNewsItemTestCase, PermissionTestCase):
         self.assertStatusCode(self.url, 200)
 
     def test_no_permission(self):
-        self.assertStatusCode(self.url, 403)
+        self.assertStatusCode(self.url, UNAUTHORIZED)
 
     @grant_permissions(['app.add_newsitem', 'app.change_newsitem'])
     def test_search_area_appears_permission(self):
