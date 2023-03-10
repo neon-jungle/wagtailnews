@@ -94,7 +94,7 @@ def create(request, pk):
         form = EditForm(instance=newsitem)
 
     if VERSION >= (3, 0):
-        edit_handler = edit_handler.bind_to(
+        edit_handler = edit_handler.get_bound_panel(
             instance=newsitem, form=form
         )
     else:
@@ -157,7 +157,7 @@ def edit(request, pk, newsitem_pk):
         do_preview = bool(request.GET.get(OPEN_PREVIEW_PARAM))
 
     if VERSION >= (3, 0):
-        edit_handler = edit_handler.bind_to(
+        edit_handler = edit_handler.get_bound_panel(
             instance=newsitem, form=form
         )
     else:
