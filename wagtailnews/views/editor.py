@@ -11,7 +11,11 @@ from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from wagtail import VERSION
 from wagtail.admin import messages
-from wagtail.admin.edit_handlers import (
+if VERSION >= (3, 0):
+  from wagtail.admin.panels import (
+    EditHandler, ObjectList, extract_panel_definitions_from_model_class)
+else:
+  from wagtail.admin.edit_handlers import (
     EditHandler, ObjectList, extract_panel_definitions_from_model_class)
 from wagtail.core.models import Page
 
@@ -22,21 +26,18 @@ from ..permissions import format_perms, perms_for_template
 
 OPEN_PREVIEW_PARAM = 'do_preview'
 
+# Wagtail < 3.0 compatibility
+if VERSION < (3, 0):
+  def bind_to_instance(self, instance, form, request):
+      return self.bind_to(instance=instance, form=form, request=request)
 
-# Wagtail < 2.6 compatibility
-def bind_to_instance(self, instance, form, request):
-    return self.bind_to(instance=instance, form=form, request=request)
+  def bind_to_model(self, model):
+      return self.bind_to(model=model)
 
-
-def bind_to_model(self, model):
-    return self.bind_to(model=model)
-
-
-if hasattr(EditHandler(), 'bind_to'):
-    EditHandler.bind_to_model = bind_to_model
-    EditHandler.bind_to_instance = bind_to_instance
-# Wagtail < 2.6 compatibility ends
-
+  if hasattr(EditHandler(), 'bind_to'):
+      EditHandler.bind_to_model = bind_to_model
+      EditHandler.bind_to_instance = bind_to_instance
+# Wagtail < 3.0 compatibility ends
 
 @lru_cache(maxsize=None)
 def get_newsitem_edit_handler(NewsItem):
@@ -92,13 +93,13 @@ def create(request, pk):
     else:
         form = EditForm(instance=newsitem)
 
-    if VERSION >= (2, 1):
-        edit_handler = edit_handler.bind_to_instance(
-            instance=newsitem, form=form, request=request
+    if VERSION >= (3, 0):
+        edit_handler = edit_handler.bind_to(
+            instance=newsitem, form=form
         )
     else:
         edit_handler = edit_handler.bind_to_instance(
-            instance=newsitem, form=form
+            instance=newsitem, form=form, request=request
         )
 
     return render(request, 'wagtailnews/create.html', {
@@ -155,13 +156,13 @@ def edit(request, pk, newsitem_pk):
         # The create view can set this param to open a preview on redirect
         do_preview = bool(request.GET.get(OPEN_PREVIEW_PARAM))
 
-    if VERSION >= (2, 1):
-        edit_handler = edit_handler.bind_to_instance(
-            instance=newsitem, form=form, request=request
+    if VERSION >= (3, 0):
+        edit_handler = edit_handler.bind_to(
+            instance=newsitem, form=form
         )
     else:
         edit_handler = edit_handler.bind_to_instance(
-            instance=newsitem, form=form
+            instance=newsitem, form=form, request=request
         )
 
     return render(request, 'wagtailnews/edit.html', {
