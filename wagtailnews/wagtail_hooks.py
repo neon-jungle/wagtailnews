@@ -1,8 +1,8 @@
-from django.conf.urls import include, url
+from django.conf.urls import include
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
 from django.templatetags.static import static
-from django.urls import reverse
+from django.urls import reverse, re_path
 from django.utils.html import format_html, format_html_join
 from django.utils.translation import gettext_lazy as _
 from wagtail.admin.search import SearchArea
@@ -17,7 +17,7 @@ from .permissions import user_can_edit_news
 @hooks.register('register_admin_urls')
 def register_admin_urls():
     return [
-        url(r'^news/', include(urls)),
+        re_path(r'^news/', include(urls)),
     ]
 
 
