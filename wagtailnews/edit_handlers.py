@@ -1,5 +1,11 @@
 from django.template.loader import render_to_string
-from django.utils.encoding import force_text
+
+import django
+if django.VERSION >= (4, 0):
+  from django.utils.encoding import force_str
+else:
+  from django.utils.encoding import force_text as force_str
+
 from django.utils.safestring import mark_safe
 from wagtail.admin.edit_handlers import BaseChooserPanel
 
@@ -49,4 +55,4 @@ class NewsChooserPanel(BaseChooserPanel):
         }))
 
     def get_newsitem_type_name(self):
-        return force_text(self.target_model()._meta.verbose_name)
+        return force_str(self.target_model()._meta.verbose_name)
