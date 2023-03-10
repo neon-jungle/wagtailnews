@@ -50,6 +50,7 @@ DATABASES = {
 }
 
 WAGTAIL_SITE_NAME = 'Wagtail News'
+WAGTAILADMIN_BASE_URL = '/admin'
 
 WAGTAILSEARCH_BACKENDS = {
     'default': {
