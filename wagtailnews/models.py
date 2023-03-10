@@ -11,7 +11,7 @@ from django.template.response import TemplateResponse
 from django.utils import timezone
 from django.utils.http import urlquote
 from django.utils.text import slugify
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from modelcluster.models import ClusterableModel
 from wagtail.admin.edit_handlers import FieldPanel
 from wagtail.contrib.routable_page.models import RoutablePageMixin, route
