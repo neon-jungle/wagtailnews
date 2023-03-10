@@ -5,7 +5,7 @@ import datetime
 
 from django.test import TestCase
 from django.utils import timezone
-from django.utils.http import urlquote
+from urllib.parse import quote
 from wagtail.core.models import Site
 from wagtail.tests.utils import WagtailTestUtils
 
@@ -51,7 +51,7 @@ class TestNewsItem(TestCase, WagtailTestUtils):
 
         self.assertEqual(
             self.newsitem.url(),
-            urlquote('/news/2017/4/13/{}-a-post/'.format(self.newsitem.pk)))
+            quote('/news/2017/4/13/{}-a-post/'.format(self.newsitem.pk)))
         self.assertEqual(
             response.redirect_chain,
             [(self.newsitem.url(), 301)])
@@ -66,7 +66,7 @@ class TestNewsItem(TestCase, WagtailTestUtils):
 
         self.assertEqual(
             self.newsitem.url(),
-            urlquote('/news/2017/4/13/{}-你好世界/'.format(self.newsitem.pk)))
+            quote('/news/2017/4/13/{}-你好世界/'.format(self.newsitem.pk)))
         self.assertEqual(
             response.redirect_chain,
             [(self.newsitem.url(), 301)])
