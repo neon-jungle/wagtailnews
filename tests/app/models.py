@@ -1,5 +1,4 @@
 from django.db import models
-from django.utils.encoding import python_2_unicode_compatible
 from modelcluster.contrib.taggit import ClusterTaggableManager
 from modelcluster.fields import ParentalKey
 from taggit.models import TaggedItemBase
@@ -42,7 +41,6 @@ class NewsIndex(NewsIndexMixin, Page):
         return context
 
 
-@python_2_unicode_compatible
 class NewsItem(AbstractNewsItem):
     title = models.CharField(max_length=32)
     page = models.ForeignKey(
