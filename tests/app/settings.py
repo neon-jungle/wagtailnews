@@ -51,6 +51,12 @@ DATABASES = {
 
 WAGTAIL_SITE_NAME = 'Wagtail News'
 
+WAGTAILSEARCH_BACKENDS = {
+    'default': {
+        'BACKEND': 'wagtail.search.backends.database',
+    }
+}
+
 DEBUG = True
 
 USE_TZ = True
