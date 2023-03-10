@@ -9,7 +9,13 @@ from django.http import Http404, HttpResponsePermanentRedirect
 from django.shortcuts import get_object_or_404
 from django.template.response import TemplateResponse
 from django.utils import timezone
-from django.utils.http import urlquote
+
+import django
+if django.VERSION >= (4, 0):
+  from urllib.parse import quote
+else: # Support for Django 3.x
+  from django.utils.http import urlquote as quote
+
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 from modelcluster.models import ClusterableModel
@@ -116,7 +122,7 @@ class NewsIndexMixin(RoutablePageMixin):
         # Check the URL date and slug are still correct
         newsitem_url = newsitem.url
         newsitem_path = urlparse(newsitem_url, allow_fragments=True).path
-        if urlquote(request.path) != newsitem_path:
+        if quote(request.path) != newsitem_path:
             return HttpResponsePermanentRedirect(newsitem_url)
 
         # Get the newsitem to serve itself
