@@ -19,10 +19,18 @@ else: # Support for Django 3.x
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 from modelcluster.models import ClusterableModel
-from wagtail.admin.edit_handlers import FieldPanel
+
+import wagtail
+if wagtail.VERSION >= (4, 2):
+  from wagtail.admin.panels import FieldPanel
+  from wagtail.models import Page
+  from wagtail.coreutils import resolve_model_string
+else: # Support for wagtail <= 4.1
+  from wagtail.admin.edit_handlers import FieldPanel
+  from wagtail.core.models import Page
+  from wagtail.core.utils import resolve_model_string
+
 from wagtail.contrib.routable_page.models import RoutablePageMixin, route
-from wagtail.core.models import Page
-from wagtail.core.utils import resolve_model_string
 from wagtail.search import index
 
 from . import feeds

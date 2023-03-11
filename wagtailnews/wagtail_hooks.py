@@ -6,7 +6,12 @@ from django.urls import reverse, re_path
 from django.utils.html import format_html, format_html_join
 from django.utils.translation import gettext_lazy as _
 from wagtail.admin.search import SearchArea
-from wagtail.core import hooks
+
+import wagtail
+if wagtail.VERSION >= (4, 2):
+  from wagtail import hooks
+else: # Support for wagtail <= 4.1
+  from wagtail.core import hooks
 
 from . import urls
 from .menu import NewsMenuItem

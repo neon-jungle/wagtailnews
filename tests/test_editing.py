@@ -2,7 +2,13 @@ from unittest.mock import MagicMock
 
 from django.test import TestCase
 from django.urls import reverse
-from wagtail.core.models import Page
+
+import wagtail
+if wagtail.VERSION >= (4, 2):
+  from wagtail.models import Page
+else: # Support for wagtail <= 4.1
+  from wagtail.core.models import Page
+
 from wagtail.tests.utils import WagtailTestUtils
 
 from tests.app.models import NewsIndex, NewsItem, SecondaryNewsIndex

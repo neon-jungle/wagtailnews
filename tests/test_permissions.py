@@ -3,7 +3,13 @@ from functools import wraps
 from django.contrib.auth.models import Group, Permission, User
 from django.test import TestCase
 from django.urls import reverse
-from wagtail.core.models import GroupPagePermission, Page
+
+import wagtail
+if wagtail.VERSION >= (4, 2):
+  from wagtail.models import Page, GroupPagePermission
+else: # Support for wagtail <= 4.1
+  from wagtail.core.models import Page, GroupPagePermission
+
 from wagtail.tests.utils import WagtailTestUtils
 
 from tests.app.models import NewsIndex, NewsItem, SecondaryNewsIndex

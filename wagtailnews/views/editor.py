@@ -14,10 +14,11 @@ from wagtail.admin import messages
 if VERSION >= (3, 0):
   from wagtail.admin.panels import (
     ObjectList, extract_panel_definitions_from_model_class)
+  from wagtail.models import Page
 else:
   from wagtail.admin.edit_handlers import (
     EditHandler, ObjectList, extract_panel_definitions_from_model_class)
-from wagtail.core.models import Page
+  from wagtail.core.models import Page
 
 from .. import signals
 from ..forms import SaveActionSet

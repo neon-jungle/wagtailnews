@@ -9,7 +9,13 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from wagtail.admin.forms.search import SearchForm
 from wagtail.admin.modal_workflow import render_modal_workflow
-from wagtail.core.models import Page
+
+import wagtail
+if wagtail.VERSION >= (4, 2):
+  from wagtail.models import Page
+else: # Support for wagtail <= 4.1
+  from wagtail.core.models import Page
+
 from wagtail.search.backends import get_search_backend
 
 from wagtailnews.conf import paginate

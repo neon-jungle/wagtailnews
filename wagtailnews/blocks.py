@@ -1,6 +1,12 @@
 from django.utils.functional import cached_property
-from wagtail.core.blocks import ChooserBlock
-from wagtail.core.utils import resolve_model_string
+
+import wagtail
+if wagtail.VERSION >= (4, 2):
+  from wagtail.blocks import ChooserBlock
+  from wagtail.coreutils import resolve_model_string
+else: # Support for wagtail <= 4.1
+  from wagtail.core.blocks import ChooserBlock
+  from wagtail.core.utils import resolve_model_string
 
 
 class NewsChooserBlock(ChooserBlock):

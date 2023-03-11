@@ -9,7 +9,9 @@ else:
 from django.utils.safestring import mark_safe
 
 import wagtail
-if wagtail.VERSION >= (3, 0):
+if wagtail.VERSION >= (4, 2):
+  from wagtail.admin.panels import FieldPanel
+elif wagtail.VERSION >= (3, 0):
   from wagtail.admin.edit_handlers import FieldPanel
 else:
   from wagtail.admin.edit_handlers import BaseChooserPanel as FieldPanel

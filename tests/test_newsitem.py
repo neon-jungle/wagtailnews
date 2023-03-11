@@ -6,7 +6,13 @@ import datetime
 from django.test import TestCase
 from django.utils import timezone
 from urllib.parse import quote
-from wagtail.core.models import Site
+
+import wagtail
+if wagtail.VERSION >= (4, 2):
+  from wagtail.models import Page, Site
+else: # Support for wagtail <= 4.1
+  from wagtail.core.models import Page, Site
+
 from wagtail.tests.utils import WagtailTestUtils
 
 from tests.app.models import NewsIndex, NewsItem

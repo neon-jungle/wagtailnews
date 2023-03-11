@@ -3,7 +3,13 @@ import datetime
 from django.test import TestCase
 from django.test.client import RequestFactory
 from django.utils import timezone
-from wagtail.core.models import Page
+
+import wagtail
+if wagtail.VERSION >= (4, 2):
+  from wagtail.models import Page
+else: # Support for wagtail <= 4.1
+  from wagtail.core.models import Page
+
 from wagtail.tests.utils import WagtailTestUtils
 
 from tests.app.models import (
