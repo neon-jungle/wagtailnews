@@ -2,7 +2,7 @@
 wagtailnews
 ===========
 
-A plugin for Wagtail that provides news / blogging functionality.
+A plugin for Wagtail that provides a simple news functionality.
 
 Installing
 ==========
@@ -11,7 +11,13 @@ Install using pip::
 
     pip install wagtailnews
 
-It works with Wagtail 2.3 and upwards. For older versions of Wagtail see past releases.
+``wagtailnews`` 2.x is compatible with Wagtail 2.15 or 2.16,
+Django 3.0 and higher,
+and Python 3.6 and higher.
+
+For older version of Wagtail or Django, see past releases
+
+For wagtail 3 and 4 check wagtailnews 3 and higher.
 
 Documentation
 =============
@@ -20,6 +26,21 @@ Documentation
 
 Quick start
 ===========
+
+Install ``wagtailnews`` using pip::
+
+   pip install wagtailnews
+
+Step 2
+______
+
+Add ``wagtailnews`` to your ``INSTALLED_APPS`` in settings:
+
+.. code-block:: python
+
+  INSTALLED_APPS += [
+      'wagtailnews',
+  ]
 
 Create news models for your application that inherit from the relevant ``wagtailnews`` models:
 
