@@ -30,8 +30,8 @@ setup(
     url='https://github.com/takeflight/wagtailnews/',
 
     install_requires=[
-        'wagtail>=2.15,<4',
-        'django>=3,<4.1'
+        'wagtail>=3.0',
+        'django>=3.2'
     ],
     extras_require={
         'docs': documentation_extras
