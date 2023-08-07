@@ -13,10 +13,10 @@ from django.utils.http import urlquote
 from django.utils.text import slugify
 from django.utils.translation import ugettext_lazy as _
 from modelcluster.models import ClusterableModel
-from wagtail.admin.edit_handlers import FieldPanel
+from wagtail.admin.panels import FieldPanel
 from wagtail.contrib.routable_page.models import RoutablePageMixin, route
-from wagtail.core.models import Page
-from wagtail.core.utils import resolve_model_string
+from wagtail.coreutils import resolve_model_string
+from wagtail.models import Page
 from wagtail.search import index
 
 from . import feeds

@@ -5,8 +5,8 @@ from django.templatetags.static import static
 from django.urls import reverse
 from django.utils.html import format_html, format_html_join
 from django.utils.translation import ugettext_lazy as _
+from wagtail import hooks
 from wagtail.admin.search import SearchArea
-from wagtail.core import hooks
 
 from . import urls
 from .menu import NewsMenuItem

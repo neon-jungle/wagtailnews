@@ -3,8 +3,8 @@ import datetime
 from django.core.cache import cache
 from django.test import TestCase, override_settings
 from django.utils import timezone
-from wagtail.core.models import Page, Site
-from wagtail.tests.utils import WagtailTestUtils
+from wagtail.models import Page, Site
+from wagtail.test.utils import WagtailTestUtils
 
 from tests.app.models import NewsIndex, NewsItem
 
