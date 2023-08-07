@@ -1,12 +1,12 @@
 from django.template.loader import render_to_string
-from django.utils.encoding import force_text
+from django.utils.encoding import force_str
 from django.utils.safestring import mark_safe
-from wagtail.admin.panels import BaseChooserPanel
+from wagtail.admin.panels import FieldPanel
 
 from .widgets import AdminNewsChooser
 
 
-class NewsChooserPanel(BaseChooserPanel):
+class NewsChooserPanel(FieldPanel):
     """
     An edit handler for editors to pick a news item.
     Takes the field name as the only argument.
@@ -21,10 +21,11 @@ class NewsChooserPanel(BaseChooserPanel):
                 NewsChooserPanel('news_item')
             }
     """
+
     model = None
     field_name = None
 
-    object_type_name = 'item'
+    object_type_name = "item"
 
     _target_model = None
 
@@ -42,11 +43,16 @@ class NewsChooserPanel(BaseChooserPanel):
 
     def render_as_field(self):
         instance_obj = self.get_chosen_item()
-        return mark_safe(render_to_string(self.field_template, {
-            'field': self.bound_field,
-            self.object_type_name: instance_obj,
-            'newsitem_type_name': self.get_newsitem_type_name(),
-        }))
+        return mark_safe(
+            render_to_string(
+                self.field_template,
+                {
+                    "field": self.bound_field,
+                    self.object_type_name: instance_obj,
+                    "newsitem_type_name": self.get_newsitem_type_name(),
+                },
+            )
+        )
 
     def get_newsitem_type_name(self):
-        return force_text(self.target_model()._meta.verbose_name)
+        return force_str(self.target_model()._meta.verbose_name)
