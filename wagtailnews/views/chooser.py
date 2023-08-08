@@ -163,41 +163,6 @@ class NewsItemIndexView(IndexView):
         return context
 
 
-# TODO replace by above
-def index(request, pk):
-    newsindex = get_object_or_404(Page.objects.specific().type(NewsIndexMixin), pk=pk)
-    NewsItem = newsindex.get_newsitem_model()
-
-    if not user_can_edit_newsitem(request.user, NewsItem):
-        raise PermissionDenied()
-
-    newsitem_list = NewsItem.objects.filter(newsindex=newsindex)
-
-    query = None
-    try:
-        query = request.GET["q"]
-    except KeyError:
-        pass
-    else:
-        backend = get_search_backend()
-        newsitem_list = backend.search(query, newsitem_list)
-
-    paginator, page = paginate(request, newsitem_list)
-
-    return render(
-        request,
-        "wagtailnews/index.html",
-        {
-            "newsindex": newsindex,
-            "page": page,
-            "paginator": paginator,
-            "newsitem_list": page.object_list,
-            "newsitem_perms": perms_for_template(request, NewsItem),
-            "query_string": query,
-        },
-    )
-
-
 def get_newsitem_model(model_string):
     """
     Get the NewsItem model from a model string. Raises ValueError if the model

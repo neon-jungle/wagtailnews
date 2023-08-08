@@ -13,7 +13,7 @@
 {% block header %}
 {% trans "New" as new_str %}
     {% trans "news post" as newspost_str %}
-    {% include "wagtailadmin/shared/header.html" with title=new_str subtitle=newspost_str icon="news" merged=True action_url=False %}
+    {% include "wagtailadmin/shared/header.html" with title=new_str subtitle=newspost_str icon="news" merged=True only %}
 {% endblock %}
 
 {% block actions %}
@@ -36,6 +36,8 @@
                                 <li>
                                     <button class="button" type="submit" name="action-publish" value="publish">{% trans 'Publish' %}</button>
                                 </li>
+                                {% block extra_actions %}
+                                {% endblock %}
                             </ul>
                         </div>
                     </li>

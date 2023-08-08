@@ -1,27 +1,25 @@
 from functools import lru_cache
 from io import StringIO
-from typing import Any
+
 from urllib.parse import urlparse
 
 from django.conf import settings
 from django.core.exceptions import PermissionDenied
 from django.core.handlers.base import BaseHandler
 from django.core.handlers.wsgi import WSGIRequest
-from django.db import models
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from wagtail.admin import messages
-from wagtail.admin.panels import (
-    ObjectList,
-    extract_panel_definitions_from_model_class,
-)
+from wagtail.admin.panels import ObjectList, extract_panel_definitions_from_model_class
+from wagtail.admin.views.generic import DeleteView
 from wagtail.models import Page
 
 from .. import signals
 from ..forms import SaveActionSet
 from ..models import NewsIndexMixin
 from ..permissions import format_perms, perms_for_template
+from wagtail.admin.views.generic import CreateView, EditView, UnpublishView
 
 OPEN_PREVIEW_PARAM = "do_preview"
 
@@ -35,22 +33,19 @@ def get_newsitem_edit_handler(NewsItem):
     return ObjectList(panels).bind_to_model(NewsItem)
 
 
-from wagtail.admin.views.generic import CreateView
-
-
-class CreateNewsItemView(CreateView):
-    template_name = "wagtailnews/create.html"
-
+class NewItemPermissionMixin:
     def dispatch(self, request, *args, **kwargs):
         self.newsindex = get_object_or_404(
             Page.objects.specific().type(NewsIndexMixin), pk=self.kwargs["pk"]
         )
         if not self.request.user.has_perms(
-            format_perms(self.newsindex.get_newsitem_model(), ["add", "change"])
+            format_perms(self.newsindex.get_newsitem_model(), self.permissions_required)
         ):
             raise PermissionDenied()
         return super().dispatch(request, *args, **kwargs)
 
+
+class NewsItemAdminMixin:
     def get_add_url(self):
         return reverse("wagtailnews:create", kwargs={"pk": self.kwargs["pk"]})
 
@@ -67,12 +62,6 @@ class CreateNewsItemView(CreateView):
         NewsItem = self.newsindex.get_newsitem_model()
         edit_handler = get_newsitem_edit_handler(NewsItem)
         return edit_handler.get_form_class()
-
-    def get_success_message(self, instance):
-        if instance.live:
-            return _('The news post "{0!s}" has been published').format(instance)
-        else:
-            return _('A draft news post "{0!s}" has been created').format(instance)
 
     def save_instance(self):
         newsitem = self.form.save(commit=False)
@@ -97,207 +86,100 @@ class CreateNewsItemView(CreateView):
 
         return newsitem
 
-
-def create(request, pk):
-    newsindex = get_object_or_404(Page.objects.specific().type(NewsIndexMixin), pk=pk)
-    NewsItem = newsindex.get_newsitem_model()
-
-    if not request.user.has_perms(format_perms(NewsItem, ["add", "change"])):
-        raise PermissionDenied()
-
-    newsitem = NewsItem(newsindex=newsindex)
-    edit_handler = get_newsitem_edit_handler(NewsItem)
-    EditForm = edit_handler.get_form_class()
-
-    if request.method == "POST":
-        form = EditForm(request.POST, request.FILES, instance=newsitem)
-        action = SaveActionSet.from_post_data(request.POST)
-
-        if form.is_valid():
-            newsitem = form.save(commit=False)
-            newsitem.live = action is SaveActionSet.publish
-
-            newsitem.save()
-            newsitem.save_revision(user=request.user)
-
-            if action is SaveActionSet.publish:
-                messages.success(
-                    request,
-                    _('The news post "{0!s}" has been published').format(newsitem),
-                )
-                signals.newsitem_published.send(
-                    sender=NewsItem, instance=newsitem, created=True
-                )
-                return redirect("wagtailnews:index", pk=newsindex.pk)
-
-            elif action is SaveActionSet.draft:
-                messages.success(
-                    request,
-                    _('A draft news post "{0!s}" has been created').format(newsitem),
-                )
-                signals.newsitem_draft_saved.send(
-                    sender=NewsItem, instance=newsitem, created=True
-                )
-                return redirect(
-                    "wagtailnews:edit", pk=newsindex.pk, newsitem_pk=newsitem.pk
-                )
-
-            elif action is SaveActionSet.preview:
-                edit_url = reverse(
-                    "wagtailnews:edit",
-                    kwargs={"pk": newsindex.pk, "newsitem_pk": newsitem.pk},
-                )
-                return redirect(
-                    "{url}?{param}=1".format(url=edit_url, param=OPEN_PREVIEW_PARAM)
-                )
-
-        else:
-            messages.error(
-                request,
-                _("The news post could not be created due to validation errors"),
-            )
-    else:
-        form = EditForm(instance=newsitem)
-        edit_handler = edit_handler.bind_to_instance(
-            instance=newsitem, form=form, request=request
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update(
+            {
+                "newsindex": self.newsindex,
+                "newsitem_opts": self.newsindex.get_newsitem_model()._meta,
+            }
         )
-
-    return render(
-        request,
-        "wagtailnews/create.html",
-        {
-            "newsindex": newsindex,
-            "form": form,
-            "edit_handler": edit_handler,
-            "newsitem_opts": NewsItem._meta,
-            "newsitem_perms": perms_for_template(request, NewsItem),
-        },
-    )
+        return context
 
 
-def edit(request, pk, newsitem_pk):
-    newsindex = get_object_or_404(Page.objects.specific().type(NewsIndexMixin), pk=pk)
-    NewsItem = newsindex.get_newsitem_model()
+class CreateNewsItemView(NewItemPermissionMixin, NewsItemAdminMixin, CreateView):
+    template_name = "wagtailnews/create.html"
+    permissions_required = ["add", "change"]
 
-    if not request.user.has_perms(format_perms(NewsItem, ["change"])):
-        raise PermissionDenied()
-
-    newsitem = get_object_or_404(NewsItem, newsindex=newsindex, pk=newsitem_pk)
-    newsitem = newsitem.get_latest_revision_as_newsitem()
-
-    edit_handler = get_newsitem_edit_handler(NewsItem)
-    EditForm = edit_handler.get_form_class()
-
-    do_preview = False
-
-    if request.method == "POST":
-        form = EditForm(request.POST, request.FILES, instance=newsitem)
-        action = SaveActionSet.from_post_data(request.POST)
-
-        if form.is_valid():
-            newsitem = form.save(commit=False)
-            revision = newsitem.save_revision(user=request.user)
-
-            if action is SaveActionSet.publish:
-                revision.publish()
-                messages.success(
-                    request,
-                    _('Your changes to "{0!s}" have been published').format(newsitem),
-                )
-                signals.newsitem_published.send(
-                    sender=NewsItem, instance=newsitem, created=False
-                )
-                return redirect("wagtailnews:index", pk=newsindex.pk)
-
-            elif action is SaveActionSet.draft:
-                messages.success(
-                    request,
-                    _('Your changes to "{0!s}" have been saved as a draft').format(
-                        newsitem
-                    ),
-                )
-                signals.newsitem_draft_saved.send(
-                    sender=NewsItem, instance=newsitem, created=False
-                )
-                return redirect(
-                    "wagtailnews:edit", pk=newsindex.pk, newsitem_pk=newsitem.pk
-                )
-
-            elif action is SaveActionSet.preview:
-                do_preview = True
+    def get_success_message(self, instance):
+        if instance.live:
+            return _('The news post "{0!s}" has been published').format(instance)
         else:
-            messages.error(
-                request,
-                _("The news post could not be updated due to validation errors"),
+            return _('A draft news post "{0!s}" has been created').format(instance)
+
+
+class EditNewsItemView(NewItemPermissionMixin, NewsItemAdminMixin, EditView):
+    template_name = "wagtailnews/edit.html"
+    permissions_required = ["change"]
+
+    def get_success_message(self):
+        if self.object.live:
+            return _('Your changes to "{0!s}" have been published').format(self.object)
+        else:
+            return _('Your changes to "{0!s}" have been saved as a draft').format(
+                self.object
             )
 
-    else:
-        form = EditForm(instance=newsitem)
-        # The create view can set this param to open a preview on redirect
-        do_preview = bool(request.GET.get(OPEN_PREVIEW_PARAM))
-        edit_handler = edit_handler.bind_to_instance(
-            instance=newsitem, form=form, request=request
+    def get_success_buttons(self):
+        return [messages.button(self.get_edit_url(), _("Edit"))]
+
+    def get_object(self, queryset=None):
+        self.object = self.newsindex.get_newsitem_model().objects.get(
+            pk=self.kwargs["newsitem_pk"]
+        )
+        return self.object
+
+
+class UnpublishNewsItemView(NewItemPermissionMixin, UnpublishView):
+    permissions_required = ["change"]
+
+    def setup(self, request, *args, **kwargs):
+        self.newsindex = get_object_or_404(
+            Page.objects.specific().type(NewsIndexMixin), pk=kwargs["pk"]
+        )
+        super().setup(request, *args, **kwargs)
+        # self.pk is set incorrectly by the parent class, and kwargs pk is stripped out by named parameter
+        self.kwargs["pk"] = kwargs["pk"]
+        self.pk = self.kwargs["newsitem_pk"]
+
+    def get_object(self, queryset=None):
+        return get_object_or_404(
+            self.newsindex.get_newsitem_model(),
+            newsindex=self.newsindex,
+            pk=self.kwargs["newsitem_pk"],
         )
 
-    return render(
-        request,
-        "wagtailnews/edit.html",
-        {
-            "newsindex": newsindex,
-            "newsitem": newsitem,
-            "form": form,
-            "edit_handler": edit_handler,
-            "do_preview": do_preview,
-            "newsitem_opts": NewsItem._meta,
-            "newsitem_perms": perms_for_template(request, NewsItem),
-        },
-    )
-
-
-def unpublish(request, pk, newsitem_pk):
-    newsindex = get_object_or_404(Page.objects.specific().type(NewsIndexMixin), pk=pk)
-    NewsItem = newsindex.get_newsitem_model()
-
-    if not request.user.has_perms(format_perms(NewsItem, ["change"])):
-        raise PermissionDenied()
-
-    newsitem = get_object_or_404(NewsItem, newsindex=newsindex, pk=newsitem_pk)
-
-    if request.method == "POST":
-        newsitem.unpublish()
-        messages.success(
-            request,
-            _("{} has been unpublished").format(newsitem),
-            [
-                (
+    def get_success_buttons(self):
+        if self.edit_url_name:
+            return [
+                messages.button(
                     reverse(
                         "wagtailnews:edit",
-                        kwargs={"pk": pk, "newsitem_pk": newsitem_pk},
+                        kwargs={"pk": self.kwargs["pk"], "newsitem_pk": self.object.pk},
                     ),
                     _("Edit"),
-                ),
-            ],
+                )
+            ]
+
+    def get_next_url(self):
+        return reverse("wagtailnews:index", kwargs={"pk": self.newsindex.pk})
+
+    def get_unpublish_url(self):
+        return reverse(
+            "wagtailnews:unpublish",
+            kwargs={"pk": self.kwargs["pk"], "newsitem_pk": self.object.pk},
         )
-        signals.newsitem_unpublished.send(sender=NewsItem, instance=newsitem)
-        return redirect("wagtailnews:index", pk=pk)
 
-    return render(
-        request,
-        "wagtailnews/unpublish.html",
-        {
-            "newsindex": newsindex,
-            "newsitem": newsitem,
-            "newsitem_perms": perms_for_template(request, NewsItem),
-        },
-    )
+    def unpublish(self):
+        self.object.unpublish()
+        signals.newsitem_unpublished.send(
+            sender=self.newsindex.get_newsitem_model(), instance=self.object
+        )
 
 
-from wagtail.admin.views.generic import DeleteView
-
-
-class NewsItemDeleteView(DeleteView):
-    def user_has_permission(self, permission):
-        return super().user_has_permission(permission)
+class NewsItemDeleteView(NewItemPermissionMixin, DeleteView):
+    success_message = _("%(object)s been deleted")
+    permissions_required = ["delete"]
 
     def get_success_url(self):
         return reverse("wagtailnews:index", kwargs={"pk": self.newsindex.pk})
@@ -318,12 +200,6 @@ class NewsItemDeleteView(DeleteView):
             pk=kwargs["newsitem_pk"],
         )
         return super().setup(request, *args, **kwargs)
-
-    def dispatch(self, request, *args, **kwargs):
-        NewsItem = self.newsindex.get_newsitem_model()
-        if not self.request.user.has_perms(format_perms(NewsItem, ["delete"])):
-            raise PermissionDenied()
-        return super().dispatch(request, *args, **kwargs)
 
     def delete_action(self):
         super().delete_action()
