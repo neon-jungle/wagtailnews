@@ -1,4 +1,4 @@
-from django.urls import re_path
+from django.urls import re_path, path
 
 from .views import chooser, editor
 
@@ -29,6 +29,17 @@ urlpatterns = [
         r"^(?P<pk>\d+)/view_draft/(?P<newsitem_pk>.*)/$",
         editor.view_draft,
         name="view_draft",
+    ),
+    path(
+        "<int:index_pk>/preview/<int:newsitem_pk>/",
+        # editor.preview,
+        editor.PreviewOnEdit.as_view(),
+        name="preview_on_edit",
+    ),
+    path(
+        "<int:index_pk>/preview/create/",
+        editor.PreviewOnCreate.as_view(),
+        name="preview_on_create",
     ),
     # Choosers
     re_path(r"^chooser/$", chooser.choose_modal, name="chooser"),

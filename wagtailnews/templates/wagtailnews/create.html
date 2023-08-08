@@ -8,15 +8,41 @@
     {{ media.css }}
 {% endblock %}
 
-
 {% block bodyclass %}menu-news{% endblock %}
-{% block header %}
-{% trans "New" as new_str %}
-    {% trans "news post" as newspost_str %}
-    {% include "wagtailadmin/shared/header.html" with title=new_str subtitle=newspost_str icon="news" merged=True only %}
-{% endblock %}
 
-{% block actions %}
+
+{% block content %}
+<div class="w-sticky w-top-0 w-z-header">
+    {% include "wagtailnews/slim_header.html" %}
+    {% include "wagtailadmin/shared/side_panels.html" %}
+</div>
+
+
+{% trans "news post" as newspost_str %}
+{% include "wagtailadmin/shared/header.html" with title=new_str subtitle=newspost_str icon="news" merged=True only %}
+
+<form action="{{ action_url }}" method="POST" novalidate{% if form.is_multipart %} enctype="multipart/form-data"{% endif %} data-edit-form>
+    {% csrf_token %}
+
+    <div class="nice-padding">
+        {% csrf_token %}
+
+        {% block non_field_errors %}
+            {% for error in form.non_field_errors %}
+                {% help_block status="critical" %}{{ error }}{% endhelp_block %}
+            {% endfor %}
+        {% endblock %}
+        {% block hidden_fields %}
+            {% for field in form.hidden_fields %}{{ field }}{% endfor %}
+        {% endblock %}
+        <ul class="fields">
+            {% for field in form.visible_fields %}
+                <li>
+                    {% include "wagtailadmin/shared/field.html" %}
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
 <footer class="footer">
     <ul>
         <li class="footer__container">

@@ -5,7 +5,7 @@ from urllib.parse import urlparse
 
 from django.conf import settings
 from django.db import models
-from django.http import Http404, HttpResponsePermanentRedirect
+from django.http import Http404, HttpResponse, HttpResponsePermanentRedirect
 from django.shortcuts import get_object_or_404
 from django.template.response import TemplateResponse
 from django.utils import timezone
@@ -18,7 +18,7 @@ from wagtail.contrib.routable_page.models import RoutablePageMixin, route
 from wagtail.coreutils import resolve_model_string
 from wagtail.models import Page
 from wagtail.search import index
-
+from wagtail.models import PreviewableMixin
 from . import feeds
 from .conf import paginate
 from .deprecation import DeprecatedCallableStr
@@ -206,7 +206,7 @@ class NewsItemQuerySet(models.QuerySet):
         return self.filter(live=True)
 
 
-class AbstractNewsItem(index.Indexed, ClusterableModel):
+class AbstractNewsItem(PreviewableMixin, index.Indexed, ClusterableModel):
     newsindex = models.ForeignKey(Page, on_delete=models.CASCADE)
     date = models.DateTimeField("Published date", default=timezone.now)
 
@@ -249,12 +249,18 @@ class AbstractNewsItem(index.Indexed, ClusterableModel):
         except AttributeError:
             return "{0}/{1}.html".format(self._meta.app_label, self._meta.model_name)
 
+    def get_preview_template(self, request, mode_name):
+        return self.get_template(request)
+
     def get_context(self, request, *args, **kwargs):
         context = self.newsindex.specific.get_context(
             request, view="newsitem", *args, **kwargs
         )
         context["newsitem"] = self
         return context
+
+    def get_preview_context(self, request, mode_name):
+        return self.get_context(request)
 
     def serve(self, request):
         template = self.get_template(request)
@@ -285,11 +291,13 @@ class AbstractNewsItem(index.Indexed, ClusterableModel):
 
     @property
     def full_url(self):
-        return DeprecatedCallableStr(
-            self.newsindex.specific.full_url + self.url_suffix(),
-            warning="NewsItem.full_url is now a property, not a method.",
-            warning_cls=DeprecationWarning,
-        )
+        if hasattr(self, "newsindex"):
+            return DeprecatedCallableStr(
+                self.newsindex.specific.full_url + self.url_suffix(),
+                warning="NewsItem.full_url is now a property, not a method.",
+                warning_cls=DeprecationWarning,
+            )
+        return None
 
     def save_revision(self, user=None, changed=True):
         # Create revision

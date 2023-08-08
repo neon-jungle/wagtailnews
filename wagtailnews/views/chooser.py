@@ -7,14 +7,16 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import PermissionDenied
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
+from django.template.loader import render_to_string
 from django.urls import reverse
+from django.utils.translation import gettext_lazy as _
 from wagtail.admin.forms.search import SearchForm
 from wagtail.admin.modal_workflow import render_modal_workflow
+from wagtail.admin.views.generic import IndexView
 from wagtail.models import Page
 from wagtail.search.backends import get_search_backend
 
 from wagtailnews.conf import paginate
-from django.utils.translation import gettext_lazy as _
 
 from ..models import NEWSINDEX_MODEL_CLASSES, AbstractNewsItem, NewsIndexMixin
 from ..permissions import perms_for_template, user_can_edit_news, user_can_edit_newsitem
@@ -97,10 +99,6 @@ def search(request):
             "query_string": query,
         },
     )
-
-
-from wagtail.admin.views.generic import IndexView
-from django.template.loader import render_to_string
 
 
 class NewsItemIndexView(IndexView):

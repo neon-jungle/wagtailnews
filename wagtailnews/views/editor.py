@@ -1,27 +1,21 @@
 from functools import lru_cache
-from io import StringIO
 
-from urllib.parse import urlparse
-
-from django.conf import settings
 from django.core.exceptions import PermissionDenied
-from django.core.handlers.base import BaseHandler
-from django.core.handlers.wsgi import WSGIRequest
-from django.shortcuts import get_object_or_404, redirect, render
+from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from wagtail.admin import messages
 from wagtail.admin.panels import ObjectList, extract_panel_definitions_from_model_class
-from wagtail.admin.views.generic import DeleteView
+from wagtail.admin.ui.side_panels import BasePreviewSidePanel, BaseSidePanels
+from wagtail.admin.views.generic import CreateView, DeleteView, EditView, UnpublishView
+from wagtail.admin.views.generic.preview import PreviewOnEdit as GenericPreviewOnEdit
 from wagtail.models import Page
+
+from wagtailnews.permissions import format_perms
 
 from .. import signals
 from ..forms import SaveActionSet
 from ..models import NewsIndexMixin
-from ..permissions import format_perms, perms_for_template
-from wagtail.admin.views.generic import CreateView, EditView, UnpublishView
-
-OPEN_PREVIEW_PARAM = "do_preview"
 
 
 @lru_cache(maxsize=None)
@@ -43,6 +37,38 @@ class NewItemPermissionMixin:
         ):
             raise PermissionDenied()
         return super().dispatch(request, *args, **kwargs)
+
+
+class PreviewSidePanel(BasePreviewSidePanel):
+    def __init__(self, object, request, newsindex):
+        self.newsindex = newsindex
+        if not object:
+            object = newsindex.get_newsitem_model()(newsindex=newsindex)
+        super().__init__(object, request)
+
+    def get_context_data(self, request):
+        context = super().get_context_data(request)
+        if self.object.id:
+            context["preview_url"] = reverse(
+                "wagtailnews:preview_on_edit",
+                kwargs={
+                    "index_pk": self.newsindex.pk,
+                    "newsitem_pk": self.object.pk,
+                },
+            )
+        else:
+            context["preview_url"] = reverse(
+                "wagtailnews:preview_on_create",
+                kwargs={"index_pk": self.newsindex.pk},
+            )
+        return context
+
+
+class NewsItemSidePanels(BaseSidePanels):
+    def __init__(self, request, object, newsindex):
+        self.side_panels = [
+            PreviewSidePanel(object, request, newsindex),
+        ]
 
 
 class NewsItemAdminMixin:
@@ -88,10 +114,13 @@ class NewsItemAdminMixin:
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        side_panels = NewsItemSidePanels(self.request, self.object, self.newsindex)
         context.update(
             {
                 "newsindex": self.newsindex,
                 "newsitem_opts": self.newsindex.get_newsitem_model()._meta,
+                "in_explorer": True,  # hide minimap
+                "side_panels": side_panels,
             }
         )
         return context
@@ -213,63 +242,45 @@ def view_draft(request, pk, newsitem_pk):
     NewsItem = newsindex.get_newsitem_model()
     newsitem = get_object_or_404(NewsItem, newsindex=newsindex, pk=newsitem_pk)
     newsitem = newsitem.get_latest_revision_as_newsitem()
-
-    dummy_request = build_dummy_request(newsitem)
-    template = newsitem.get_template(dummy_request)
-    context = newsitem.get_context(
-        dummy_request,
-        year=newsitem.date.year,
-        month=newsitem.date.month,
-        day=newsitem.date.day,
-        pk=newsitem.pk,
-        slug=newsitem.get_slug(),
-    )
-    return render(dummy_request, template, context)
+    return newsitem.serve_preview(request, newsitem.default_preview_mode)
 
 
-def build_dummy_request(newsitem):
-    """
-    Construct a HttpRequest object that is, as far as possible,
-    representative of ones that would receive this page as a response. Used
-    for previewing / moderation and any other place where we want to
-    display a view of this page in the admin interface without going
-    through the regular page routing logic.
-    """
-    url = newsitem.full_url
-    if url:
-        url_info = urlparse(url)
-        hostname = url_info.hostname
-        path = url_info.path
-        port = url_info.port or 80
-    else:
-        # Cannot determine a URL to this page - cobble one together based on
-        # whatever we find in ALLOWED_HOSTS
-        try:
-            hostname = settings.ALLOWED_HOSTS[0]
-        except IndexError:
-            hostname = "localhost"
-        path = "/"
-        port = 80
+class PreviewOnEdit(GenericPreviewOnEdit):
+    def setup(self, request, *args, **kwargs):
+        self.newsindex = get_object_or_404(
+            Page.objects.specific().type(NewsIndexMixin), pk=kwargs["index_pk"]
+        )
+        super().setup(request, *args, **kwargs)
 
-    request = WSGIRequest(
-        {
-            "REQUEST_METHOD": "GET",
-            "PATH_INFO": path,
-            "SERVER_NAME": hostname,
-            "SERVER_PORT": port,
-            "HTTP_HOST": hostname,
-            "wsgi.input": StringIO(),
-        }
-    )
+    @property
+    def session_key(self):
+        return f"{self.session_key_prefix}{self.kwargs['newsitem_pk']}"
 
-    # Apply middleware to the request - see http://www.mellowmorning.com/2011/04/18/mock-django-request-for-testing/
-    handler = BaseHandler()
-    handler.load_middleware()
-    # call each middleware in turn and throw away any responses that they might return
-    if hasattr(handler, "_request_middleware"):
-        for middleware_method in handler._request_middleware:
-            middleware_method(request)
-    else:
-        handler.get_response(request)
+    def get_object(self):
+        return get_object_or_404(
+            self.newsindex.get_newsitem_model(),
+            newsindex=self.newsindex,
+            pk=self.kwargs["newsitem_pk"],
+        ).get_latest_revision_as_newsitem()
 
-    return request
+    def get_form(self, querydict):
+        NewsItem = self.newsindex.get_newsitem_model()
+        edit_handler = get_newsitem_edit_handler(NewsItem)
+        form_class = edit_handler.get_form_class()
+
+        if querydict:
+            return form_class(querydict, instance=self.object)
+
+        return form_class(instance=self.object)
+
+
+class PreviewOnCreate(PreviewOnEdit):
+    @property
+    def session_key(self):
+        model = self.newsindex.get_newsitem_model()
+        app_label = model._meta.app_label
+        model_name = model._meta.model_name
+        return f"{self.session_key_prefix}{app_label}-{model_name}"
+
+    def get_object(self):
+        return self.newsindex.get_newsitem_model()()
