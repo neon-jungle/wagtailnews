@@ -1,52 +1,55 @@
-{% extends "wagtailadmin/base.html" %}
-{% load i18n %}
+{% extends "wagtailadmin/generic/create.html" %}
+{% load i18n wagtailadmin_tags %}
 {% block titletag %}{% blocktrans with type=newsitem_opts.verbose_name %}Creating {{ type }}{% endblocktrans %}{% endblock %}
 
-{% block bodyclass %}menu-news{% endblock %}
-
-{% block content %}
-    {% trans "New" as new_str %}
-    {% trans "news post" as newspost_str %}
-
-    {% block header %}
-      {% include "wagtailadmin/shared/header.html" with title=new_str subtitle=newspost_str icon="news" merged=True %}
-    {% endblock %}
-
-    <form action="{% block form_action %}{% url 'wagtailnews:create' pk=newsindex.pk %}{% endblock %}" method="POST">
-        {% csrf_token %}
-        {{ edit_handler.render_form_content }}
-        <footer>
-            <ul>
-                <li class="actions">
-                  {% block form_actions %}
-                    <div class="dropdown dropup dropdown-button match-width">
-                        <button class="button" type="submit" name="action-draft" value="draft">{% trans 'Save draft' %}</button>
-                        <div class="dropdown-toggle icon icon-arrow-up"></div>
-                        <ul role="menu">
-                            <li><input class="button" type="submit" name="action-publish" value="{% trans 'Publish' %}" /></li>
-                        </ul>
-                    </div>
-                    {% endblock %}
-                </li>
-                <li class="actions preview">
-                    <button class="button icon icon-view" name="action-preview" value="woop">
-                        {% trans 'Preview' %}
-                    </button>
-                </li>
-            </ul>
-        </footer>
-    </form>
-{% endblock %}
-
 {% block extra_css %}
-    {% include "wagtailadmin/pages/_editor_css.html" %}
+    {{ block.super }}
     {{ edit_handler.form.media.css }}
-    {{ view.media.css }}
+    {{ media.css }}
 {% endblock %}
+
+
+{% block bodyclass %}menu-news{% endblock %}
+{% block header %}
+{% trans "New" as new_str %}
+    {% trans "news post" as newspost_str %}
+    {% include "wagtailadmin/shared/header.html" with title=new_str subtitle=newspost_str icon="news" merged=True action_url=False %}
+{% endblock %}
+
+{% block actions %}
+<footer class="footer">
+    <ul>
+        <li class="footer__container">
+            <nav>
+                <ul>
+                    <li class="actions actions--primary">
+                        <div class="dropdown dropup dropdown-button match-width">
+                            <button
+                                type="submit"
+                                class="button action-save button-longrunning"
+                                name="action-draft"
+                                value="draft"
+                                
+                            >{% trans 'Save draft' %}</button>
+                            <div class="dropdown-toggle">{% icon name="arrow-up" %}</div>
+                            <ul>
+                                <li>
+                                    <button class="button" type="submit" name="action-publish" value="publish">{% trans 'Publish' %}</button>
+                                </li>
+                            </ul>
+                        </div>
+                    </li>
+                </ul>
+            </nav>
+        </li>
+    </ul>
+</footer>
+{% endblock %}
+
+
 {% block extra_js %}
+    {{ block.super }}
     {% include "wagtailadmin/pages/_editor_js.html" %}
     {{ edit_handler.form.media.js }}
-  	{{ edit_handler.html_declarations }}
-
-  	{{ view.media.js }}
+  	{{ media.js }}
 {% endblock %}

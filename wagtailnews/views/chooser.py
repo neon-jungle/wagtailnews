@@ -1,5 +1,6 @@
 import json
 import logging
+from typing import Any
 
 from django.apps import apps
 from django.contrib.contenttypes.models import ContentType
@@ -13,10 +14,10 @@ from wagtail.models import Page
 from wagtail.search.backends import get_search_backend
 
 from wagtailnews.conf import paginate
+from django.utils.translation import gettext_lazy as _
 
 from ..models import NEWSINDEX_MODEL_CLASSES, AbstractNewsItem, NewsIndexMixin
-from ..permissions import (
-    perms_for_template, user_can_edit_news, user_can_edit_newsitem)
+from ..permissions import perms_for_template, user_can_edit_news, user_can_edit_newsitem
 
 LOGGER = logging.getLogger(__name__)
 
@@ -24,8 +25,10 @@ LOGGER = logging.getLogger(__name__)
 def get_allowed_news_types(user):
     """Get a list of all NewsIndex models that the user can edit"""
     return [
-        NewsIndex for NewsIndex in NEWSINDEX_MODEL_CLASSES
-        if user_can_edit_newsitem(user, NewsIndex.get_newsitem_model())]
+        NewsIndex
+        for NewsIndex in NEWSINDEX_MODEL_CLASSES
+        if user_can_edit_newsitem(user, NewsIndex.get_newsitem_model())
+    ]
 
 
 def choose(request):
@@ -34,20 +37,25 @@ def choose(request):
 
     allowed_news_types = get_allowed_news_types(request.user)
 
-    allowed_cts = ContentType.objects.get_for_models(*allowed_news_types)\
-        .values()
+    allowed_cts = ContentType.objects.get_for_models(*allowed_news_types).values()
     newsindex_list = Page.objects.filter(content_type__in=allowed_cts).specific()
     newsindex_count = newsindex_list.count()
 
     if newsindex_count == 1:
         newsindex = newsindex_list.first()
-        return redirect('wagtailnews:index', pk=newsindex.pk)
+        return redirect("wagtailnews:index", pk=newsindex.pk)
 
-    return render(request, 'wagtailnews/choose.html', {
-        'has_news': newsindex_count != 0,
-        'newsindex_list': ((newsindex, newsindex.content_type.model_class()._meta.verbose_name)
-                           for newsindex in newsindex_list)
-    })
+    return render(
+        request,
+        "wagtailnews/choose.html",
+        {
+            "has_news": newsindex_count != 0,
+            "newsindex_list": (
+                (newsindex, newsindex.content_type.model_class()._meta.verbose_name)
+                for newsindex in newsindex_list
+            ),
+        },
+    )
 
 
 def _search_newsitems(request, newsitem_models, query):
@@ -59,36 +67,105 @@ def _search_newsitems(request, newsitem_models, query):
             yield (
                 NewsItem._meta.verbose_name_plural,
                 perms_for_template(request, NewsItem),
-                results)
+                results,
+            )
 
 
 def search(request):
     if not user_can_edit_news(request.user):
         raise PermissionDenied
 
+    query = request.GET.get("q", "")
+
     allowed_news_types = get_allowed_news_types(request.user)
-
-    query = request.GET.get('q', '')
-
     # FIXME: this is crap, need to construct a single query for all types
     # to search by relevance however that's not currently possible in
     # a backend agnostic way :(
-    newsitem_models = [NewsIndex.get_newsitem_model()
-                       for NewsIndex in allowed_news_types]
+    newsitem_models = [
+        NewsIndex.get_newsitem_model() for NewsIndex in allowed_news_types
+    ]
     newsitem_results = list(_search_newsitems(request, newsitem_models, query))
 
-    return render(request, 'wagtailnews/search.html', {
-        'single_result_type': len(newsitem_results) == 1,
-        'single_newsitem_model': len(newsitem_models) == 1,
-        'newsitem_results': newsitem_results,
-        'search_form': SearchForm(request.GET if request.GET else None),
-        'query_string': query,
-    })
+    return render(
+        request,
+        "wagtailnews/search.html",
+        {
+            "single_result_type": len(newsitem_results) == 1,
+            "single_newsitem_model": len(newsitem_models) == 1,
+            "newsitem_results": newsitem_results,
+            "search_form": SearchForm(request.GET if request.GET else None),
+            "query_string": query,
+        },
+    )
 
 
+from wagtail.admin.views.generic import IndexView
+from django.template.loader import render_to_string
+
+
+class NewsItemIndexView(IndexView):
+    results_template_name = "wagtailnews/newsitem_list.html"
+    template_name = "wagtailnews/index.html"
+    page_title = _("News")
+    is_searchable = True
+    search_fields = ("title",)
+
+    def dispatch(self, request, *args, **kwargs):
+        self.newsindex = get_object_or_404(
+            Page.objects.specific().type(NewsIndexMixin), pk=self.kwargs["pk"]
+        )
+        NewsItem = self.newsindex.get_newsitem_model()
+        if not user_can_edit_newsitem(request.user, NewsItem):
+            raise PermissionDenied()
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_edit_url(self, instance):
+        return reverse("wagtailnews:edit", args=(instance.pk,))
+
+    def get_add_url(self):
+        return reverse("wagtailnews:create", args=(self.kwargs["pk"],))
+
+    def get_base_queryset(self):
+        newsindex = get_object_or_404(
+            Page.objects.specific().type(NewsIndexMixin), pk=self.kwargs["pk"]
+        )
+        NewsItem = newsindex.get_newsitem_model()
+        newsitem_list = NewsItem.objects.filter(newsindex=newsindex)
+        return newsitem_list
+
+    def search_queryset(self, queryset):
+        search_query = self.request.GET.get("q", "")
+        if search_query:
+            backend = get_search_backend()
+            queryset = backend.search(search_query, queryset)
+            return queryset.get_queryset()
+        return queryset
+
+    def get_context_data(self, *args, object_list=None, **kwargs):
+        context = super().get_context_data(*args, object_list=object_list, **kwargs)
+        NewsItem = self.newsindex.get_newsitem_model()
+        # Can't customise the form properly (search_url) so just replace the whole thing
+        search = render_to_string(
+            "wagtailnews/search_form.html",
+            {
+                "search_form": SearchForm(
+                    self.request.GET if self.request.GET else None
+                ),
+            },
+        )
+        context.update(
+            {
+                "newsindex": self.newsindex,
+                "newsitem_perms": perms_for_template(self.request, NewsItem),
+                "search": search,
+            }
+        )
+        return context
+
+
+# TODO replace by above
 def index(request, pk):
-    newsindex = get_object_or_404(
-        Page.objects.specific().type(NewsIndexMixin), pk=pk)
+    newsindex = get_object_or_404(Page.objects.specific().type(NewsIndexMixin), pk=pk)
     NewsItem = newsindex.get_newsitem_model()
 
     if not user_can_edit_newsitem(request.user, NewsItem):
@@ -98,7 +175,7 @@ def index(request, pk):
 
     query = None
     try:
-        query = request.GET['q']
+        query = request.GET["q"]
     except KeyError:
         pass
     else:
@@ -107,14 +184,18 @@ def index(request, pk):
 
     paginator, page = paginate(request, newsitem_list)
 
-    return render(request, 'wagtailnews/index.html', {
-        'newsindex': newsindex,
-        'page': page,
-        'paginator': paginator,
-        'newsitem_list': page.object_list,
-        'newsitem_perms': perms_for_template(request, NewsItem),
-        'query_string': query,
-    })
+    return render(
+        request,
+        "wagtailnews/index.html",
+        {
+            "newsindex": newsindex,
+            "page": page,
+            "paginator": paginator,
+            "newsitem_list": page.object_list,
+            "newsitem_perms": perms_for_template(request, NewsItem),
+            "query_string": query,
+        },
+    )
 
 
 def get_newsitem_model(model_string):
@@ -126,13 +207,13 @@ def get_newsitem_model(model_string):
         NewsItem = apps.get_model(model_string)
         assert issubclass(NewsItem, AbstractNewsItem)
     except (ValueError, LookupError, AssertionError):
-        raise ValueError('Invalid news item model string'.format(model_string))
+        raise ValueError("Invalid news item model string".format(model_string))
     return NewsItem
 
 
 def choose_modal(request):
     try:
-        newsitem_model_string = request.GET['type']
+        newsitem_model_string = request.GET["type"]
         NewsItem = get_newsitem_model(newsitem_model_string)
     except (ValueError, KeyError):
         raise Http404
@@ -142,11 +223,11 @@ def choose_modal(request):
     # Search
     is_searching = False
     search_query = None
-    if 'q' in request.GET:
+    if "q" in request.GET:
         search_form = SearchForm(request.GET, placeholder="Search news")
 
         if search_form.is_valid():
-            search_query = search_form.cleaned_data['q']
+            search_query = search_form.cleaned_data["q"]
 
             search_backend = get_search_backend()
             newsitem_list = search_backend.search(search_query, newsitem_list)
@@ -160,39 +241,52 @@ def choose_modal(request):
 
     # If paginating or searching, render "results.html" - these views are
     # accessed via AJAX so do not need the modal wrapper
-    if request.GET.get('results', None) == 'true':
-        return render(request, "wagtailnews/chooser/search_results.html", {
-            'query_string': search_query,
-            'items': paginated_items,
-            'is_searching': is_searching,
-        })
+    if request.GET.get("results", None) == "true":
+        return render(
+            request,
+            "wagtailnews/chooser/search_results.html",
+            {
+                "query_string": search_query,
+                "items": paginated_items,
+                "is_searching": is_searching,
+            },
+        )
 
     return render_modal_workflow(
         request,
-        'wagtailnews/chooser/chooser.html', 'wagtailnews/chooser/choose.js',
+        "wagtailnews/chooser/chooser.html",
+        "wagtailnews/chooser/choose.js",
         {
-            'query_string': search_query,
-            'newsitem_type': newsitem_model_string,
-            'items': paginated_items,
-            'is_searchable': True,
-            'is_searching': is_searching,
-            'search_form': search_form,
-        }
+            "query_string": search_query,
+            "newsitem_type": newsitem_model_string,
+            "items": paginated_items,
+            "is_searchable": True,
+            "is_searching": is_searching,
+            "search_form": search_form,
+        },
     )
 
 
 def chosen_modal(request, pk, newsitem_pk):
-    newsindex = get_object_or_404(
-        Page.objects.specific().type(NewsIndexMixin), pk=pk)
+    newsindex = get_object_or_404(Page.objects.specific().type(NewsIndexMixin), pk=pk)
     NewsItem = newsindex.get_newsitem_model()
 
     newsitem = get_object_or_404(NewsItem, pk=newsitem_pk)
 
-    return render_modal_workflow(request, None, 'wagtailnews/chooser/chosen.js', {
-        'newsitem_json': json.dumps({
-            'id': newsitem.id,
-            'string': str(newsitem),
-            'edit_link': reverse('wagtailnews:edit', kwargs={
-                'pk': newsindex.pk, 'newsitem_pk': newsitem.pk}),
-        }),
-    })
+    return render_modal_workflow(
+        request,
+        None,
+        "wagtailnews/chooser/chosen.js",
+        {
+            "newsitem_json": json.dumps(
+                {
+                    "id": newsitem.id,
+                    "string": str(newsitem),
+                    "edit_link": reverse(
+                        "wagtailnews:edit",
+                        kwargs={"pk": newsindex.pk, "newsitem_pk": newsitem.pk},
+                    ),
+                }
+            ),
+        },
+    )

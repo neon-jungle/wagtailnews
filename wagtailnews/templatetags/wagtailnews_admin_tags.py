@@ -35,20 +35,27 @@ def newsitem_status(newsitem, link=True):
 
     if link:
         for button in buttons:
+            # Both WT4 + 5 version classes
+            class_names = "status-tag w-status"
+            if button["primary"]:
+                class_names += " primary w-status--primary"
             output.append(
                 format_html(
                     '<a href="{}" target="_blank" class="{}">{}</a>',
                     button["href"],
-                    "status-tag primary" if button["primary"] else "status-tag",
+                    class_names,
                     button["text"],
                 )
             )
     else:
         for button in buttons:
+            class_names = "status-tag w-status"
+            if button["primary"]:
+                class_names += " primary w-status--primary"
             output.append(
                 format_html(
                     '<span class="{}">{}</span>',
-                    "status-tag primary" if button["primary"] else "status-tag",
+                    class_names,
                     button["text"],
                 )
             )

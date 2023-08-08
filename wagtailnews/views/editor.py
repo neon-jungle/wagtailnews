@@ -1,11 +1,13 @@
 from functools import lru_cache
 from io import StringIO
+from typing import Any
 from urllib.parse import urlparse
 
 from django.conf import settings
 from django.core.exceptions import PermissionDenied
 from django.core.handlers.base import BaseHandler
 from django.core.handlers.wsgi import WSGIRequest
+from django.db import models
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
@@ -31,6 +33,69 @@ def get_newsitem_edit_handler(NewsItem):
 
     panels = extract_panel_definitions_from_model_class(NewsItem, exclude=["newsindex"])
     return ObjectList(panels).bind_to_model(NewsItem)
+
+
+from wagtail.admin.views.generic import CreateView
+
+
+class CreateNewsItemView(CreateView):
+    template_name = "wagtailnews/create.html"
+
+    def dispatch(self, request, *args, **kwargs):
+        self.newsindex = get_object_or_404(
+            Page.objects.specific().type(NewsIndexMixin), pk=self.kwargs["pk"]
+        )
+        if not self.request.user.has_perms(
+            format_perms(self.newsindex.get_newsitem_model(), ["add", "change"])
+        ):
+            raise PermissionDenied()
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_add_url(self):
+        return reverse("wagtailnews:create", kwargs={"pk": self.kwargs["pk"]})
+
+    def get_edit_url(self):
+        return reverse(
+            "wagtailnews:edit",
+            kwargs={"pk": self.kwargs["pk"], "newsitem_pk": self.object.pk},
+        )
+
+    def get_success_url(self):
+        return reverse("wagtailnews:index", kwargs={"pk": self.kwargs["pk"]})
+
+    def get_form_class(self):
+        NewsItem = self.newsindex.get_newsitem_model()
+        edit_handler = get_newsitem_edit_handler(NewsItem)
+        return edit_handler.get_form_class()
+
+    def get_success_message(self, instance):
+        if instance.live:
+            return _('The news post "{0!s}" has been published').format(instance)
+        else:
+            return _('A draft news post "{0!s}" has been created').format(instance)
+
+    def save_instance(self):
+        newsitem = self.form.save(commit=False)
+        action = SaveActionSet.from_post_data(self.request.POST)
+        newsitem.live = action is SaveActionSet.publish
+        newsitem.newsindex = self.newsindex
+        newsitem.save()
+        newsitem.save_revision(user=self.request.user)
+
+        NewsItem = self.newsindex.get_newsitem_model()
+
+        # TODO replace with DraftStateMixin, PreviewMixin
+        if action is SaveActionSet.publish:
+            signals.newsitem_published.send(
+                sender=NewsItem, instance=newsitem, created=True
+            )
+
+        elif action is SaveActionSet.draft:
+            signals.newsitem_draft_saved.send(
+                sender=NewsItem, instance=newsitem, created=True
+            )
+
+        return newsitem
 
 
 def create(request, pk):
@@ -227,29 +292,44 @@ def unpublish(request, pk, newsitem_pk):
     )
 
 
-def delete(request, pk, newsitem_pk):
-    newsindex = get_object_or_404(Page.objects.specific().type(NewsIndexMixin), pk=pk)
-    NewsItem = newsindex.get_newsitem_model()
+from wagtail.admin.views.generic import DeleteView
 
-    if not request.user.has_perms(format_perms(NewsItem, ["delete"])):
-        raise PermissionDenied()
 
-    newsitem = get_object_or_404(NewsItem, newsindex=newsindex, pk=newsitem_pk)
+class NewsItemDeleteView(DeleteView):
+    def user_has_permission(self, permission):
+        return super().user_has_permission(permission)
 
-    if request.method == "POST":
-        newsitem.delete()
-        signals.newsitem_deleted.send(sender=NewsItem, instance=newsitem)
-        return redirect("wagtailnews:index", pk=pk)
+    def get_success_url(self):
+        return reverse("wagtailnews:index", kwargs={"pk": self.newsindex.pk})
 
-    return render(
-        request,
-        "wagtailnews/delete.html",
-        {
-            "newsindex": newsindex,
-            "newsitem": newsitem,
-            "newsitem_perms": perms_for_template(request, NewsItem),
-        },
-    )
+    def get_delete_url(self):
+        return reverse(
+            "wagtailnews:delete",
+            kwargs={"pk": self.newsindex.pk, "newsitem_pk": self.object.pk},
+        )
+
+    def setup(self, request, *args, **kwargs):
+        self.newsindex = get_object_or_404(
+            Page.objects.specific().type(NewsIndexMixin), pk=kwargs["pk"]
+        )
+        self.object = get_object_or_404(
+            self.newsindex.get_newsitem_model(),
+            newsindex=self.newsindex,
+            pk=kwargs["newsitem_pk"],
+        )
+        return super().setup(request, *args, **kwargs)
+
+    def dispatch(self, request, *args, **kwargs):
+        NewsItem = self.newsindex.get_newsitem_model()
+        if not self.request.user.has_perms(format_perms(NewsItem, ["delete"])):
+            raise PermissionDenied()
+        return super().dispatch(request, *args, **kwargs)
+
+    def delete_action(self):
+        super().delete_action()
+        signals.newsitem_deleted.send(
+            sender=self.newsindex.get_newsitem_model(), instance=self.object
+        )
 
 
 def view_draft(request, pk, newsitem_pk):

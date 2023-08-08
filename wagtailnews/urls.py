@@ -6,15 +6,21 @@ app_name = "wagtailnews"
 urlpatterns = [
     re_path(r"^$", chooser.choose, name="choose"),
     re_path(r"^search/$", chooser.search, name="search"),
-    re_path(r"^(?P<pk>\d+)/$", chooser.index, name="index"),
-    re_path(r"^(?P<pk>\d+)/create/$", editor.create, name="create"),
+    re_path(r"^(?P<pk>\d+)/$", chooser.NewsItemIndexView.as_view(), name="index"),
+    re_path(
+        r"^(?P<pk>\d+)/create/$", editor.CreateNewsItemView.as_view(), name="create"
+    ),
     re_path(r"^(?P<pk>\d+)/edit/(?P<newsitem_pk>.*)/$", editor.edit, name="edit"),
     re_path(
         r"^(?P<pk>\d+)/unpublish/(?P<newsitem_pk>.*)/$",
         editor.unpublish,
         name="unpublish",
     ),
-    re_path(r"^(?P<pk>\d+)/delete/(?P<newsitem_pk>.*)/$", editor.delete, name="delete"),
+    re_path(
+        r"^(?P<pk>\d+)/delete/(?P<newsitem_pk>.*)/$",
+        editor.NewsItemDeleteView.as_view(),
+        name="delete",
+    ),
     re_path(
         r"^(?P<pk>\d+)/view_draft/(?P<newsitem_pk>.*)/$",
         editor.view_draft,

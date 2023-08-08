@@ -1,6 +1,7 @@
 {% load i18n %}
 {% load wagtailnews_admin_tags %}
 
+{% if newsitem_list %}
 <table class="listing full-width">
     <colgroup>
     <thead><tr class="table-headers">
@@ -9,7 +10,7 @@
         <th class="date">Status</th>
     </tr></thead>
     <tbody>
-    {% for newsitem in newsitem_list %}
+    {% for newsitem in object_list %}
         <tr>
             <td class="title">
                 <h2>
@@ -44,3 +45,11 @@
     {% endfor %}
     </tbody>
 </table>
+{% else %}
+{% if is_searching %}
+<div class="nice-padding">No news posts found.</div>
+{% else %}
+<div class="nice-padding">No news posts yet!</div>
+{% endif %}
+{% endif %}
+
