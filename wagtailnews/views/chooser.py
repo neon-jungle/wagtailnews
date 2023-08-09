@@ -231,6 +231,17 @@ class NewsItemChooseView(BaseNewsItemChooserMixin, chooser_views.ChooseView):
     pass
 
 
+class NewsItemChosenView(chooser_views.ChosenView):
+    def get_edit_item_url(self, instance):
+        return reverse(
+            "wagtailnews:edit",
+            kwargs={
+                "pk": instance.newsindex.pk,
+                "newsitem_pk": instance.pk,
+            },
+        )
+
+
 def choooser_viewset_factory(model):
     model_name = model.__name__
     nice_name = model._meta.verbose_name
@@ -246,6 +257,6 @@ def choooser_viewset_factory(model):
             "link_to_chosen_text": f"Edit this {nice_name}",
             "choose_view_class": NewsItemChooseView,
             "choose_results_view_class": NewsItemChooseResultsView,
-            # "base_block_class": DeconstructibleChooserBlock,
+            "chosen_view_class": NewsItemChosenView,
         },
     )(f"{model_name.lower()}_chooser")

@@ -17,6 +17,8 @@ from wagtailnews.models import (
     AbstractNewsItemRevision,
     NewsIndexMixin,
 )
+from wagtailnews.blocks import NewsChooserBlock
+from wagtail.fields import StreamField
 
 from . import feeds
 
@@ -36,9 +38,16 @@ class NewsIndex(NewsIndexMixin, Page):
     featured_newsitem = models.ForeignKey(
         "NewsItem", blank=True, null=True, on_delete=models.SET_NULL, related_name="+"
     )
+    body = StreamField(
+        [
+            ("featured", NewsChooserBlock("app.NewsItem")),
+        ],
+        use_json_field=True,
+    )
 
     content_panels = Page.content_panels + [
         FieldPanel("featured_newsitem"),
+        FieldPanel("body"),
     ]
 
     def get_context(self, request, *args, **kwargs):
