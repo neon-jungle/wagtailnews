@@ -25,23 +25,7 @@
     {% csrf_token %}
 
     <div class="nice-padding">
-        {% csrf_token %}
-
-        {% block non_field_errors %}
-            {% for error in form.non_field_errors %}
-                {% help_block status="critical" %}{{ error }}{% endhelp_block %}
-            {% endfor %}
-        {% endblock %}
-        {% block hidden_fields %}
-            {% for field in form.hidden_fields %}{{ field }}{% endfor %}
-        {% endblock %}
-        <ul class="fields">
-            {% for field in form.visible_fields %}
-                <li>
-                    {% include "wagtailadmin/shared/field.html" %}
-                </li>
-            {% endfor %}
-        </ul>
+        {{ panel.render_form_content }}
     </div>
 <footer class="footer">
     <ul>

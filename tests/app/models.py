@@ -12,7 +12,6 @@ from wagtail.models import Page
 from wagtail.search import index
 
 from wagtailnews.decorators import newsindex
-from wagtailnews.edit_handlers import NewsChooserPanel
 from wagtailnews.models import (
     AbstractNewsItem,
     AbstractNewsItemRevision,

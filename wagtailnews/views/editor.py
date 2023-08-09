@@ -18,7 +18,7 @@ from ..forms import SaveActionSet
 from ..models import NewsIndexMixin
 
 
-@lru_cache(maxsize=None)
+# @lru_cache(maxsize=None)
 def get_newsitem_edit_handler(NewsItem):
     if hasattr(NewsItem, "edit_handler"):
         return NewsItem.edit_handler.bind_to_model(NewsItem)
@@ -29,9 +29,6 @@ def get_newsitem_edit_handler(NewsItem):
 
 class NewItemPermissionMixin:
     def dispatch(self, request, *args, **kwargs):
-        self.newsindex = get_object_or_404(
-            Page.objects.specific().type(NewsIndexMixin), pk=self.kwargs["pk"]
-        )
         if not self.request.user.has_perms(
             format_perms(self.newsindex.get_newsitem_model(), self.permissions_required)
         ):
@@ -66,12 +63,19 @@ class PreviewSidePanel(BasePreviewSidePanel):
 
 class NewsItemSidePanels(BaseSidePanels):
     def __init__(self, request, object, newsindex):
+        # TODO status panel should be pretty easy, it's the default in BaseSidePanels
         self.side_panels = [
             PreviewSidePanel(object, request, newsindex),
         ]
 
 
 class NewsItemAdminMixin:
+    def setup(self, request, *args, **kwargs):
+        self.newsindex = get_object_or_404(
+            Page.objects.specific().type(NewsIndexMixin), pk=kwargs["pk"]
+        )
+        super().setup(request, *args, **kwargs)
+
     def get_add_url(self):
         return reverse("wagtailnews:create", kwargs={"pk": self.kwargs["pk"]})
 
@@ -84,10 +88,9 @@ class NewsItemAdminMixin:
     def get_success_url(self):
         return reverse("wagtailnews:index", kwargs={"pk": self.kwargs["pk"]})
 
-    def get_form_class(self):
+    def get_panel(self):
         NewsItem = self.newsindex.get_newsitem_model()
-        edit_handler = get_newsitem_edit_handler(NewsItem)
-        return edit_handler.get_form_class()
+        return get_newsitem_edit_handler(NewsItem)
 
     def save_instance(self):
         newsitem = self.form.save(commit=False)
@@ -99,7 +102,7 @@ class NewsItemAdminMixin:
 
         NewsItem = self.newsindex.get_newsitem_model()
 
-        # TODO replace with DraftStateMixin, PreviewMixin
+        # TODO replace with DraftStateMixin
         if action is SaveActionSet.publish:
             signals.newsitem_published.send(
                 sender=NewsItem, instance=newsitem, created=True
@@ -119,7 +122,7 @@ class NewsItemAdminMixin:
             {
                 "newsindex": self.newsindex,
                 "newsitem_opts": self.newsindex.get_newsitem_model()._meta,
-                "in_explorer": True,  # hide minimap
+                # "in_explorer": True,  # hide minimap
                 "side_panels": side_panels,
             }
         )

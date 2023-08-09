@@ -65,13 +65,9 @@ def _search_newsitems(request, newsitem_models, query):
     backend = get_search_backend()
 
     for NewsItem in newsitem_models:
-        results = backend.search(query, NewsItem)[:10]
-        if results:
-            yield (
-                NewsItem._meta.verbose_name_plural,
-                perms_for_template(request, NewsItem),
-                results,
-            )
+        results = backend.autocomplete(query, NewsItem)[:10]
+        for r in results:
+            yield r
 
 
 def search(request):
@@ -87,17 +83,26 @@ def search(request):
     newsitem_models = [
         NewsIndex.get_newsitem_model() for NewsIndex in allowed_news_types
     ]
-    newsitem_results = list(_search_newsitems(request, newsitem_models, query))
+    if query:
+        newsitem_results = list(_search_newsitems(request, newsitem_models, query))
+    else:
+        newsitem_results = []
+
+    if request.META.get("HTTP_X_REQUESTED_WITH") == "XMLHttpRequest":
+        template = "wagtailnews/newsitem_list.html"
+    else:
+        template = "wagtailnews/search.html"
 
     return render(
         request,
-        "wagtailnews/search.html",
+        template,
         {
             "single_result_type": len(newsitem_results) == 1,
             "single_newsitem_model": len(newsitem_models) == 1,
-            "newsitem_results": newsitem_results,
+            "object_list": newsitem_results,
             "search_form": SearchForm(request.GET if request.GET else None),
             "query_string": query,
+            "is_searching": True,
         },
     )
 

@@ -1,7 +1,7 @@
 {% load i18n %}
 {% load wagtailnews_admin_tags %}
 
-{% if newsitem_list %}
+{% if object_list %}
 <table class="listing full-width">
     <colgroup>
     <thead><tr class="table-headers">
@@ -14,24 +14,22 @@
         <tr>
             <td class="title">
                 <h2>
-                    {% if newsitem_perms.change %}
-                        <a href="{% url 'wagtailnews:edit' pk=newsitem.newsindex_id newsitem_pk=newsitem.pk %}">
-                            {{ newsitem }}
-                        </a>
-                    {% else %}
+                    <a href="{% url 'wagtailnews:edit' pk=newsitem.newsindex_id newsitem_pk=newsitem.pk %}">
                         {{ newsitem }}
-                    {% endif %}
+                    </a>
                 </h2>
                 <ul class="actions">
-                    {% if newsitem_perms.change %}
-                        <li><a href="{% url 'wagtailnews:edit' pk=newsitem.newsindex_id newsitem_pk=newsitem.pk %}" class="button button-small">{% trans 'Edit' %}</a></li>
-                    {% endif %}
-                    <li><a href="{% url 'wagtailnews:view_draft' pk=newsitem.newsindex_id newsitem_pk=newsitem.pk %}" class="button button-small button-secondary">{% trans 'View' %}</a></li>
-                    {% if newsitem_perms.delete %}
-                        <li><a href="{% url 'wagtailnews:delete' pk=newsitem.newsindex_id newsitem_pk=newsitem.pk %}" class="button button-small button-secondary no">{% trans 'Delete' %}</a></li>
-                    {% endif %}
-                    {% if newsitem.live and newsitem_perms.change %}
-                        <li><a href="{% url 'wagtailnews:unpublish' pk=newsitem.newsindex_id newsitem_pk=newsitem.pk %}" class="button button-small button-secondary no">{% trans 'Unpublish' %}</a></li>
+                    {% if newsitem_perms %} {% comment %} Only add the buttons when listed from an index {% endcomment %}
+                        {% if newsitem_perms.change %}
+                            <li><a href="{% url 'wagtailnews:edit' pk=newsitem.newsindex_id newsitem_pk=newsitem.pk %}" class="button button-small">{% trans 'Edit' %}</a></li>
+                        {% endif %}
+                        <li><a href="{% url 'wagtailnews:view_draft' pk=newsitem.newsindex_id newsitem_pk=newsitem.pk %}" class="button button-small button-secondary">{% trans 'View' %}</a></li>
+                        {% if newsitem_perms.delete %}
+                            <li><a href="{% url 'wagtailnews:delete' pk=newsitem.newsindex_id newsitem_pk=newsitem.pk %}" class="button button-small button-secondary no">{% trans 'Delete' %}</a></li>
+                        {% endif %}
+                        {% if newsitem.live and newsitem_perms.change %}
+                            <li><a href="{% url 'wagtailnews:unpublish' pk=newsitem.newsindex_id newsitem_pk=newsitem.pk %}" class="button button-small button-secondary no">{% trans 'Unpublish' %}</a></li>
+                        {% endif %}
                     {% endif %}
                 </ul>
             </td>
