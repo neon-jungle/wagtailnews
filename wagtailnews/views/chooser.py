@@ -1,24 +1,25 @@
-import json
 import logging
-from typing import Any
 
-from django.apps import apps
+from wagtail.admin.ui.tables import Column
+from wagtail.admin.viewsets.chooser import ChooserViewSet
+from wagtail.admin.views.generic import chooser as chooser_views
+from django import forms
+
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import PermissionDenied
-from django.http import Http404
+
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from wagtail.admin.forms.search import SearchForm
-from wagtail.admin.modal_workflow import render_modal_workflow
+
 from wagtail.admin.views.generic import IndexView
 from wagtail.models import Page
 from wagtail.search.backends import get_search_backend
 
-from wagtailnews.conf import paginate
 
-from ..models import NEWSINDEX_MODEL_CLASSES, AbstractNewsItem, NewsIndexMixin
+from ..models import NEWSINDEX_MODEL_CLASSES, NewsIndexMixin
 from ..permissions import perms_for_template, user_can_edit_news, user_can_edit_newsitem
 
 LOGGER = logging.getLogger(__name__)
@@ -135,7 +136,7 @@ class NewsItemIndexView(IndexView):
         search_query = self.request.GET.get("q", "")
         if search_query:
             backend = get_search_backend()
-            queryset = backend.search(search_query, queryset)
+            queryset = backend.autocomplete(search_query, queryset)
             return queryset.get_queryset()
         return queryset
 
@@ -161,95 +162,85 @@ class NewsItemIndexView(IndexView):
         return context
 
 
-def get_newsitem_model(model_string):
-    """
-    Get the NewsItem model from a model string. Raises ValueError if the model
-    string is invalid, or references a model that is not a NewsItem.
-    """
-    try:
-        NewsItem = apps.get_model(model_string)
-        assert issubclass(NewsItem, AbstractNewsItem)
-    except (ValueError, LookupError, AssertionError):
-        raise ValueError("Invalid news item model string".format(model_string))
-    return NewsItem
+class IndexFilterMixin(forms.Form):
+    def __init__(self, *args, indexes=None, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        if indexes:
+            index_choices = [("", _("All indexes"))] + [
+                (index.id, index) for index in indexes
+            ]
+            self.fields["index_id"] = forms.ChoiceField(
+                label=_("News page"),
+                choices=index_choices,
+                required=False,
+                widget=forms.Select(attrs={"data-chooser-modal-search-filter": True}),
+            )
+
+    def filter(self, objects):
+        index_id = self.cleaned_data.get("index_id")
+        if index_id:
+            objects = objects.filter(newsindex=index_id)
+        return super().filter(objects)
 
 
-def choose_modal(request):
-    try:
-        newsitem_model_string = request.GET["type"]
-        NewsItem = get_newsitem_model(newsitem_model_string)
-    except (ValueError, KeyError):
-        raise Http404
+class BaseNewsItemChooserMixin:
+    def get_filter_form_class(self):
+        filter_class = super().get_filter_form_class()
 
-    newsitem_list = NewsItem.objects.all()
+        allowed_news_types = get_allowed_news_types(self.request.user)
 
-    # Search
-    is_searching = False
-    search_query = None
-    if "q" in request.GET:
-        search_form = SearchForm(request.GET, placeholder="Search news")
+        allowed_cts = ContentType.objects.get_for_models(*allowed_news_types).values()
+        self.newsindex_list = Page.objects.filter(
+            content_type__in=allowed_cts
+        ).specific()
+        newsindex_count = self.newsindex_list.count()
+        if newsindex_count > 1:
+            return type(
+                "FilterForm",
+                (IndexFilterMixin, filter_class),
+                {},
+            )
+        return filter_class
 
-        if search_form.is_valid():
-            search_query = search_form.cleaned_data["q"]
+    def get_filter_form(self):
+        FilterForm = self.get_filter_form_class()
+        if self.newsindex_list.count() > 1:
+            return FilterForm(self.request.GET, indexes=self.newsindex_list)
+        return FilterForm(self.request.GET)
 
-            search_backend = get_search_backend()
-            newsitem_list = search_backend.search(search_query, newsitem_list)
-            is_searching = True
+    @property
+    def columns(self):
+        columns = [self.title_column]
+        columns += [Column("status", label=_("Status"), accessor="status_button")]
+        return columns
 
-    else:
-        search_form = SearchForm()
 
-    # Pagination
-    paginator, paginated_items = paginate(request, newsitem_list, per_page=10)
+class NewsItemChooseResultsView(
+    BaseNewsItemChooserMixin, chooser_views.ChooseResultsView
+):
+    pass
 
-    # If paginating or searching, render "results.html" - these views are
-    # accessed via AJAX so do not need the modal wrapper
-    if request.GET.get("results", None) == "true":
-        return render(
-            request,
-            "wagtailnews/chooser/search_results.html",
-            {
-                "query_string": search_query,
-                "items": paginated_items,
-                "is_searching": is_searching,
-            },
-        )
 
-    return render_modal_workflow(
-        request,
-        "wagtailnews/chooser/chooser.html",
-        "wagtailnews/chooser/choose.js",
+class NewsItemChooseView(BaseNewsItemChooserMixin, chooser_views.ChooseView):
+    pass
+
+
+def choooser_viewset_factory(model):
+    model_name = model.__name__
+    nice_name = model._meta.verbose_name
+
+    return type(
+        f"{model_name}ChooserViewSet",
+        (ChooserViewSet,),
         {
-            "query_string": search_query,
-            "newsitem_type": newsitem_model_string,
-            "items": paginated_items,
-            "is_searchable": True,
-            "is_searching": is_searching,
-            "search_form": search_form,
+            "model": model,
+            "icon": "grip",
+            "choose_one_text": f"Choose {nice_name}",
+            "choose_another_text": f"Choose another {nice_name}",
+            "link_to_chosen_text": f"Edit this {nice_name}",
+            "choose_view_class": NewsItemChooseView,
+            "choose_results_view_class": NewsItemChooseResultsView,
+            # "base_block_class": DeconstructibleChooserBlock,
         },
-    )
-
-
-def chosen_modal(request, pk, newsitem_pk):
-    newsindex = get_object_or_404(Page.objects.specific().type(NewsIndexMixin), pk=pk)
-    NewsItem = newsindex.get_newsitem_model()
-
-    newsitem = get_object_or_404(NewsItem, pk=newsitem_pk)
-
-    return render_modal_workflow(
-        request,
-        None,
-        "wagtailnews/chooser/chosen.js",
-        {
-            "newsitem_json": json.dumps(
-                {
-                    "id": newsitem.id,
-                    "string": str(newsitem),
-                    "edit_link": reverse(
-                        "wagtailnews:edit",
-                        kwargs={"pk": newsindex.pk, "newsitem_pk": newsitem.pk},
-                    ),
-                }
-            ),
-        },
-    )
+    )(f"{model_name.lower()}_chooser")

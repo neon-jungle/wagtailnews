@@ -41,11 +41,4 @@ urlpatterns = [
         editor.PreviewOnCreate.as_view(),
         name="preview_on_create",
     ),
-    # Choosers
-    re_path(r"^chooser/$", chooser.choose_modal, name="chooser"),
-    re_path(
-        r"^chooser/(?P<pk>\d+)/(?P<newsitem_pk>\d+)/$",
-        chooser.chosen_modal,
-        name="chosen",
-    ),
 ]

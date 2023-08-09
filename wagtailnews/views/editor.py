@@ -283,4 +283,4 @@ class PreviewOnCreate(PreviewOnEdit):
         return f"{self.session_key_prefix}{app_label}-{model_name}"
 
     def get_object(self):
-        return self.newsindex.get_newsitem_model()()
+        return self.newsindex.get_newsitem_model()(newsindex=self.newsindex)

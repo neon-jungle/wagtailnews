@@ -8,6 +8,8 @@ from django.utils.translation import gettext_lazy as _
 from wagtail import hooks
 from wagtail.admin.search import SearchArea
 
+from wagtailnews.views.chooser import choooser_viewset_factory
+
 from . import urls
 from .menu import NewsMenuItem
 from .models import NEWSINDEX_MODEL_CLASSES
@@ -36,7 +38,7 @@ class NewsItemSearchArea(SearchArea):
             reverse("wagtailnews:search"),
             classnames="icon icon-grip",
             order=250,
-            **kwargs
+            **kwargs,
         )
 
     def is_shown(self, request):
@@ -56,16 +58,9 @@ def newsitem_permissions():
     return Permission.objects.filter(content_type__in=newsitem_cts)
 
 
-@hooks.register("insert_editor_js")
-def editor_js():
-    js_files = [
-        static("js/news_chooser.js"),
+@hooks.register("register_admin_viewset")
+def register_newsitem_chooser_viewsets():
+    return [
+        choooser_viewset_factory(model.get_newsitem_model())
+        for model in NEWSINDEX_MODEL_CLASSES
     ]
-    js_includes = format_html_join(
-        "\n", '<script src="{0}"></script>\n', ((filename,) for filename in js_files)
-    )
-    urls = format_html(
-        '<script>window.chooserUrls.newsChooser = "{}";</script>',
-        reverse("wagtailnews:chooser"),
-    )
-    return js_includes + urls

@@ -39,7 +39,7 @@ class NewsIndex(NewsIndexMixin, Page):
     )
 
     content_panels = Page.content_panels + [
-        NewsChooserPanel("featured_newsitem"),
+        FieldPanel("featured_newsitem"),
     ]
 
     def get_context(self, request, *args, **kwargs):
@@ -68,7 +68,7 @@ class NewsItem(AbstractNewsItem):
     ]
 
     search_fields = AbstractNewsItem.search_fields + [
-        index.SearchField("title"),
+        index.AutocompleteField("title"),
     ]
 
     def __str__(self):

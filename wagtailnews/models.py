@@ -22,6 +22,8 @@ from wagtail.models import PreviewableMixin
 from . import feeds
 from .conf import paginate
 from .deprecation import DeprecatedCallableStr
+from django.utils.html import format_html, mark_safe
+from django.urls import reverse
 
 NEWSINDEX_MODEL_CLASSES = []
 
@@ -268,6 +270,9 @@ class AbstractNewsItem(PreviewableMixin, index.Indexed, ClusterableModel):
         return TemplateResponse(request, template, context)
 
     def url_suffix(self):
+        if not self.pk:
+            # not yet saved (preview)
+            return ""
         newsindex = self.newsindex.specific
         ldate = timezone.localtime(self.date)
         return newsindex.reverse_subpage(
@@ -337,3 +342,58 @@ class AbstractNewsItem(PreviewableMixin, index.Indexed, ClusterableModel):
                 return _("live + draft")
             else:
                 return _("live")
+
+    def status_button(self, link=False):
+        buttons = []
+        output = []
+        if self.live:
+            buttons.append(
+                {
+                    "href": self.url,
+                    "primary": True,
+                    "text": _("live"),
+                }
+            )
+        if self.has_unpublished_changes or not self.live:
+            buttons.append(
+                {
+                    "href": reverse(
+                        "wagtailnews:view_draft",
+                        kwargs={
+                            "pk": self.newsindex.pk,
+                            "newsitem_pk": self.pk,
+                        },
+                    ),
+                    "primary": False,
+                    "text": _("draft"),
+                }
+            )
+
+        if link:
+            for button in buttons:
+                # Both WT4 + 5 version classes
+                class_names = "status-tag w-status"
+                if button["primary"]:
+                    class_names += " primary w-status--primary"
+                output.append(
+                    format_html(
+                        '<a href="{}" target="_blank" class="{}">{}</a>',
+                        button["href"],
+                        class_names,
+                        button["text"],
+                    )
+                )
+        else:
+            for button in buttons:
+                class_names = "status-tag w-status"
+                if button["primary"]:
+                    class_names += " primary w-status--primary"
+                output.append(
+                    format_html(
+                        '<span class="{}">{}</span>',
+                        class_names,
+                        button["text"],
+                    )
+                )
+
+        return mark_safe(" + ".join(output))
