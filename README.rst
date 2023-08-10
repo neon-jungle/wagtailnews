@@ -11,7 +11,7 @@ Install using pip::
 
     pip install wagtailnews
 
-It works with Wagtail 2.3 and upwards. For older versions of Wagtail see past releases.
+It works with Wagtail 4.0 and upwards. For older versions of Wagtail see past releases.
 
 Documentation
 =============
