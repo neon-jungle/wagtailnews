@@ -8,44 +8,79 @@ import wagtailnews.blocks
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('taggit', '0005_auto_20220424_2025'),
+        ("taggit", "0005_auto_20220424_2025"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('wagtailcore', '0089_log_entry_data_json_null_to_object'),
-        ('app', '0001_initial'),
+        ("app", "0001_initial"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='newsindex',
-            name='body',
-            field=wagtail.fields.StreamField([('featured', wagtailnews.blocks.NewsChooserBlock(target_model='app.newsitem'))], default=[], use_json_field=True),
+            model_name="newsindex",
+            name="body",
+            field=wagtail.fields.StreamField(
+                [
+                    (
+                        "featured",
+                        wagtailnews.blocks.NewsChooserBlock(
+                            target_model="app.newsitem"
+                        ),
+                    )
+                ],
+                default=[],
+                use_json_field=True,
+            ),
             preserve_default=False,
         ),
         migrations.AlterField(
-            model_name='newsindextag',
-            name='tag',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='%(app_label)s_%(class)s_items', to='taggit.tag'),
+            model_name="newsindextag",
+            name="tag",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="%(app_label)s_%(class)s_items",
+                to="taggit.tag",
+            ),
         ),
         migrations.AlterField(
-            model_name='newsitem',
-            name='page',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='+', to='wagtailcore.page'),
+            model_name="newsitem",
+            name="page",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="+",
+                to="wagtailcore.page",
+            ),
         ),
         migrations.AlterField(
-            model_name='newsitemrevision',
-            name='user',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL, verbose_name='User'),
+            model_name="newsitemrevision",
+            name="user",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to=settings.AUTH_USER_MODEL,
+                verbose_name="User",
+            ),
         ),
         migrations.AlterField(
-            model_name='newsitemtag',
-            name='tag',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='%(app_label)s_%(class)s_items', to='taggit.tag'),
+            model_name="newsitemtag",
+            name="tag",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="%(app_label)s_%(class)s_items",
+                to="taggit.tag",
+            ),
         ),
         migrations.AlterField(
-            model_name='secondarynewsitemrevision',
-            name='user',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL, verbose_name='User'),
+            model_name="secondarynewsitemrevision",
+            name="user",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to=settings.AUTH_USER_MODEL,
+                verbose_name="User",
+            ),
         ),
     ]

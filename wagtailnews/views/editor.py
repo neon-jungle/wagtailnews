@@ -11,7 +11,7 @@ from wagtail.admin.views.generic import CreateView, DeleteView, EditView, Unpubl
 from wagtail.admin.views.generic.preview import PreviewOnEdit as GenericPreviewOnEdit
 from wagtail.models import Page
 
-from wagtailnews.permissions import format_perms
+from wagtailnews.permissions import format_perm, format_perms
 
 from .. import signals
 from ..forms import SaveActionSet
@@ -95,22 +95,28 @@ class NewsItemAdminMixin:
     def save_instance(self):
         newsitem = self.form.save(commit=False)
         action = SaveActionSet.from_post_data(self.request.POST)
-        newsitem.live = action is SaveActionSet.publish
-        newsitem.newsindex = self.newsindex
-        newsitem.save()
-        newsitem.save_revision(user=self.request.user)
+        created = False
+        if not newsitem.pk:
+            # Must be creation
+            created = True
+            newsitem.newsindex = self.newsindex
+            newsitem.live = action is SaveActionSet.publish
+            newsitem.newsindex = self.newsindex
+            newsitem.save()
 
         NewsItem = self.newsindex.get_newsitem_model()
+        revision = newsitem.save_revision(user=self.request.user)
 
         # TODO replace with DraftStateMixin
         if action is SaveActionSet.publish:
+            revision.publish()
             signals.newsitem_published.send(
-                sender=NewsItem, instance=newsitem, created=True
+                sender=NewsItem, instance=newsitem, created=created
             )
 
         elif action is SaveActionSet.draft:
             signals.newsitem_draft_saved.send(
-                sender=NewsItem, instance=newsitem, created=True
+                sender=NewsItem, instance=newsitem, created=created
             )
 
         return newsitem
@@ -159,7 +165,15 @@ class EditNewsItemView(NewItemPermissionMixin, NewsItemAdminMixin, EditView):
         self.object = self.newsindex.get_newsitem_model().objects.get(
             pk=self.kwargs["newsitem_pk"]
         )
-        return self.object
+        return self.object.get_latest_revision_as_newsitem()
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        context["can_delete"] = self.request.user.has_perm(
+            format_perm(self.newsindex.get_newsitem_model(), "delete")
+        )
+        return context
 
 
 class UnpublishNewsItemView(NewItemPermissionMixin, UnpublishView):

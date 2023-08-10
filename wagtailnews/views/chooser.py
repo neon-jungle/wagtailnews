@@ -20,7 +20,12 @@ from wagtail.search.backends import get_search_backend
 
 
 from ..models import NEWSINDEX_MODEL_CLASSES, NewsIndexMixin
-from ..permissions import perms_for_template, user_can_edit_news, user_can_edit_newsitem
+from ..permissions import (
+    format_perm,
+    perms_for_template,
+    user_can_edit_news,
+    user_can_edit_newsitem,
+)
 
 LOGGER = logging.getLogger(__name__)
 
@@ -127,7 +132,11 @@ class NewsItemIndexView(IndexView):
         return reverse("wagtailnews:edit", args=(instance.pk,))
 
     def get_add_url(self):
-        return reverse("wagtailnews:create", args=(self.kwargs["pk"],))
+        if self.request.user.has_perm(
+            format_perm(self.newsindex.get_newsitem_model(), "add")
+        ):
+            return reverse("wagtailnews:create", args=(self.kwargs["pk"],))
+        return None
 
     def get_base_queryset(self):
         newsindex = get_object_or_404(

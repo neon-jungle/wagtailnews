@@ -14,9 +14,17 @@
         <tr>
             <td class="title">
                 <h2>
-                    <a href="{% url 'wagtailnews:edit' pk=newsitem.newsindex_id newsitem_pk=newsitem.pk %}">
+                    {% if newsitem_perms %}
+                        {% if newsitem_perms.change %}
+                            <a href="{% url 'wagtailnews:edit' pk=newsitem.newsindex_id newsitem_pk=newsitem.pk %}">
+                                {{ newsitem }}
+                            </a>
+                        {% else %}
+                            {{ newsitem }}
+                        {% endif %}
+                    {% else %}
                         {{ newsitem }}
-                    </a>
+                    {% endif %}
                 </h2>
                 <ul class="actions">
                     {% if newsitem_perms %} {% comment %} Only add the buttons when listed from an index {% endcomment %}

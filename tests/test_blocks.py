@@ -6,7 +6,7 @@ from wagtailnews.blocks import NewsChooserBlock
 
 class TestNewsChooserBlock(TestCase):
     def test_target_model_string(self):
-        block = NewsChooserBlock(target_model='app.NewsItem')
+        block = NewsChooserBlock(target_model="app.NewsItem")
         self.assertIs(block.target_model, NewsItem)
 
     def test_target_model_literal(self):
@@ -16,6 +16,6 @@ class TestNewsChooserBlock(TestCase):
     def test_deconstruct(self):
         block = NewsChooserBlock(target_model=NewsItem)
         path, args, kwargs = block.deconstruct()
-        self.assertEqual(path, 'wagtailnews.blocks.NewsChooserBlock')
+        self.assertEqual(path, "wagtailnews.blocks.NewsChooserBlock")
         self.assertEqual(args, ())
-        self.assertEqual(kwargs, {'target_model': 'app.NewsItem'})
+        self.assertEqual(kwargs, {"target_model": "app.newsitem"})

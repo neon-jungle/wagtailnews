@@ -9,7 +9,14 @@
 
 
 {% block extra_actions %}
+{% if can_delete %}
 <li>
     <a href="{% url 'wagtailnews:delete' pk=newsindex.pk newsitem_pk=object.pk %}" class="button">{% trans "Delete" %}</a>
 </li>
+{% endif %}
+{% if object.live %}
+<li>
+    <a href="{% url "wagtailnews:unpublish" pk=newsindex.pk newsitem_pk=object.pk %}" class="button">{% trans "Unpublish" %}</a>
+</li>
+{% endif %}
 {% endblock %}

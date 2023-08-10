@@ -6,7 +6,6 @@ import datetime
 from django.test import TestCase
 from django.utils import timezone
 from urllib.parse import quote
-from django.utils.text import url
 from wagtail.models import Site
 from wagtail.test.utils import WagtailTestUtils
 
