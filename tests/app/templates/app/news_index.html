@@ -5,4 +5,5 @@
 {% for item in newsitem_list %}
 <h1>{{ item.title }}</h1>
 <p>{{ item.date.isoformat }}</p>
+<a href="{{ item.url }}">Read more</a>
 {% endfor %}

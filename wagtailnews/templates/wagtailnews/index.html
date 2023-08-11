@@ -1,48 +1,14 @@
-{% extends "wagtailadmin/base.html" %}
-{% load i18n %}
-{% load wagtailadmin_tags %}
-{% block titletag %}{% trans "News" %}{% endblock %}
-{% block bodyclass %}menu-news{% endblock %}
-{% block content %}
+{% extends "wagtailadmin/generic/index.html" %}
 
-    <header class="nice-padding merged">
-        <div class="row row-flush">
-            <div class="left">
-                <h1 class="col icon icon-grip">{% blocktrans %}News{% endblocktrans %} <span>{{ newsindex.url }}</span></h1>
-                <form class="col search-form" action="" method="GET">
-                    <ul class="fields">
-                        <li class="required">
-                            <div class="field char_field text_input field-small iconfield">
-                                <label for="id_q">
-                                    Search jobs
-                                </label>
-                                <div class="field-content">
-                                    <div class="input icon-search">
-                                        <input id="id_q"
-                                              name="q"
-                                              value="{{ request.GET.q }}"
-                                              placeholder="Search news"
-                                              type="text" />
-                                        <span></span>
-                                    </div>
-                                </div>
-                            </div>
-                        </li>
-                    </ul>
-                </form>
-            </div>
-            <div class="right">
-                {% if newsitem_perms.add and newsitem_perms.change %}
-                    <a href="{% url 'wagtailnews:create' newsindex.pk %}" class="col button bicolor icon icon-plus">{% blocktrans %}Add news post{% endblocktrans %}</a>
-                {% endif %}
-            </div>
+{% block header %}
+    {% include "wagtailadmin/shared/header.html" with title=page_title subtitle=page_subtitle action_url=header_action_url action_text=header_action_label icon=header_icon search=search only %}
+{% endblock %}
+
+{% comment %} Taken from WT5.1 {% endcomment %}
+{% block listing %}
+    <div class="nice-padding">
+        <div id="listing-results">
+            {% include view.results_template_name %}
         </div>
-    </header>
-
-    {% if newsitem_list %}
-        {% include "wagtailnews/newsitem_list.html" %}
-        {% paginate page page_key="page" %}
-    {% else %}
-        <div class="nice-padding">No news posts yet!</div>
-    {% endif %}
+    </div>
 {% endblock %}

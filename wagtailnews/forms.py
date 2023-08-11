@@ -13,7 +13,7 @@ class ActionSet(Enum):
 
     @property
     def form_name(self):
-        return 'action-' + self.name
+        return "action-" + self.name
 
 
 class SaveActionSet(ActionSet):

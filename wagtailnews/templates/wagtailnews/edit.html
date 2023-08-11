@@ -4,39 +4,19 @@
 {% block titletag %}{% blocktrans with newsitem=newsitem type=newsitem_opts.verbose_name %}Editing {{ type }}: {{ newsitem }}{% endblocktrans %}{% endblock %}
 {% trans "Edit" as new_str %}
 {% block header %}
-  {% include "wagtailadmin/shared/header.html" with title=new_str subtitle=newsitem icon="news" merged=True %}
-{% endblock %}
-
-{% block form_action %}{% url 'wagtailnews:edit' pk=newsindex.pk newsitem_pk=newsitem.pk %}{% endblock %}
-
-{% block form_actions %}
-<div class="dropdown dropup dropdown-button match-width">
-    <button class="button" type="submit" name="action-draft" value="draft">{% trans 'Save draft' %}</button>
-    <div class="dropdown-toggle icon icon-arrow-up"></div>
-    <ul role="menu">
-        {% if newsitem.live %}
-            <li><a href="{% url 'wagtailnews:unpublish' pk=newsindex.pk newsitem_pk=newsitem.pk %}" class="button no">{% trans 'Unpublish' %}</a></li>
-        {% endif %}
-        {% if newsitem_perms.delete %}
-            <li><a href="{% url 'wagtailnews:delete' pk=newsindex.pk newsitem_pk=newsitem.pk %}" class="button no">{% trans 'Delete' %}</a></li>
-        {% endif %}
-        <li><input class="button" type="submit" name="action-publish" value="{% trans 'Publish' %}" /></li>
-    </ul>
-</div>
+  {% include "wagtailadmin/shared/header.html" with title=new_str subtitle=newsitem icon="news" merged=True only %}
 {% endblock %}
 
 
-{% block extra_js %}
-    {{ block.super }}
-    {% if do_preview %}
-    <script>
-    $(function() {
-        setTimeout(function() {
-            var url = "{% url 'wagtailnews:view_draft' pk=newsindex.pk newsitem_pk=newsitem.pk %}";
-            var previewWindow = window.open(url, "wagtailnews:edit")
-            previewWindow.focus();
-        }, 10);
-    });
-    </script>
-    {% endif %}
+{% block extra_actions %}
+{% if can_delete %}
+<li>
+    <a href="{% url 'wagtailnews:delete' pk=newsindex.pk newsitem_pk=object.pk %}" class="button">{% trans "Delete" %}</a>
+</li>
+{% endif %}
+{% if object.live %}
+<li>
+    <a href="{% url "wagtailnews:unpublish" pk=newsindex.pk newsitem_pk=object.pk %}" class="button">{% trans "Unpublish" %}</a>
+</li>
+{% endif %}
 {% endblock %}

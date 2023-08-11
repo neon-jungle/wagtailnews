@@ -1,22 +1,23 @@
 import datetime
 import os
 import warnings
-from urllib.parse import urlparse
+from urllib.parse import quote, urlparse
 
 from django.conf import settings
 from django.db import models
 from django.http import Http404, HttpResponsePermanentRedirect
 from django.shortcuts import get_object_or_404
 from django.template.response import TemplateResponse
+from django.urls import reverse
 from django.utils import timezone
-from django.utils.http import urlquote
+from django.utils.html import format_html, mark_safe
 from django.utils.text import slugify
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from modelcluster.models import ClusterableModel
-from wagtail.admin.edit_handlers import FieldPanel
+from wagtail.admin.panels import FieldPanel
 from wagtail.contrib.routable_page.models import RoutablePageMixin, route
-from wagtail.core.models import Page
-from wagtail.core.utils import resolve_model_string
+from wagtail.coreutils import resolve_model_string
+from wagtail.models import Page, PreviewableMixin
 from wagtail.search import index
 
 from . import feeds
@@ -35,7 +36,6 @@ def get_date_or_404(year, month, day):
 
 
 class NewsIndexMixin(RoutablePageMixin):
-
     class Meta:
         pass
 
@@ -54,27 +54,28 @@ class NewsIndexMixin(RoutablePageMixin):
         """
         return self.get_newsitems().live().filter(date__lte=timezone.now())
 
-    def get_template(self, request, view='all', **kwargs):
+    def get_template(self, request, view="all", **kwargs):
         template = super(NewsIndexMixin, self).get_template(
-            request, view=view, **kwargs)
+            request, view=view, **kwargs
+        )
 
         base, ext = os.path.splitext(template)
 
         # Will make something like:
         # ["news/news_index_month.html", "news/news_index.html"]
-        return ['{}_{}{}'.format(base, view, ext), template]
+        return ["{}_{}{}".format(base, view, ext), template]
 
     def get_context(self, request, view, **kwargs):
         context = super(NewsIndexMixin, self).get_context(request, **kwargs)
-        context.update({'newsitem_view': view})
+        context.update({"newsitem_view": view})
         return context
 
     def paginate_newsitems(self, request, newsitem_list):
         paginator, page = paginate(request, newsitem_list)
         return {
-            'paginator': paginator,
-            'newsitem_page': page,
-            'newsitem_list': page.object_list,
+            "paginator": paginator,
+            "newsitem_page": page,
+            "newsitem_list": page.object_list,
         }
 
     def respond(self, request, view, newsitems, extra_context={}):
@@ -85,44 +86,49 @@ class NewsIndexMixin(RoutablePageMixin):
         template = self.get_template(request, view=view)
         return TemplateResponse(request, template, context)
 
-    @route(r'^$', name='index')
+    @route(r"^$", name="index")
     def v_index(self, request):
-        return self.respond(request, 'all', self.get_newsitems_for_display())
+        return self.respond(request, "all", self.get_newsitems_for_display())
 
-    @route(r'^(?P<year>\d{4})/$', name='year')
+    @route(r"^(?P<year>\d{4})/$", name="year")
     def v_year(self, request, year):
         date = get_date_or_404(year, 1, 1)
         newsitems = self.get_newsitems_for_display().filter(date__year=year)
-        return self.respond(request, 'year', newsitems, {'date': date})
+        return self.respond(request, "year", newsitems, {"date": date})
 
-    @route(r'^(?P<year>\d{4})/(?P<month>\d{1,2})/$', name='month')
+    @route(r"^(?P<year>\d{4})/(?P<month>\d{1,2})/$", name="month")
     def v_month(self, request, year, month):
         date = get_date_or_404(year, month, 1)
         newsitems = self.get_newsitems_for_display().filter(
-            date__year=year, date__month=month)
-        return self.respond(request, 'month', newsitems, {'date': date})
+            date__year=year, date__month=month
+        )
+        return self.respond(request, "month", newsitems, {"date": date})
 
-    @route(r'^(?P<year>\d{4})/(?P<month>\d{1,2})/(?P<day>\d{1,2})/$', name='day')
+    @route(r"^(?P<year>\d{4})/(?P<month>\d{1,2})/(?P<day>\d{1,2})/$", name="day")
     def v_day(self, request, year, month, day):
         date = get_date_or_404(year, month, day)
         newsitems = self.get_newsitems_for_display().filter(
-            date__year=year, date__month=month, date__day=day)
-        return self.respond(request, 'day', newsitems, {'date': date})
+            date__year=year, date__month=month, date__day=day
+        )
+        return self.respond(request, "day", newsitems, {"date": date})
 
-    @route(r'^(?P<year>\d{4})/(?P<month>\d{1,2})/(?P<day>\d{1,2})/(?P<pk>\d+)-(?P<slug>.*)/$', name='post')
+    @route(
+        r"^(?P<year>\d{4})/(?P<month>\d{1,2})/(?P<day>\d{1,2})/(?P<pk>\d+)-(?P<slug>.*)/$",
+        name="post",
+    )
     def v_post(self, request, year, month, day, pk, slug):
         newsitem = get_object_or_404(self.get_newsitems_for_display(), pk=pk)
 
         # Check the URL date and slug are still correct
         newsitem_url = newsitem.url
         newsitem_path = urlparse(newsitem_url, allow_fragments=True).path
-        if urlquote(request.path) != newsitem_path:
+        if quote(request.path) != newsitem_path:
             return HttpResponsePermanentRedirect(newsitem_url)
 
         # Get the newsitem to serve itself
         return newsitem.serve(request)
 
-    @route(r'^rss/$', name='feed')
+    @route(r"^rss/$", name="feed")
     def newsfeed(self, request):
         return self.feed_class(self)(request)
 
@@ -132,11 +138,15 @@ class NewsIndexMixin(RoutablePageMixin):
 
 
 class AbstractNewsItemRevision(models.Model):
-    created_at = models.DateTimeField(verbose_name=_('Created at'))
+    created_at = models.DateTimeField(verbose_name=_("Created at"))
     user = models.ForeignKey(
-        settings.AUTH_USER_MODEL, verbose_name=_('User'),
-        null=True, blank=True, on_delete=models.SET_NULL)
-    content_json = models.TextField(verbose_name=_('Content JSON'))
+        settings.AUTH_USER_MODEL,
+        verbose_name=_("User"),
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+    )
+    content_json = models.TextField(verbose_name=_("Content JSON"))
 
     objects = models.Manager()
 
@@ -168,8 +178,13 @@ class AbstractNewsItemRevision(models.Model):
             # special case: a revision without an ID is presumed to be newly-created and is thus
             # newer than any revision that might exist in the database
             return True
-        latest_revision = type(self).objects.filter(newsitem_id=self.newsitem_id).order_by('-created_at', '-id').first()
-        return (latest_revision == self)
+        latest_revision = (
+            type(self)
+            .objects.filter(newsitem_id=self.newsitem_id)
+            .order_by("-created_at", "-id")
+            .first()
+        )
+        return latest_revision == self
 
     def publish(self):
         newsitem = self.as_newsitem()
@@ -183,7 +198,7 @@ class AbstractNewsItemRevision(models.Model):
         return '"{}" at {}'.format(self.newsitem, self.created_at)
 
     class Meta:
-        verbose_name = _('news item revision')
+        verbose_name = _("news item revision")
         abstract = True
 
 
@@ -192,54 +207,61 @@ class NewsItemQuerySet(models.QuerySet):
         return self.filter(live=True)
 
 
-class AbstractNewsItem(index.Indexed, ClusterableModel):
-
+class AbstractNewsItem(PreviewableMixin, index.Indexed, ClusterableModel):
     newsindex = models.ForeignKey(Page, on_delete=models.CASCADE)
-    date = models.DateTimeField('Published date', default=timezone.now)
+    date = models.DateTimeField("Published date", default=timezone.now)
 
-    live = models.BooleanField(
-        verbose_name=_('Live'), default=True, editable=False)
+    live = models.BooleanField(verbose_name=_("Live"), default=True, editable=False)
     has_unpublished_changes = models.BooleanField(
-        verbose_name=_('Has unpublished changes'),
-        default=False, editable=False)
+        verbose_name=_("Has unpublished changes"), default=False, editable=False
+    )
 
     panels = [
-        FieldPanel('date'),
+        FieldPanel("date"),
     ]
 
     search_fields = [
-        index.FilterField('date'),
-        index.FilterField('newsindex_id'),
-        index.FilterField('live'),
+        index.FilterField("date"),
+        index.FilterField("newsindex_id"),
+        index.FilterField("live"),
     ]
 
     class Meta:
-        ordering = ('-date',)
+        ordering = ("-date",)
         abstract = True
 
     objects = NewsItemQuerySet.as_manager()
 
     def get_nice_url(self):
         warnings.warn(
-            'AbstractNewsItem.get_nice_url() has been renamed to AbstractNewsItem.get_slug()',
+            "AbstractNewsItem.get_nice_url() has been renamed to AbstractNewsItem.get_slug()",
             DeprecationWarning,
-            stacklevel=2)
+            stacklevel=2,
+        )
         return self.get_slug()
 
     def get_slug(self):
-        allow_unicode = getattr(settings, 'WAGTAIL_ALLOW_UNICODE_SLUGS', True)
+        allow_unicode = getattr(settings, "WAGTAIL_ALLOW_UNICODE_SLUGS", True)
         return slugify(str(self), allow_unicode=allow_unicode)
 
     def get_template(self, request):
         try:
             return self.template
         except AttributeError:
-            return '{0}/{1}.html'.format(self._meta.app_label, self._meta.model_name)
+            return "{0}/{1}.html".format(self._meta.app_label, self._meta.model_name)
+
+    def get_preview_template(self, request, mode_name):
+        return self.get_template(request)
 
     def get_context(self, request, *args, **kwargs):
-        context = self.newsindex.specific.get_context(request, view='newsitem', *args, **kwargs)
-        context['newsitem'] = self
+        context = self.newsindex.specific.get_context(
+            request, view="newsitem", *args, **kwargs
+        )
+        context["newsitem"] = self
         return context
+
+    def get_preview_context(self, request, mode_name):
+        return self.get_context(request)
 
     def serve(self, request):
         template = self.get_template(request)
@@ -247,25 +269,39 @@ class AbstractNewsItem(index.Indexed, ClusterableModel):
         return TemplateResponse(request, template, context)
 
     def url_suffix(self):
+        if not self.pk:
+            # not yet saved (preview)
+            return ""
         newsindex = self.newsindex.specific
         ldate = timezone.localtime(self.date)
-        return newsindex.reverse_subpage('post', kwargs={
-            'year': ldate.year, 'month': ldate.month, 'day': ldate.day,
-            'pk': self.pk, 'slug': self.get_slug()})
+        return newsindex.reverse_subpage(
+            "post",
+            kwargs={
+                "year": ldate.year,
+                "month": ldate.month,
+                "day": ldate.day,
+                "pk": self.pk,
+                "slug": self.get_slug(),
+            },
+        )
 
     @property
     def url(self):
         return DeprecatedCallableStr(
             self.newsindex.specific.url + self.url_suffix(),
             warning="NewsItem.url is now a property, not a method.",
-            warning_cls=DeprecationWarning)
+            warning_cls=DeprecationWarning,
+        )
 
     @property
     def full_url(self):
-        return DeprecatedCallableStr(
-            self.newsindex.specific.full_url + self.url_suffix(),
-            warning="NewsItem.full_url is now a property, not a method.",
-            warning_cls=DeprecationWarning)
+        if hasattr(self, "newsindex"):
+            return DeprecatedCallableStr(
+                self.newsindex.specific.full_url + self.url_suffix(),
+                warning="NewsItem.full_url is now a property, not a method.",
+                warning_cls=DeprecationWarning,
+            )
+        return None
 
     def save_revision(self, user=None, changed=True):
         # Create revision
@@ -273,12 +309,12 @@ class AbstractNewsItem(index.Indexed, ClusterableModel):
 
         if changed:
             self.has_unpublished_changes = True
-            self.save(update_fields=['has_unpublished_changes'])
+            self.save(update_fields=["has_unpublished_changes"])
 
         return revision
 
     def get_latest_revision(self):
-        return self.revisions.order_by('-created_at', '-id').first()
+        return self.revisions.order_by("-created_at", "-id").first()
 
     def get_latest_revision_as_newsitem(self):
         latest_revision = self.get_latest_revision()
@@ -294,7 +330,7 @@ class AbstractNewsItem(index.Indexed, ClusterableModel):
             self.has_unpublished_changes = True
 
             if commit:
-                self.save(update_fields=['live', 'has_unpublished_changes'])
+                self.save(update_fields=["live", "has_unpublished_changes"])
 
     @property
     def status_string(self):
@@ -305,3 +341,58 @@ class AbstractNewsItem(index.Indexed, ClusterableModel):
                 return _("live + draft")
             else:
                 return _("live")
+
+    def status_button(self, link=False):
+        buttons = []
+        output = []
+        if self.live:
+            buttons.append(
+                {
+                    "href": self.url,
+                    "primary": True,
+                    "text": _("live"),
+                }
+            )
+        if self.has_unpublished_changes or not self.live:
+            buttons.append(
+                {
+                    "href": reverse(
+                        "wagtailnews:view_draft",
+                        kwargs={
+                            "pk": self.newsindex.pk,
+                            "newsitem_pk": self.pk,
+                        },
+                    ),
+                    "primary": False,
+                    "text": _("draft"),
+                }
+            )
+
+        if link:
+            for button in buttons:
+                # Both WT4 + 5 version classes
+                class_names = "status-tag w-status"
+                if button["primary"]:
+                    class_names += " primary w-status--primary"
+                output.append(
+                    format_html(
+                        '<a href="{}" target="_blank" class="{}">{}</a>',
+                        button["href"],
+                        class_names,
+                        button["text"],
+                    )
+                )
+        else:
+            for button in buttons:
+                class_names = "status-tag w-status"
+                if button["primary"]:
+                    class_names += " primary w-status--primary"
+                output.append(
+                    format_html(
+                        '<span class="{}">{}</span>',
+                        class_names,
+                        button["text"],
+                    )
+                )
+
+        return mark_safe(" + ".join(output))

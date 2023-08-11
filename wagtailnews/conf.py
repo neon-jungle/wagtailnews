@@ -4,7 +4,7 @@ from django.utils.module_loading import import_string
 try:
     name = settings.WAGTAILNEWS_PAGINATOR
 except AttributeError:
-    from django.core.paginator import Paginator, EmptyPage
+    from django.core.paginator import EmptyPage, Paginator
 
     def paginate(request, items):
         paginator = Paginator(items, 20)

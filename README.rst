@@ -11,12 +11,8 @@ Install using pip::
 
     pip install wagtailnews
 
-It works with Wagtail 2.3 and upwards. For older versions of Wagtail see past releases.
+It works with Wagtail 4.0 and upwards. For older versions of Wagtail see past releases.
 
-Documentation
-=============
-
-`Documentation for Wagtail news <http://wagtail-news.readthedocs.org>`_ can be found on Read The Docs
 
 Quick start
 ===========
@@ -27,9 +23,9 @@ Create news models for your application that inherit from the relevant ``wagtail
 
     from django.db import models
 
-    from wagtail.admin.edit_handlers import FieldPanel
-    from wagtail.core.fields import RichTextField
-    from wagtail.core.models import Page
+    from wagtail.admin.panels import FieldPanel
+    from wagtail.fields import RichTextField
+    from wagtail.models import Page
 
     from wagtailnews.models import NewsIndexMixin, AbstractNewsItem, AbstractNewsItemRevision
     from wagtailnews.decorators import newsindex
@@ -40,6 +36,18 @@ Create news models for your application that inherit from the relevant ``wagtail
     class NewsIndex(NewsIndexMixin, Page):
         # Add extra fields here, as in a normal Wagtail Page class, if required
         newsitem_model = 'NewsItem'
+
+        featured_news_item = models.ForeignKey(
+            'NewsItem',
+            null=True,
+            blank=True,
+            on_delete=models.SET_NULL,
+            related_name='+',
+        )
+
+        content_panels = Page.content_panels + [
+            FieldPanel('featured_news_item'), # This will set up a chooser for selecting a news item
+        ]
 
 
     class NewsItem(AbstractNewsItem):
@@ -60,3 +68,9 @@ Create news models for your application that inherit from the relevant ``wagtail
 
     class NewsItemRevision(AbstractNewsItemRevision):
         newsitem = models.ForeignKey(NewsItem, related_name='revisions', on_delete=models.CASCADE)
+
+
+Old docs
+========
+
+`The docs for Wagtail news <http://wagtail-news.readthedocs.org>`_ are severely out of date, but may still be useful for reference.

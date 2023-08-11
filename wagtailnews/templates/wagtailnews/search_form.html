@@ -1,0 +1,11 @@
+<form
+    class="col search-form"
+    action=""
+    method="get"
+    novalidate
+    role="search"
+>
+    {% for field in search_form %}
+        {% include "wagtailadmin/shared/field.html" with field=field classname="w-mb-0 -w-mt-2.5" sr_only_label=True icon="search" %}
+    {% endfor %}
+</form>

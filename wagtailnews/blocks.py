@@ -1,6 +1,8 @@
 from django.utils.functional import cached_property
-from wagtail.core.blocks import ChooserBlock
-from wagtail.core.utils import resolve_model_string
+from wagtail.blocks import ChooserBlock
+from wagtail.coreutils import resolve_model_string
+
+from .views.chooser import choooser_viewset_factory
 
 
 class NewsChooserBlock(ChooserBlock):
@@ -17,6 +19,7 @@ class NewsChooserBlock(ChooserBlock):
                 ('news', NewsChooserBlock('news.NewsItem')),
             ])
     """
+
     def __init__(self, target_model, **kwargs):
         super(NewsChooserBlock, self).__init__(**kwargs)
         self._target_model = target_model
@@ -27,13 +30,18 @@ class NewsChooserBlock(ChooserBlock):
 
     @cached_property
     def widget(self):
-        from wagtailnews.widgets import AdminNewsChooser
-        return AdminNewsChooser(self.target_model)
+        viewset = choooser_viewset_factory(self.target_model)
+        return viewset.widget_class()
 
+    # only used in migrations, which are useless anyway for streamfields
     def deconstruct(self):
-        path, args, kwargs = super(NewsChooserBlock, self).deconstruct()
-        kwargs['target_model'] = self.target_model._meta.label
-        return path, args, kwargs
+        name, args, kwargs = super().deconstruct()
+
+        if args:
+            args = args[1:]  # Remove the args target_model
+
+        kwargs["target_model"] = self.target_model._meta.label_lower
+        return name, args, kwargs
 
     class Meta:
         icon = "grip"

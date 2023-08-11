@@ -3,8 +3,8 @@ import datetime
 from django.test import TestCase
 from django.test.client import RequestFactory
 from django.utils import timezone
-from wagtail.core.models import Page
-from wagtail.tests.utils import WagtailTestUtils
+from wagtail.models import Page
+from wagtail.test.utils import WagtailTestUtils
 
 from tests.app.models import (
     NewsIndex, NewsItem, SecondaryNewsIndex, SecondaryNewsItem)
