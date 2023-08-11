@@ -1,31 +1,23 @@
 import logging
 
-from wagtail.admin.ui.tables import Column
-from wagtail.admin.viewsets.chooser import ChooserViewSet
-from wagtail.admin.views.generic import chooser as chooser_views
 from django import forms
-
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import PermissionDenied
-
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from wagtail.admin.forms.search import SearchForm
-
+from wagtail.admin.ui.tables import Column
 from wagtail.admin.views.generic import IndexView
+from wagtail.admin.views.generic import chooser as chooser_views
+from wagtail.admin.viewsets.chooser import ChooserViewSet
 from wagtail.models import Page
 from wagtail.search.backends import get_search_backend
 
-
 from ..models import NEWSINDEX_MODEL_CLASSES, NewsIndexMixin
 from ..permissions import (
-    format_perm,
-    perms_for_template,
-    user_can_edit_news,
-    user_can_edit_newsitem,
-)
+    format_perm, perms_for_template, user_can_edit_news, user_can_edit_newsitem)
 
 LOGGER = logging.getLogger(__name__)
 
@@ -129,13 +121,24 @@ class NewsItemIndexView(IndexView):
         return super().dispatch(request, *args, **kwargs)
 
     def get_edit_url(self, instance):
-        return reverse("wagtailnews:edit", args=(instance.pk,))
+        return reverse(
+            "wagtailnews:edit",
+            kwargs={
+                "pk": self.newsindex.pk,
+                "newsitem_pk": instance.pk,
+            },
+        )
 
     def get_add_url(self):
         if self.request.user.has_perm(
             format_perm(self.newsindex.get_newsitem_model(), "add")
         ):
-            return reverse("wagtailnews:create", args=(self.kwargs["pk"],))
+            return reverse(
+                "wagtailnews:create",
+                kwargs={
+                    "pk": self.newsindex.pk,
+                },
+            )
         return None
 
     def get_base_queryset(self):
@@ -145,6 +148,9 @@ class NewsItemIndexView(IndexView):
         NewsItem = newsindex.get_newsitem_model()
         newsitem_list = NewsItem.objects.filter(newsindex=newsindex)
         return newsitem_list
+
+    def get_queryset(self):
+        return self.get_base_queryset()
 
     def search_queryset(self, queryset):
         search_query = self.request.GET.get("q", "")

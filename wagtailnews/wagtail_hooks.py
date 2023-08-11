@@ -1,9 +1,6 @@
-from django.urls import include, path
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
-from django.templatetags.static import static
-from django.urls import reverse
-from django.utils.html import format_html, format_html_join
+from django.urls import include, path, reverse
 from django.utils.translation import gettext_lazy as _
 from wagtail import hooks
 from wagtail.admin.search import SearchArea

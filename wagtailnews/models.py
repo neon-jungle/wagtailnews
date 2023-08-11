@@ -1,29 +1,28 @@
 import datetime
 import os
 import warnings
-from urllib.parse import urlparse
+from urllib.parse import quote, urlparse
 
 from django.conf import settings
 from django.db import models
 from django.http import Http404, HttpResponsePermanentRedirect
 from django.shortcuts import get_object_or_404
 from django.template.response import TemplateResponse
+from django.urls import reverse
 from django.utils import timezone
-from urllib.parse import quote
+from django.utils.html import format_html, mark_safe
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 from modelcluster.models import ClusterableModel
 from wagtail.admin.panels import FieldPanel
 from wagtail.contrib.routable_page.models import RoutablePageMixin, route
 from wagtail.coreutils import resolve_model_string
-from wagtail.models import Page
+from wagtail.models import Page, PreviewableMixin
 from wagtail.search import index
-from wagtail.models import PreviewableMixin
+
 from . import feeds
 from .conf import paginate
 from .deprecation import DeprecatedCallableStr
-from django.utils.html import format_html, mark_safe
-from django.urls import reverse
 
 NEWSINDEX_MODEL_CLASSES = []
 

@@ -1,6 +1,7 @@
 from django.utils.functional import cached_property
 from wagtail.blocks import ChooserBlock
 from wagtail.coreutils import resolve_model_string
+
 from .views.chooser import choooser_viewset_factory
 
 
@@ -31,11 +32,6 @@ class NewsChooserBlock(ChooserBlock):
     def widget(self):
         viewset = choooser_viewset_factory(self.target_model)
         return viewset.widget_class()
-
-    def deconstruct(self):
-        path, args, kwargs = super(NewsChooserBlock, self).deconstruct()
-        kwargs["target_model"] = self.target_model._meta.label
-        return path, args, kwargs
 
     # only used in migrations, which are useless anyway for streamfields
     def deconstruct(self):

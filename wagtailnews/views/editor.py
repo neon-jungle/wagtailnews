@@ -5,10 +5,13 @@ from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from wagtail.admin import messages
-from wagtail.admin.panels import ObjectList, extract_panel_definitions_from_model_class
+from wagtail.admin.panels import (
+    ObjectList, extract_panel_definitions_from_model_class)
 from wagtail.admin.ui.side_panels import BasePreviewSidePanel, BaseSidePanels
-from wagtail.admin.views.generic import CreateView, DeleteView, EditView, UnpublishView
-from wagtail.admin.views.generic.preview import PreviewOnEdit as GenericPreviewOnEdit
+from wagtail.admin.views.generic import (
+    CreateView, DeleteView, EditView, UnpublishView)
+from wagtail.admin.views.generic.preview import \
+    PreviewOnEdit as GenericPreviewOnEdit
 from wagtail.models import Page
 
 from wagtailnews.permissions import format_perm, format_perms
@@ -18,7 +21,7 @@ from ..forms import SaveActionSet
 from ..models import NewsIndexMixin
 
 
-# @lru_cache(maxsize=None)
+@lru_cache(maxsize=None)
 def get_newsitem_edit_handler(NewsItem):
     if hasattr(NewsItem, "edit_handler"):
         return NewsItem.edit_handler.bind_to_model(NewsItem)
@@ -145,6 +148,9 @@ class CreateNewsItemView(NewItemPermissionMixin, NewsItemAdminMixin, CreateView)
         else:
             return _('A draft news post "{0!s}" has been created').format(instance)
 
+    def get_success_buttons(self):
+        return [messages.button(self.get_edit_url(), _("Edit"))]
+
 
 class EditNewsItemView(NewItemPermissionMixin, NewsItemAdminMixin, EditView):
     template_name = "wagtailnews/edit.html"
@@ -183,6 +189,7 @@ class UnpublishNewsItemView(NewItemPermissionMixin, UnpublishView):
         self.newsindex = get_object_or_404(
             Page.objects.specific().type(NewsIndexMixin), pk=kwargs["pk"]
         )
+        self.model = self.newsindex.get_newsitem_model()
         super().setup(request, *args, **kwargs)
         # self.pk is set incorrectly by the parent class, and kwargs pk is stripped out by named parameter
         self.kwargs["pk"] = kwargs["pk"]
@@ -245,7 +252,11 @@ class NewsItemDeleteView(NewItemPermissionMixin, DeleteView):
             newsindex=self.newsindex,
             pk=kwargs["newsitem_pk"],
         )
+        self.queryset = self.newsindex.get_newsitem_model().objects.live()  # pre 5.0
         return super().setup(request, *args, **kwargs)
+
+    def get_object(self, queryset=None):
+        return self.object
 
     def delete_action(self):
         super().delete_action()
