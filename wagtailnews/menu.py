@@ -10,12 +10,12 @@ class NewsMenuItem(MenuItem):
         self,
         label=_("News"),
         url=reverse_lazy("wagtailnews:choose"),
-        classnames="icon icon-grip",
+        classname="icon icon-grip",
         order=250,
-        **kwargs
+        **kwargs,
     ):
         super(NewsMenuItem, self).__init__(
-            label, url, classnames=classnames, order=order, **kwargs
+            label, url, classname=classname, order=order, **kwargs
         )
 
     def is_shown(self, request):
