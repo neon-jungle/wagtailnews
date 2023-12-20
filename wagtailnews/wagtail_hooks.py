@@ -33,7 +33,7 @@ class NewsItemSearchArea(SearchArea):
         super(NewsItemSearchArea, self).__init__(
             _("News"),
             reverse("wagtailnews:search"),
-            classnames="icon icon-grip",
+            classname="icon icon-grip",
             order=250,
             **kwargs,
         )

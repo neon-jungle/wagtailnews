@@ -5,15 +5,14 @@ from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from wagtail.admin import messages
-from wagtail.admin.panels import (
-    ObjectList, extract_panel_definitions_from_model_class)
-from wagtail.admin.ui.side_panels import BasePreviewSidePanel, BaseSidePanels
-from wagtail.admin.views.generic import (
-    CreateView, DeleteView, EditView, UnpublishView)
-from wagtail.admin.views.generic.preview import \
-    PreviewOnEdit as GenericPreviewOnEdit
+from wagtail.admin.panels import ObjectList, extract_panel_definitions_from_model_class
+from wagtail.admin.ui.side_panels import PreviewSidePanel
+from wagtail.admin.views.generic import CreateView, DeleteView, EditView, UnpublishView
+from wagtail.admin.views.generic.preview import PreviewOnEdit as GenericPreviewOnEdit
 from wagtail.models import Page
-
+from django.forms import Media
+from django.urls import reverse
+from django.utils.functional import cached_property
 from wagtailnews.permissions import format_perm, format_perms
 
 from .. import signals
@@ -39,37 +38,45 @@ class NewItemPermissionMixin:
         return super().dispatch(request, *args, **kwargs)
 
 
-class PreviewSidePanel(BasePreviewSidePanel):
+class PreviewSidePanel(PreviewSidePanel):
     def __init__(self, object, request, newsindex):
         self.newsindex = newsindex
         if not object:
             object = newsindex.get_newsitem_model()(newsindex=newsindex)
-        super().__init__(object, request)
-
-    def get_context_data(self, request):
-        context = super().get_context_data(request)
-        if self.object.id:
-            context["preview_url"] = reverse(
+        if object.id:
+            preview_url = reverse(
                 "wagtailnews:preview_on_edit",
                 kwargs={
                     "index_pk": self.newsindex.pk,
-                    "newsitem_pk": self.object.pk,
+                    "newsitem_pk": object.pk,
                 },
             )
         else:
-            context["preview_url"] = reverse(
+            preview_url = reverse(
                 "wagtailnews:preview_on_create",
                 kwargs={"index_pk": self.newsindex.pk},
             )
-        return context
+        super().__init__(object, request, preview_url=preview_url)
 
 
-class NewsItemSidePanels(BaseSidePanels):
+class NewsItemSidePanels:
     def __init__(self, request, object, newsindex):
-        # TODO status panel should be pretty easy, it's the default in BaseSidePanels
+        self.request = request
+        self.object = object
+
         self.side_panels = [
             PreviewSidePanel(object, request, newsindex),
         ]
+
+    def __iter__(self):
+        return iter(sorted(self.side_panels, key=lambda p: p.order))
+
+    @cached_property
+    def media(self):
+        media = Media()
+        for panel in self:
+            media += panel.media
+        return media
 
 
 class NewsItemAdminMixin:

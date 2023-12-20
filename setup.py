@@ -29,7 +29,7 @@ setup(
     author_email="developers@neonjungle.studio",
     url="https://github.com/neon-jungle/wagtailnews/",
     install_requires=[
-        "wagtail>=4.0.0",
+        "wagtail>=5.2.0",
     ],
     extras_require={"docs": documentation_extras},
     zip_safe=False,
