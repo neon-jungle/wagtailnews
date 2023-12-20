@@ -1,18 +1,21 @@
 from functools import lru_cache
 
 from django.core.exceptions import PermissionDenied
+from django.forms import Media
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
+from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 from wagtail.admin import messages
-from wagtail.admin.panels import ObjectList, extract_panel_definitions_from_model_class
+from wagtail.admin.panels import (
+    ObjectList, extract_panel_definitions_from_model_class)
 from wagtail.admin.ui.side_panels import PreviewSidePanel
-from wagtail.admin.views.generic import CreateView, DeleteView, EditView, UnpublishView
-from wagtail.admin.views.generic.preview import PreviewOnEdit as GenericPreviewOnEdit
+from wagtail.admin.views.generic import (
+    CreateView, DeleteView, EditView, UnpublishView)
+from wagtail.admin.views.generic.preview import \
+    PreviewOnEdit as GenericPreviewOnEdit
 from wagtail.models import Page
-from django.forms import Media
-from django.urls import reverse
-from django.utils.functional import cached_property
+
 from wagtailnews.permissions import format_perm, format_perms
 
 from .. import signals
